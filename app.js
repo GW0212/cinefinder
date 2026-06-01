@@ -1781,7 +1781,7 @@ function restorePagingFromCache(cache){
 
 /* ═══════════════════════════════ FETCH ═══════════════════════════════ */
 async function fetchJson(url,opts={}){
-  const fetchOpts={...opts};
+  const fetchOpts={cache:'no-store',...opts}; // iOS Safari 캐시 방지
   const ctrl=fetchOpts.signal?null:new AbortController();
   if(!fetchOpts.signal){fetchOpts.signal=ctrl.signal;ABORTS.add(ctrl);}
   let attempt=0;
