@@ -161,44 +161,47 @@
       </div>
     </div>
 
-    <!-- Row 2: 탭 + 검색 + 정렬/저장 한 줄 -->
+    <!-- Row 2: 탭/정렬/저장 + 검색 (모바일 2줄) -->
     <div class="controlbar">
-      <div class="type-tabs" role="tablist">
-        <button data-type="all"   class="tab active" role="tab" id="tabAll">모두</button>
-        <button data-type="movie" class="tab"        role="tab" id="tabMovie">영화</button>
-        <button data-type="tv"    class="tab"        role="tab" id="tabTV">드라마</button>
-      </div>
-      <div class="ctrl-divider"></div>
-      <form id="searchForm" class="search-form" autocomplete="off">
-        <div class="searchbox-wrap">
-          <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input id="searchInput" type="text" placeholder="영화·드라마·감독·배우 검색" autocomplete="off" />
-          <button type="button" id="clearSearch" class="clear-btn" aria-label="지우기">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <!-- 줄1: 탭 + 정렬 + 저장 -->
+      <div class="ctrl-row1">
+        <div class="type-tabs" role="tablist">
+          <button data-type="all"   class="tab active" role="tab" id="tabAll">모두</button>
+          <button data-type="movie" class="tab"        role="tab" id="tabMovie">영화</button>
+          <button data-type="tv"    class="tab"        role="tab" id="tabTV">드라마</button>
+        </div>
+        <div class="ctrl-row1-right">
+          <div class="custom-select-wrap sort-wrap">
+            <select id="sortSelect" class="hdr-select sort-select">
+              <option value="popularity.desc">인기순</option>
+              <option value="vote_average.desc">평점순</option>
+              <option value="date.desc">최신순</option>
+            </select>
+            <svg class="select-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <button id="btnFav" class="saved-btn fav-saved" title="즐겨찾기">
+            <span class="saved-btn-icon" aria-hidden="true">♡</span>
+            <span>즐겨찾기</span>
           </button>
-          <div id="suggestBox" class="suggest hidden" role="listbox"></div>
+          <button id="btnWatch" class="saved-btn watch-saved" title="나중에 보기">
+            <span class="saved-btn-icon" aria-hidden="true">⏱</span>
+            <span>나중에 보기</span>
+          </button>
         </div>
-        <button id="searchBtn" type="submit" class="btn-search">검색</button>
-      </form>
-      <div class="ctrl-divider"></div>
-      <div class="ctrl-right">
-        <div class="custom-select-wrap sort-wrap">
-          <select id="sortSelect" class="hdr-select sort-select">
-            <option value="popularity.desc">인기순</option>
-            <option value="vote_average.desc">평점순</option>
-            <option value="date.desc">최신순</option>
-          </select>
-          <svg class="select-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <button id="btnFav" class="saved-btn fav-saved" title="즐겨찾기">
-          <span class="saved-btn-icon" aria-hidden="true">♡</span>
-          <span>즐겨찾기</span>
-        </button>
-        <button id="btnWatch" class="saved-btn watch-saved" title="나중에 보기">
-          <span class="saved-btn-icon" aria-hidden="true">⏱</span>
-          <span>나중에 보기</span>
-        </button>
-
+      </div>
+      <!-- 줄2: 검색 -->
+      <div class="ctrl-row2">
+        <form id="searchForm" class="search-form" autocomplete="off">
+          <div class="searchbox-wrap">
+            <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="searchInput" type="text" placeholder="영화·드라마·감독·배우 검색" autocomplete="off" />
+            <button type="button" id="clearSearch" class="clear-btn" aria-label="지우기">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div id="suggestBox" class="suggest hidden" role="listbox"></div>
+          </div>
+          <button id="searchBtn" type="submit" class="btn-search">검색</button>
+        </form>
       </div>
     </div>
 
