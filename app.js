@@ -340,10 +340,12 @@ function translationTitle(entry,type){
 }
 function titleLooksReadable(title,lang=CUR_LANG){
   title=cleanTitle(title); if(!title)return false;
-  if(lang==='ko') return /[\uAC00-\uD7A3]/.test(title);  // 한글 포함 필수
-  if(lang==='ja') return /[\u3040-\u30FF]/.test(title);  // 히라가나/가타카나 포함 필수
-  if(lang==='zh') return /[\u4E00-\u9FFF]/.test(title);  // 한자 포함 필수
-  return COMMON_TITLE_CHARS_RE.test(title);
+  if(lang==='ko') return /[\uAC00-\uD7A3]/.test(title);         // 한글 필수
+  if(lang==='ja') return /[\u3040-\u30FF]/.test(title);         // 가나 필수
+  if(lang==='zh') return /[\u4E00-\u9FFF\u3400-\u4DBF]/.test(title); // 한자 필수
+  // en/fr 등 라틴 계열: ASCII+라틴 문자여야 하고, 한글/한자/가나가 없어야 함
+  if(/[\uAC00-\uD7A3\u3040-\u30FF\u4E00-\u9FFF]/.test(title)) return false;
+  return /[A-Za-z]/.test(title); // 최소 영문자 1개 포함
 }
 function getTranslationTitle(translations,type,lang,countries=[]){
   const rows=(translations?.translations||[]).filter(x=>x.iso_639_1===lang);
@@ -385,10 +387,11 @@ async function resolveTmdbDisplayTitle(type,id,currentTitle=''){
 
     const candidates = [
       nativeVerified,       // 1순위: 해당 언어 검증된 제목
-      currentLangTitle,     // 2순위: API가 돌려준 현재 언어 제목 (검증 없이)
+      currentLangTitle,     // 2순위: API가 돌려준 현재 언어 제목
       enTitle,              // 3순위: 영어 제목
-      koTitle,              // 4순위: 한국어 제목 (비ko 언어 fallback)
-      current               // 5순위: 원제
+      // 4순위: ko 언어일 때만 koTitle 추가 (다른 언어에선 한국어 제목 사용 안 함)
+      lang==='ko' ? koTitle : '',
+      current               // 최후: 원제
     ].map(cleanTitle).filter(Boolean);
 
     // 중복 제거
@@ -397,7 +400,7 @@ async function resolveTmdbDisplayTitle(type,id,currentTitle=''){
 
     const picked =
       unique.find(x=>titleLooksReadable(x, lang)) ||
-      unique.find(x=>/[A-Za-z가-힣ぁ-ゟ゠-ヿ一-鿿]/.test(x)) ||
+      unique.find(x=>/[A-Za-z]/.test(x)) ||   // 최소 영문자가 있는 것
       current;
 
     TITLE_CACHE.set(cacheKey,picked);
@@ -1031,8 +1034,11 @@ function bindEvents() {
   $('#langSelect').addEventListener('change', async()=>{
     CUR_LANG=$('#langSelect').value||'ko';
     await storage.set({[SK.lang]:CUR_LANG});
-    TITLE_CACHE.clear(); TITLE_STORE={}; try{localStorage.removeItem(TITLE_STORE_KEY);}catch{}
-    POSTER_CACHE.clear();
+    // 언어 관련 모든 캐시 초기화
+    TITLE_CACHE.clear();  TITLE_STORE={};  try{localStorage.removeItem(TITLE_STORE_KEY);}catch{}
+    POSTER_CACHE.clear(); POSTER_STORE={}; try{localStorage.removeItem(POSTER_STORE_KEY);}catch{}
+    DETAIL_STORE={};      try{localStorage.removeItem(DETAIL_STORE_KEY);}catch{}
+    await storage.remove(SK.cache); // 앱 내부 결과 캐시도 제거
     PAGE_STATE.personActive=null;
     PAGE_STATE.personMeta=null;
     applyI18n(); renderCountryOptions();
@@ -1195,7 +1201,7 @@ function getTvGenreName(id, lang) {
 
 async function loadGenres(kind){
   try{
-    const j=await fetchJson(`https://api.themoviedb.org/3/genre/${kind}/list?api_key=${API_KEY}&language=${tmdbLang()}`);
+    const j=await fetchJson(`https://api.themoviedb.org/3/genre/${kind}/list?api_key=${API_KEY}&language=${tmdbLang()}&_lang=${CUR_LANG}`);
     const raw=j.genres||[];
     if(kind==='tv'){
       // TMDB가 번역 안 한 TV 장르를 로컬 테이블로 보완
@@ -1318,7 +1324,7 @@ async function runSearch(clear){
   if(PAGE_STATE.personActive){clearSkeletons();await renderPersonFilmography(PAGE_STATE.personMeta||{id:PAGE_STATE.personActive},clear);return;}
   const p=new URLSearchParams({api_key:API_KEY,language:tmdbLang(),include_adult:'false',query:PAGE_STATE.query,page:String(PAGE_STATE.pageSearch||1)});
   try{
-    const multi=await fetchJson(`https://api.themoviedb.org/3/search/multi?${p}`);
+    const multi=await fetchJson(`https://api.themoviedb.org/3/search/multi?${p}&_lang=${CUR_LANG}`);
     if(isStale(token))return;
     const person=(multi.results||[]).find(r=>r.media_type==='person');
     if(person){ PAGE_STATE.personActive=person.id; PAGE_STATE.personMeta={id:person.id,known_for_department:person.known_for_department||''}; clearSkeletons(); await renderPersonFilmography(PAGE_STATE.personMeta,clear); return; }
@@ -1354,7 +1360,7 @@ async function renderPersonFilmography(meta, clear){
 
 function buildDiscoverParams(type,page){
   const p=new URLSearchParams();
-  p.set('api_key',API_KEY); p.set('language',tmdbLang());
+  p.set('api_key',API_KEY); p.set('language',tmdbLang()); p.set('_lang',CUR_LANG); // 언어변경 캐시 bust
   p.set('sort_by',SORT_BY==='date.desc'?(type==='movie'?'primary_release_date.desc':'first_air_date.desc'):SORT_BY);
   p.set('include_adult','false'); p.set('page',String(page||1));
   const inc = type==='movie' ? MOVIE_INC : TV_INC;
@@ -1447,7 +1453,11 @@ function renderCards(items,append){
   }
   const html=items.map(it=>{
     const type=it.media_type||(it.first_air_date?'tv':'movie');
-    const title=itemTitle(it,type);
+    // API 응답 title이 현재 언어와 맞지 않으면 original_title로 초기 표시 (refreshCardTitles가 곧 덮어씀)
+    const rawTitle=itemTitle(it,type);
+    const title=(titleLooksReadable(rawTitle,CUR_LANG)||!rawTitle)
+      ? rawTitle
+      : (cleanTitle(type==='movie'?(it.original_title||it.title||''):(it.original_name||it.name||''))||rawTitle);
     const year=getYear(it.release_date||it.first_air_date);
     const img=posterUrl(it.poster_path);
     const ratingVal=(it.vote_average||0);
