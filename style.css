@@ -1016,16 +1016,28 @@ a { color: inherit; text-decoration: none; }
 .action-btn.active {
   box-shadow: 0 8px 18px rgba(15,23,42,.24);
 }
+/* 즐겨찾기: 비활성 — 연한 하트 힌트 */
+.fav-btn { color: #e5372a; }
+.fav-btn .btn-glyph { font-size: 15px; }
+
+/* 나중에 보기: 비활성 — 파란 시계 힌트 */
+.watch-btn { color: #2563eb; }
+.watch-btn .btn-glyph svg { stroke: #2563eb; }
+
+/* 활성 상태 */
 .fav-btn.active {
   background: rgba(255,245,217,.98);
-  border-color: rgba(224,158,0,.42);
+  border-color: rgba(224,158,0,.52);
   color: #d18c00;
 }
 .watch-btn.active {
   background: rgba(230,241,255,.98);
-  border-color: rgba(51,102,255,.34);
+  border-color: rgba(51,102,255,.44);
   color: #2f66ff;
 }
+[data-theme="dark"] .fav-btn { color: #ff6b6b; }
+[data-theme="dark"] .watch-btn { color: #60a5fa; }
+[data-theme="dark"] .watch-btn .btn-glyph svg { stroke: #60a5fa; }
 [data-theme="dark"] .fav-btn.active {
   background: rgba(89,62,0,.92);
   border-color: rgba(255,209,84,.55);

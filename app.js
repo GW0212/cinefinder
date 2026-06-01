@@ -24,6 +24,7 @@ const I18N = {
     status_auth_fail:'API 인증 실패(401)', status_fetch_fail:'결과 수집 실패',
     offline_using_cache:'오프라인: 마지막 결과를 표시합니다.',
     toast_reset:'초기화 완료', toast_saved:'저장됨', toast_removed:'삭제됨',
+    toast_save_failed:'저장 실패: 브라우저 저장 공간을 정리한 뒤 다시 시도해주세요.',
     badge_movie:'영화', badge_tv:'드라마', poster_none:'포스터 없음', year_unknown:'연도 미상',
     modal_overview:'개요', modal_description:'설명', modal_trailer:'예고편', modal_cast:'출연', modal_crew:'제작',
     modal_providers:'시청 가능', modal_buy:'구매', modal_rent:'대여', modal_open_tmdb:'TMDB에서 보기',
@@ -75,6 +76,7 @@ const I18N = {
     status_auth_fail:'API auth failed (401)', status_fetch_fail:'Failed to fetch',
     offline_using_cache:'Offline: showing cached results.',
     toast_reset:'Reset complete', toast_saved:'Saved', toast_removed:'Removed',
+    toast_save_failed:'Save failed: clear browser storage and try again.',
     badge_movie:'Movie', badge_tv:'TV', poster_none:'No poster', year_unknown:'Unknown year',
     modal_overview:'Overview', modal_description:'Description', modal_trailer:'Trailer', modal_cast:'Cast', modal_crew:'Crew',
     modal_providers:'Available On', modal_buy:'Buy', modal_rent:'Rent', modal_open_tmdb:'Open on TMDB',
@@ -126,6 +128,7 @@ const I18N = {
     status_auth_fail:'API認証失敗(401)', status_fetch_fail:'結果取得失敗',
     offline_using_cache:'オフライン: キャッシュを表示します。',
     toast_reset:'リセット完了', toast_saved:'保存済み', toast_removed:'削除済み',
+    toast_save_failed:'保存に失敗しました。ブラウザの保存容量を整理して再試行してください。',
     badge_movie:'映画', badge_tv:'ドラマ', poster_none:'ポスターなし', year_unknown:'年不明',
     modal_overview:'概要', modal_description:'説明', modal_trailer:'予告編', modal_cast:'キャスト', modal_crew:'スタッフ',
     modal_providers:'視聴可能', modal_buy:'購入', modal_rent:'レンタル', modal_open_tmdb:'TMDBで開く',
@@ -177,6 +180,7 @@ const I18N = {
     status_auth_fail:'API认证失败(401)', status_fetch_fail:'获取结果失败',
     offline_using_cache:'离线: 显示上次结果。',
     toast_reset:'重置完成', toast_saved:'已保存', toast_removed:'已删除',
+    toast_save_failed:'保存失败：请清理浏览器存储后重试。',
     badge_movie:'电影', badge_tv:'剧集', poster_none:'无海报', year_unknown:'年份未知',
     modal_overview:'概述', modal_description:'说明', modal_trailer:'预告片', modal_cast:'演员', modal_crew:'主创',
     modal_providers:'可观看', modal_buy:'购买', modal_rent:'租借', modal_open_tmdb:'在TMDB打开',
@@ -228,6 +232,7 @@ const I18N = {
     status_auth_fail:'Échec auth API (401)', status_fetch_fail:'Échec de récupération',
     offline_using_cache:'Hors ligne : affichage du cache.',
     toast_reset:'Réinitialisé', toast_saved:'Sauvegardé', toast_removed:'Supprimé',
+    toast_save_failed:'Échec de sauvegarde : libérez le stockage du navigateur puis réessayez.',
     badge_movie:'Film', badge_tv:'Série', poster_none:'Pas d\'affiche', year_unknown:'Année inconnue',
     modal_overview:'Aperçu', modal_description:'Description', modal_trailer:'Bande-annonce', modal_cast:'Acteurs', modal_crew:'Équipe',
     modal_providers:'Disponible sur', modal_buy:'Acheter', modal_rent:'Louer', modal_open_tmdb:'Ouvrir sur TMDB',
@@ -278,6 +283,42 @@ const COUNTRY_NAMES = {
 };
 
 /* ═══════════════════════════════ localStorage ═══════════════════════════════ */
+function isQuotaError(err) {
+  return !!err && (
+    err.name === 'QuotaExceededError' ||
+    err.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+    err.code === 22 ||
+    err.code === 1014
+  );
+}
+function clearVolatileStorageForSave() {
+  // 즐겨찾기/나중에 보기 저장 실패의 주 원인은 결과/제목/포스터 캐시가 localStorage 용량을 차지하는 케이스입니다.
+  // 사용자 저장 목록은 보존하고, 다시 받아올 수 있는 캐시만 정리합니다.
+  ['cinefinder_cache', 'cinefinder_title_store_v3', 'cinefinder_poster_store_v2', 'cinefinder_detail_filter_store_v1'].forEach(k => {
+    try { localStorage.removeItem(k); } catch {}
+  });
+  try { TITLE_CACHE.clear(); } catch {}
+  try { POSTER_CACHE.clear(); } catch {}
+  try { TITLE_STORE = {}; } catch {}
+  try { POSTER_STORE = {}; } catch {}
+  try { DETAIL_STORE = {}; } catch {}
+}
+function safeSetJsonItem(key, value) {
+  const json = JSON.stringify(value);
+  try {
+    localStorage.setItem(key, json);
+    return true;
+  } catch (err) {
+    if (isQuotaError(err)) {
+      clearVolatileStorageForSave();
+      try {
+        localStorage.setItem(key, json);
+        return true;
+      } catch {}
+    }
+    return false;
+  }
+}
 const storage = {
   get(keys) {
     const result = {};
@@ -287,12 +328,13 @@ const storage = {
     return Promise.resolve(result);
   },
   set(obj) {
-    Object.entries(obj).forEach(([k,v]) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} });
-    return Promise.resolve();
+    let ok = true;
+    Object.entries(obj).forEach(([k,v]) => { if (!safeSetJsonItem(k, v)) ok = false; });
+    return Promise.resolve(ok);
   },
   remove(key) {
     (Array.isArray(key) ? key : [key]).forEach(k => { try { localStorage.removeItem(k); } catch {} });
-    return Promise.resolve();
+    return Promise.resolve(true);
   }
 };
 
@@ -325,10 +367,25 @@ let DETAIL_STORE = {};
 try { TITLE_STORE = JSON.parse(localStorage.getItem(TITLE_STORE_KEY) || '{}'); } catch { TITLE_STORE = {}; }
 try { POSTER_STORE = JSON.parse(localStorage.getItem(POSTER_STORE_KEY) || '{}'); } catch { POSTER_STORE = {}; }
 try { DETAIL_STORE = JSON.parse(localStorage.getItem(DETAIL_STORE_KEY) || '{}'); } catch { DETAIL_STORE = {}; }
-function persistSmallCache(key,obj){ try { localStorage.setItem(key, JSON.stringify(obj)); } catch {} }
-function rememberTitleCache(key,value){ if(value){ TITLE_STORE[key]=value; persistSmallCache(TITLE_STORE_KEY,TITLE_STORE); } }
-function rememberPosterCache(key,value){ if(value){ POSTER_STORE[key]=value; persistSmallCache(POSTER_STORE_KEY,POSTER_STORE); } }
-function rememberDetailCache(key,value){ if(value){ DETAIL_STORE[key]={when:Date.now(),data:value}; persistSmallCache(DETAIL_STORE_KEY,DETAIL_STORE); } }
+function trimCacheObject(obj, limit, preferRecent=false) {
+  const entries = Object.entries(obj || {});
+  if (entries.length <= limit) return obj || {};
+  const kept = preferRecent
+    ? entries.sort((a,b)=>(a[1]?.when||0)-(b[1]?.when||0)).slice(-limit)
+    : entries.slice(-limit);
+  return Object.fromEntries(kept);
+}
+function persistSmallCache(key,obj){
+  // 캐시는 실패해도 서비스 핵심 기능이 아니므로, 저장 목록을 밀어내지 않도록 작게 유지합니다.
+  const limit = key === DETAIL_STORE_KEY ? 120 : 350;
+  const compact = trimCacheObject(obj, limit, key === DETAIL_STORE_KEY);
+  try { localStorage.setItem(key, JSON.stringify(compact)); }
+  catch { try { localStorage.removeItem(key); } catch {} }
+  return compact;
+}
+function rememberTitleCache(key,value){ if(value){ TITLE_STORE[key]=value; TITLE_STORE=persistSmallCache(TITLE_STORE_KEY,TITLE_STORE); } }
+function rememberPosterCache(key,value){ if(value){ POSTER_STORE[key]=value; POSTER_STORE=persistSmallCache(POSTER_STORE_KEY,POSTER_STORE); } }
+function rememberDetailCache(key,value){ if(value){ DETAIL_STORE[key]={when:Date.now(),data:value}; DETAIL_STORE=persistSmallCache(DETAIL_STORE_KEY,DETAIL_STORE); } }
 const COMMON_TITLE_CHARS_RE = /^[\u0000-\u007F\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F\s.,:;!?"'()\[\]{}\-–—_&+/·•★☆#@%°]+$/;
 const JA_TITLE_CHARS_RE = /^[\u0000-\u007F\u3040-\u30FF\u3400-\u9FFF\s.,:;!?"'()\[\]{}\-–—_&+/·•★☆#@%°]+$/;
 const ZH_TITLE_CHARS_RE = /^[\u0000-\u007F\u3400-\u9FFF\s.,:;!?"'()\[\]{}\-–—_&+/·•★☆#@%°]+$/;
@@ -1420,13 +1477,68 @@ function showSkeletons(n=12){
 function clearSkeletons(){ $$('.skeleton').forEach(el=>el.remove()); }
 
 /* ═══════════════════════════════ SAVED ═══════════════════════════════ */
-async function getSaved(kind){ const key=kind==='fav'?SK.favs:SK.watch; const obj=await storage.get([key]); return obj[key]||[]; }
-async function setSaved(kind,list){ await storage.set({[kind==='fav'?SK.favs:SK.watch]:list}); }
+function savedKey(kind){ return kind==='fav' ? SK.favs : SK.watch; }
+function normalizeSavedItem(item){
+  if(!item) return null;
+  const id = Number(item.id);
+  const mediaType = item.media_type || (item.first_air_date ? 'tv' : 'movie');
+  if(!Number.isFinite(id) || !['movie','tv'].includes(mediaType)) return null;
+  const title = cleanTitle(item.title || item.name || item.original_title || item.original_name || '');
+  return {
+    k: `${mediaType}-${id}`,
+    id,
+    media_type: mediaType,
+    title,
+    poster_path: item.poster_path || '',
+    vote_average: Number(item.vote_average || 0),
+    release_date: item.release_date || item.first_air_date || '',
+    popularity: Number(item.popularity || 0)
+  };
+}
+function normalizeSavedList(list){
+  const map = new Map();
+  (Array.isArray(list) ? list : []).forEach(x=>{
+    const item = normalizeSavedItem(x);
+    if(item) map.set(item.k, {...item, title: cleanTitle(x.title || x.name || item.title)});
+  });
+  return Array.from(map.values());
+}
+async function getSaved(kind){
+  const key = savedKey(kind);
+  const obj = await storage.get([key]);
+  return normalizeSavedList(obj[key]);
+}
+async function setSaved(kind,list){
+  const key = savedKey(kind);
+  const normalized = normalizeSavedList(list);
+  const ok = await storage.set({[key]: normalized});
+  if(!ok) return false;
+  const check = await storage.get([key]);
+  const saved = normalizeSavedList(check[key]);
+  return saved.length === normalized.length && normalized.every((x,i)=>saved[i]?.k === x.k);
+}
+function updateSavedButtons(kind, list){
+  const set = new Set(normalizeSavedList(list).map(x=>x.k));
+  $$('#results .card').forEach(card=>{
+    const key = card.getAttribute('data-key');
+    setActionButtonVisual(card.querySelector(kind==='fav'?'.fav-btn':'.watch-btn'), kind, set.has(key));
+  });
+}
 async function toggleSaved(kind,item){
-  const list=await getSaved(kind), k=`${item.media_type}-${item.id}`, idx=list.findIndex(x=>x.k===k);
-  if(idx>=0){list.splice(idx,1);await setSaved(kind,list);showToast(t('toast_removed'));}
-  else{list.push({k,id:item.id,media_type:item.media_type,title:cleanTitle(item.title||item.name||''),poster_path:item.poster_path||'',vote_average:item.vote_average||0,release_date:item.release_date||item.first_air_date||'',popularity:item.popularity||0});await setSaved(kind,list);showToast(t('toast_saved'));}
-  if(PAGE_STATE.lastMode===`saved-${kind}`)await showSaved(kind);
+  const current = await getSaved(kind);
+  const savedItem = normalizeSavedItem(item);
+  if(!savedItem){ showToast(t('toast_save_failed'), 2600); return current; }
+  const idx = current.findIndex(x=>x.k===savedItem.k);
+  const next = current.slice();
+  const willRemove = idx >= 0;
+  if(willRemove) next.splice(idx,1);
+  else next.push(savedItem);
+
+  const ok = await setSaved(kind,next);
+  if(!ok){ showToast(t('toast_save_failed'), 2800); return current; }
+
+  showToast(willRemove ? t('toast_removed') : t('toast_saved'));
+  if(PAGE_STATE.lastMode===`saved-${kind}`) await showSaved(kind);
   return await getSaved(kind);
 }
 
@@ -1444,7 +1556,13 @@ function setActionButtonVisual(btn,kind,active){
   const label = kind==='fav' ? t('favorite') : t('watch_later');
   btn.setAttribute('aria-label', `${label} ${active ? t('selected') : t('not_selected')}`);
   btn.setAttribute('title', `${label} ${active ? t('selected') : t('not_selected')}`);
-  btn.innerHTML = `<span class="btn-glyph">${kind==='fav' ? (active ? '♥' : '♡') : (active ? '✓' : '⏱')}</span>`;
+  // 즐겨찾기: 하트 / 나중에보기: 시계 (비활성), 체크 (활성)
+  const glyph = kind==='fav'
+    ? (active ? '♥' : '♡')
+    : (active
+        ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>');
+  btn.innerHTML = `<span class="btn-glyph">${glyph}</span>`;
 }
 function renderCards(items,append){
   if(!items.length&&!append){
@@ -1469,7 +1587,7 @@ function renderCards(items,append){
       <div class="thumb">${img?`<img src="${img}" alt="${escapeHtml(title)}" loading="lazy">`:`<div class="thumb-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>${t('poster_none')}</span></div>`}</div>
       <div class="card-actions">
         <button class="action-btn fav-btn" type="button" aria-pressed="false" aria-label="${t('favorite')} ${t('not_selected')}" title="${t('favorite')} ${t('not_selected')}"><span class="btn-glyph">♡</span></button>
-        <button class="action-btn watch-btn" type="button" aria-pressed="false" aria-label="${t('watch_later')} ${t('not_selected')}" title="${t('watch_later')} ${t('not_selected')}"><span class="btn-glyph">⏱</span></button>
+        <button class="action-btn watch-btn" type="button" aria-pressed="false" aria-label="${t('watch_later')} ${t('not_selected')}" title="${t('watch_later')} ${t('not_selected')}"><span class="btn-glyph"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span></button>
       </div>
       <div class="meta">
         <div class="title-line"><span class="${badgeCls}">${type==='movie'?t('badge_movie'):t('badge_tv')}</span><span class="${ratingCls}">★ ${rating}</span></div>
@@ -1490,8 +1608,8 @@ function renderCards(items,append){
     const type=card.getAttribute('data-type'),id=card.getAttribute('data-id');
     const fb=card.querySelector('.fav-btn'),wb=card.querySelector('.watch-btn');
     card.addEventListener('click',e=>{if(e.target.closest('.action-btn'))return;openDetail(type,id,card);});
-    fb.addEventListener('click',async e=>{e.stopPropagation();const s=pickStub(card);const l=await toggleSaved('fav',s);reflectUI(card,l,'fav');});
-    wb.addEventListener('click',async e=>{e.stopPropagation();const s=pickStub(card);const l=await toggleSaved('watch',s);reflectUI(card,l,'watch');});
+    fb.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();const s=pickStub(card);const l=await toggleSaved('fav',s);updateSavedButtons('fav',l);});
+    wb.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();const s=pickStub(card);const l=await toggleSaved('watch',s);updateSavedButtons('watch',l);});
   });
   Promise.all([getSaved('fav'),getSaved('watch')]).then(([fl,wl])=>{
     const fs=new Set(fl.map(x=>x.k)),ws=new Set(wl.map(x=>x.k));
@@ -1521,7 +1639,7 @@ async function clearSavedList(kind) {
   }
   // 확인 다이얼로그
   if (!confirm(`${kindName} ${list.length}개를 모두 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
-  await setSaved(kind, []);
+  if(!await setSaved(kind, [])){ showToast(t('toast_save_failed'), 2800); return; }
   showToast(`${kindName} 목록을 초기화했습니다`, 2200);
   // 현재 화면 갱신
   if (PAGE_STATE.lastMode === `saved-${kind}`) {
@@ -1586,7 +1704,7 @@ async function importSaved(file, kind) {
     const merged = Array.from(map.values());
     const added  = merged.length - cur.length;
 
-    await setSaved(kind, merged);
+    if(!await setSaved(kind, merged)){ showToast(t('toast_save_failed'), 2800); return; }
     showToast(`가져오기 완료 · ${kindName} +${added}개`, 2400);
 
     // 현재 화면 갱신
@@ -1599,31 +1717,35 @@ async function importSaved(file, kind) {
 }
 
 async function showSaved(kind){
-  PAGE_STATE.lastMode=`saved-${kind}`; $('#results').innerHTML='';
-  const list=await getSaved(kind);
-  if(!list.length){setStatus(t('status_empty'));setSavedModeUI(kind);renderEmptyState();return;}
-  const fixed=await Promise.all(list.map(async x=>{
-    try{x.title=await resolveTmdbDisplayTitle(x.media_type,x.id,x.title||'');}catch{}
-    if(!x.poster_path||x.vote_average==null||!x.release_date){
-      try{
-        const d=await fetchJson(`https://api.themoviedb.org/3/${x.media_type}/${x.id}?api_key=${API_KEY}&language=${tmdbLang()}`);
-        x.poster_path=d.poster_path||'';
-        x.release_date=d.release_date||d.first_air_date||'';
-        x.vote_average=d.vote_average||0;
-        x.popularity=d.popularity||x.popularity||0;
-        x.title=await resolveTmdbDisplayTitle(x.media_type,x.id,itemTitle(d,x.media_type)||x.title||'');
-      }catch{}
-    }return x;
-  }));
-  await setSaved(kind,fixed);
-  let items=fixed.slice();
-  if(PAGE_STATE.query){ if(PAGE_STATE.personActive){const ks=await personKeySet();items=ks?items.filter(x=>ks.has(`${x.media_type}-${x.id}`)):[];}else{const q=lc(PAGE_STATE.query);items=items.filter(x=>lc(x.title).includes(q));} }
-  if(CONTENT_TYPE!=='all')items=items.filter(x=>x.media_type===CONTENT_TYPE);
-  items=await applyClientFiltersStrict(items);
-  if(!items.length){setStatus(t('status_empty'));setSavedModeUI(kind);renderEmptyState();return;}
-  items=clientSort(items);
+  PAGE_STATE.lastMode=`saved-${kind}`;
+  $('#results').innerHTML='';
+  setStatus('');
   setSavedModeUI(kind);
-  renderCards(items.map(x=>({id:x.id,media_type:x.media_type,title:x.title,name:x.title,poster_path:x.poster_path,vote_average:x.vote_average,release_date:x.release_date,popularity:x.popularity||0})),false);
+
+  const list = await getSaved(kind);
+  if(!list.length){ renderEmptyState(); return; }
+
+  // 탭 필터만 적용 (장르/국가 필터 미적용)
+  let items = list.slice();
+  if(CONTENT_TYPE!=='all') items = items.filter(x=>x.media_type===CONTENT_TYPE);
+  if(!items.length){ renderEmptyState(); return; }
+
+  // 정렬
+  items.sort((a,b)=>{
+    if(SORT_BY==='vote_average.desc') return (b.vote_average||0)-(a.vote_average||0);
+    if(SORT_BY==='date.desc'){ const da=a.release_date||'',db=b.release_date||''; return db>da?1:db<da?-1:0; }
+    return (b.popularity||0)-(a.popularity||0);
+  });
+
+  // 즉시 렌더링 (제목/포스터는 refreshCardTitles/Posters가 비동기 보완)
+  renderCards(items.map(x=>({
+    id: x.id, media_type: x.media_type,
+    title: x.title, name: x.title,
+    poster_path: x.poster_path,
+    vote_average: x.vote_average||0,
+    release_date: x.release_date||'',
+    popularity: x.popularity||0
+  })), false);
   setStatus('');
 }
 async function personKeySet(){
@@ -1712,7 +1834,7 @@ async function openDetail(type,id,sourceEl=null){
       btn.classList.toggle('active',active);
       btn.setAttribute('aria-pressed',active?'true':'false');
       btn.textContent=`${kind==='fav'?(active?'♥':'♡'):(active?'✓':'⏱')} ${kind==='fav'?t('modal_add_fav'):t('modal_add_watch')}`;
-      $$('#results .card').forEach(card=>{ if(card.getAttribute('data-key')===key)reflectUI(card,list,kind); });
+      updateSavedButtons(kind, list);
     }));
     document.querySelector('.modal-content').scrollTop=0;
     $('#modal').classList.remove('hidden');
