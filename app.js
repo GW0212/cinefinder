@@ -1836,9 +1836,14 @@ async function openDetail(type,id,sourceEl=null){
       btn.textContent=`${kind==='fav'?(active?'♥':'♡'):(active?'✓':'⏱')} ${kind==='fav'?t('modal_add_fav'):t('modal_add_watch')}`;
       updateSavedButtons(kind, list);
     }));
-    document.querySelector('.modal-content').scrollTop=0;
+    const modalContent=document.querySelector('.modal-content');
+    if(modalContent) modalContent.scrollTop=0;
     $('#modal').classList.remove('hidden');
     document.body.classList.add('lock-scroll');
+    requestAnimationFrame(()=>{
+      const mc=document.querySelector('.modal-content');
+      if(mc) mc.scrollTo({top:0,left:0,behavior:'instant'});
+    });
     $('#modalClose').focus();
   }catch(e){showToast(t('status_fetch_fail'));}
 }
