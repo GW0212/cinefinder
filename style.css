@@ -4762,3 +4762,167 @@ html, body {
     max-width: none !important;
   }
 }
+
+/* ================================================================
+   PC THUMBNAIL ACTION BUTTON RESTORE — 2026-06-06
+   - PC에서만 장르 배지 + 즐겨찾기/나중에 보기/내 평점 버튼을
+     썸네일 상단 가로형 원형 버튼 디자인으로 고정
+   - 모바일 전용 정렬/크기 보정은 그대로 유지
+   ================================================================ */
+@media (min-width: 721px) {
+  .results-grid .card .thumb-top-info {
+    top: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    pointer-events: none !important;
+  }
+
+  .results-grid .card .thumb-badge-action {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: auto !important;
+    flex: 0 1 auto !important;
+    pointer-events: none !important;
+  }
+
+  .results-grid .card .thumb-top-info .badge,
+  .results-grid .card .thumb-badge-action .badge {
+    height: 23px !important;
+    min-height: 23px !important;
+    max-height: 23px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    padding: 0 10px !important;
+    border-radius: 999px !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: -0.02em !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  .results-grid .card .thumb-badge-action .card-actions,
+  .results-grid .card .card-actions {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    transform: none !important;
+    z-index: 4 !important;
+    pointer-events: auto !important;
+  }
+
+  .results-grid .card .action-btn {
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    background: rgba(255,255,255,.96) !important;
+    border: 1px solid rgba(255,255,255,.88) !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+    box-shadow: 0 7px 18px rgba(15,23,42,.20) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+  }
+
+  .results-grid .card .action-btn:hover {
+    transform: translateY(-1px) scale(1.04) !important;
+    background: #fff !important;
+    box-shadow: 0 10px 22px rgba(15,23,42,.24) !important;
+  }
+
+  .results-grid .card .action-btn .btn-glyph {
+    width: 18px !important;
+    height: 18px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+    text-align: center !important;
+  }
+
+  .results-grid .card .action-btn .btn-glyph svg,
+  .results-grid .card .action-icon {
+    width: 17px !important;
+    height: 17px !important;
+    display: block !important;
+    margin: auto !important;
+  }
+
+  .results-grid .card .watch-btn .action-icon-clock,
+  .results-grid .card .watch-btn .action-icon-check {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .results-grid .card .fav-btn,
+  .results-grid .card .fav-btn .btn-glyph {
+    color: #ef4444 !important;
+  }
+  .results-grid .card .watch-btn,
+  .results-grid .card .watch-btn .btn-glyph {
+    color: #2563eb !important;
+  }
+  .results-grid .card .watch-btn .btn-glyph svg {
+    stroke: #2563eb !important;
+  }
+  .results-grid .card .rate-btn,
+  .results-grid .card .rate-btn .btn-glyph {
+    color: #d97706 !important;
+  }
+
+  .results-grid .card .fav-btn.active {
+    background: rgba(254,242,242,.98) !important;
+    border-color: rgba(239,68,68,.58) !important;
+    color: #dc2626 !important;
+  }
+  .results-grid .card .watch-btn.active {
+    background: rgba(239,246,255,.98) !important;
+    border-color: rgba(37,99,235,.55) !important;
+    color: #2563eb !important;
+  }
+  .results-grid .card .watch-btn.active .btn-glyph svg {
+    stroke: #2563eb !important;
+  }
+  .results-grid .card .rate-btn.active {
+    background: rgba(255,251,235,.98) !important;
+    border-color: rgba(217,119,6,.58) !important;
+    color: #d97706 !important;
+  }
+
+  [data-theme="dark"] .results-grid .card .action-btn {
+    background: rgba(255,255,255,.94) !important;
+    border-color: rgba(255,255,255,.72) !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,.36) !important;
+  }
+}
