@@ -4123,3 +4123,271 @@ html, body {
     margin-left: auto !important;
   }
 }
+
+/* ================================================================
+   FINAL MOBILE THUMBNAIL POLISH — 2026-06-06
+   - 모바일 4열 카드 비율에 맞춰 장르/액션 버튼 크기 재조정
+   - 버튼 내부 아이콘 중앙 정렬 보정
+   - 카드 제목/연도 완전 중앙 정렬
+   ================================================================ */
+.card .meta,
+.card .name,
+.card .sub {
+  text-align: center !important;
+}
+
+.card .meta {
+  align-items: center !important;
+}
+
+.card .name,
+.card .sub {
+  width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  display: block !important;
+}
+
+.card .action-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+}
+
+.card .action-btn .btn-glyph {
+  width: 100% !important;
+  height: 100% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  transform: none !important;
+}
+
+.card .action-btn .btn-glyph svg {
+  display: block !important;
+  margin: auto !important;
+}
+
+@media (max-width: 720px) {
+  .results-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  .thumb-top-info {
+    top: 5px !important;
+    left: 5px !important;
+    right: 5px !important;
+    width: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 2px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .thumb-badge-action {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 2px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .thumb-badge-action .badge,
+  .thumb-top-info .badge {
+    min-width: 0 !important;
+    max-width: 34px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    padding: 0 4px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 8px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+  }
+
+  .thumb-badge-action .card-actions,
+  .card-actions {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex: 0 0 auto !important;
+    gap: 2px !important;
+    margin-left: auto !important;
+    min-width: 0 !important;
+  }
+
+  .action-btn {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    min-height: 18px !important;
+    border-radius: 999px !important;
+    font-size: 10px !important;
+    box-shadow: 0 3px 8px rgba(15,23,42,.18) !important;
+  }
+
+  .fav-btn .btn-glyph,
+  .rate-btn .btn-glyph {
+    font-size: 12px !important;
+    font-weight: 800 !important;
+  }
+
+  .watch-btn .btn-glyph svg,
+  .action-btn .btn-glyph svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
+
+  .card-user-rating {
+    height: 18px !important;
+    min-height: 18px !important;
+    padding: 0 4px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 8px !important;
+    line-height: 1 !important;
+  }
+
+  .meta {
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .name,
+  .sub {
+    text-align: center !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    transform: translateX(0) !important;
+  }
+
+  .name {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: keep-all !important;
+    overflow-wrap: anywhere !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .results-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .thumb-top-info {
+    top: 4px !important;
+    left: 4px !important;
+    right: 4px !important;
+    gap: 1px !important;
+  }
+
+  .thumb-badge-action {
+    gap: 1px !important;
+  }
+
+  .thumb-badge-action .badge,
+  .thumb-top-info .badge {
+    max-width: 30px !important;
+    height: 17px !important;
+    min-height: 17px !important;
+    padding: 0 3px !important;
+    font-size: 7.5px !important;
+  }
+
+  .thumb-badge-action .card-actions,
+  .card-actions {
+    gap: 1px !important;
+  }
+
+  .action-btn {
+    width: 17px !important;
+    height: 17px !important;
+    min-width: 17px !important;
+    max-width: 17px !important;
+    min-height: 17px !important;
+    font-size: 9.5px !important;
+  }
+
+  .fav-btn .btn-glyph,
+  .rate-btn .btn-glyph {
+    font-size: 11.5px !important;
+  }
+
+  .watch-btn .btn-glyph svg,
+  .action-btn .btn-glyph svg {
+    width: 9.5px !important;
+    height: 9.5px !important;
+  }
+
+  .meta {
+    min-height: 58px !important;
+    padding: 6px 4px 7px !important;
+  }
+
+  .name {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+  }
+
+  .sub {
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .thumb-badge-action .badge,
+  .thumb-top-info .badge {
+    max-width: 27px !important;
+    height: 16px !important;
+    min-height: 16px !important;
+    font-size: 7px !important;
+    padding: 0 2px !important;
+  }
+
+  .action-btn {
+    width: 15.5px !important;
+    height: 15.5px !important;
+    min-width: 15.5px !important;
+    max-width: 15.5px !important;
+    min-height: 15.5px !important;
+  }
+
+  .fav-btn .btn-glyph,
+  .rate-btn .btn-glyph {
+    font-size: 10.5px !important;
+  }
+
+  .watch-btn .btn-glyph svg,
+  .action-btn .btn-glyph svg {
+    width: 8.5px !important;
+    height: 8.5px !important;
+  }
+}
