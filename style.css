@@ -4391,3 +4391,260 @@ html, body {
     height: 8.5px !important;
   }
 }
+
+/* ================================================================
+   FINAL MOBILE MICRO-ALIGNMENT HOTFIX
+   - 4열 모바일 카드 상단 배지/버튼을 동일 높이 중앙 정렬
+   - 하트/별 아이콘을 SVG 기준으로 작게 조정
+   - 카드 제목/연도 영역을 실제 카드 중앙 기준으로 재보정
+   ================================================================ */
+.action-icon {
+  display: block !important;
+  flex: 0 0 auto !important;
+  margin: auto !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 720px) {
+  .card .thumb-top-info {
+    top: 4px !important;
+    left: 4px !important;
+    right: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 2px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .card .thumb-badge-action {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 2px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .card .thumb-badge-action .badge,
+  .card .thumb-top-info .badge {
+    width: 31px !important;
+    min-width: 31px !important;
+    max-width: 31px !important;
+    height: 17px !important;
+    min-height: 17px !important;
+    max-height: 17px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    line-height: 17px !important;
+    font-size: 7.6px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.04em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+  }
+
+  .card .thumb-badge-action .card-actions,
+  .card .card-actions {
+    height: 17px !important;
+    min-height: 17px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 1.5px !important;
+    margin-left: auto !important;
+    flex: 0 0 auto !important;
+  }
+
+  .card .action-btn {
+    width: 16.5px !important;
+    min-width: 16.5px !important;
+    max-width: 16.5px !important;
+    height: 16.5px !important;
+    min-height: 16.5px !important;
+    max-height: 16.5px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+  }
+
+  .card .action-btn .btn-glyph {
+    width: 100% !important;
+    height: 100% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+    text-align: center !important;
+  }
+
+  .card .action-btn .btn-glyph svg,
+  .card .action-icon {
+    width: 9.2px !important;
+    height: 9.2px !important;
+    display: block !important;
+    margin: auto !important;
+  }
+
+  .card .fav-btn .action-icon-heart,
+  .card .rate-btn .action-icon-star {
+    width: 9px !important;
+    height: 9px !important;
+  }
+
+  .card .watch-btn .action-icon-clock,
+  .card .watch-btn .action-icon-check {
+    width: 8.8px !important;
+    height: 8.8px !important;
+  }
+
+  .card .meta {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .card .name,
+  .card .sub {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    text-align: center !important;
+    text-align-last: center !important;
+    transform: none !important;
+  }
+
+  .card .name {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: keep-all !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .card .thumb-top-info {
+    top: 4px !important;
+    left: 3px !important;
+    right: 3px !important;
+    gap: 1.5px !important;
+  }
+
+  .card .thumb-badge-action {
+    gap: 1.5px !important;
+  }
+
+  .card .thumb-badge-action .badge,
+  .card .thumb-top-info .badge {
+    width: 30px !important;
+    min-width: 30px !important;
+    max-width: 30px !important;
+    height: 16px !important;
+    min-height: 16px !important;
+    max-height: 16px !important;
+    line-height: 16px !important;
+    font-size: 7.2px !important;
+  }
+
+  .card .thumb-badge-action .card-actions,
+  .card .card-actions {
+    height: 16px !important;
+    min-height: 16px !important;
+    gap: 1px !important;
+  }
+
+  .card .action-btn {
+    width: 16px !important;
+    min-width: 16px !important;
+    max-width: 16px !important;
+    height: 16px !important;
+    min-height: 16px !important;
+    max-height: 16px !important;
+  }
+
+  .card .action-btn .btn-glyph svg,
+  .card .action-icon {
+    width: 8.8px !important;
+    height: 8.8px !important;
+  }
+
+  .card .fav-btn .action-icon-heart,
+  .card .rate-btn .action-icon-star {
+    width: 8.6px !important;
+    height: 8.6px !important;
+  }
+
+  .card .watch-btn .action-icon-clock,
+  .card .watch-btn .action-icon-check {
+    width: 8.5px !important;
+    height: 8.5px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .card .thumb-top-info {
+    left: 2.5px !important;
+    right: 2.5px !important;
+  }
+
+  .card .thumb-badge-action .badge,
+  .card .thumb-top-info .badge {
+    width: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+    height: 15px !important;
+    min-height: 15px !important;
+    max-height: 15px !important;
+    line-height: 15px !important;
+    font-size: 6.8px !important;
+  }
+
+  .card .thumb-badge-action .card-actions,
+  .card .card-actions {
+    height: 15px !important;
+    min-height: 15px !important;
+    gap: .5px !important;
+  }
+
+  .card .action-btn {
+    width: 15px !important;
+    min-width: 15px !important;
+    max-width: 15px !important;
+    height: 15px !important;
+    min-height: 15px !important;
+    max-height: 15px !important;
+  }
+
+  .card .action-btn .btn-glyph svg,
+  .card .action-icon {
+    width: 8.1px !important;
+    height: 8.1px !important;
+  }
+
+  .card .fav-btn .action-icon-heart,
+  .card .rate-btn .action-icon-star {
+    width: 7.9px !important;
+    height: 7.9px !important;
+  }
+}

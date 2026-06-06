@@ -1788,6 +1788,14 @@ function ratingSourceFromCard(card){
     note: card.getAttribute('data-user-note') || ''
   };
 }
+
+function actionHeartSvg(active=false){
+  return `<svg class="action-icon action-icon-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="${active ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+}
+function actionStarSvg(active=false){
+  return `<svg class="action-icon action-icon-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="${active ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+}
+
 function setRateButtonVisual(btn, rating){
   if(!btn) return;
   const active = Number.isFinite(Number(rating)) && Number(rating) > 0;
@@ -1795,7 +1803,7 @@ function setRateButtonVisual(btn, rating){
   btn.setAttribute('aria-pressed', active ? 'true' : 'false');
   btn.setAttribute('title', active ? `${t('my_rating')} ${Number(rating).toFixed(1)}` : t('rate_this'));
   btn.setAttribute('aria-label', active ? `${t('my_rating')} ${Number(rating).toFixed(1)}` : t('rate_this'));
-  btn.innerHTML = `<span class="btn-glyph">${active ? '★' : '☆'}</span>`;
+  btn.innerHTML = `<span class="btn-glyph">${actionStarSvg(active)}</span>`;
 }
 function ratingViewMapForList(list){
   const cached = getCachedRatingView(list);
@@ -2257,12 +2265,12 @@ function setActionButtonVisual(btn,kind,active){
   const label = kind==='fav' ? t('favorite') : t('watch_later');
   btn.setAttribute('aria-label', `${label} ${active ? t('selected') : t('not_selected')}`);
   btn.setAttribute('title', `${label} ${active ? t('selected') : t('not_selected')}`);
-  // 즐겨찾기: 하트 / 나중에보기: 시계 (비활성), 체크 (활성)
+  // 즐겨찾기: 하트 / 나중에보기: 시계 또는 체크
   const glyph = kind==='fav'
-    ? (active ? '♥' : '♡')
+    ? actionHeartSvg(active)
     : (active
-        ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>'
-        : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>');
+        ? '<svg class="action-icon action-icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '<svg class="action-icon action-icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>');
   btn.innerHTML = `<span class="btn-glyph">${glyph}</span>`;
 }
 function renderCards(items,append){
@@ -2289,7 +2297,7 @@ function renderCards(items,append){
     const badgeCls=userRatingType==='anime'?'badge badge-anime':type==='tv'?'badge badge-tv':'badge';
     const badgeLabel=userRatingType==='anime'?t('anime'):(type==='movie'?t('badge_movie'):t('badge_tv'));
     return`<div class="card" data-type="${type}" data-id="${it.id}" data-key="${key}" data-title="${escapeHtml(title)}" data-rating-id="${escapeHtml(ratingId)}" data-rating-title="${escapeHtml(ratingTitle)}" data-rating-type="${escapeHtml(userRatingType)}" data-poster="${escapeHtml(it.poster_path||'')}" data-date="${escapeHtml(it.release_date||it.first_air_date||'')}" data-vote="${it.vote_average||0}">
-      <div class="thumb">${img?`<img src="${img}" alt="${escapeHtml(title)}" loading="lazy">`:`<div class="thumb-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>${t('poster_none')}</span></div>`}<div class="thumb-top-info"><div class="thumb-badge-action"><span class="${badgeCls}">${escapeHtml(badgeLabel)}</span><div class="card-actions"><button class="action-btn fav-btn" type="button" aria-pressed="false" aria-label="${t('favorite')} ${t('not_selected')}" title="${t('favorite')} ${t('not_selected')}"><span class="btn-glyph">♡</span></button><button class="action-btn watch-btn" type="button" aria-pressed="false" aria-label="${t('watch_later')} ${t('not_selected')}" title="${t('watch_later')} ${t('not_selected')}"><span class="btn-glyph"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span></button><button class="action-btn rate-btn" type="button" aria-pressed="false" aria-label="${t('rate_this')}" title="${t('rate_this')}"><span class="btn-glyph">☆</span></button></div></div><span class="card-user-rating user-rating-score hidden"></span></div></div>
+      <div class="thumb">${img?`<img src="${img}" alt="${escapeHtml(title)}" loading="lazy">`:`<div class="thumb-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>${t('poster_none')}</span></div>`}<div class="thumb-top-info"><div class="thumb-badge-action"><span class="${badgeCls}">${escapeHtml(badgeLabel)}</span><div class="card-actions"><button class="action-btn fav-btn" type="button" aria-pressed="false" aria-label="${t('favorite')} ${t('not_selected')}" title="${t('favorite')} ${t('not_selected')}"><span class="btn-glyph">${actionHeartSvg(false)}</span></button><button class="action-btn watch-btn" type="button" aria-pressed="false" aria-label="${t('watch_later')} ${t('not_selected')}" title="${t('watch_later')} ${t('not_selected')}"><span class="btn-glyph"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span></button><button class="action-btn rate-btn" type="button" aria-pressed="false" aria-label="${t('rate_this')}" title="${t('rate_this')}"><span class="btn-glyph">${actionStarSvg(false)}</span></button></div></div><span class="card-user-rating user-rating-score hidden"></span></div></div>
       <div class="meta">
         <div class="name" title="${escapeHtml(title)}">${escapeHtml(title)||'&nbsp;'}</div>
         <div class="sub">${year||t('year_unknown')}</div>
