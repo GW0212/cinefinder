@@ -3738,3 +3738,307 @@ html, body {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ================================================================
+   FINAL MOBILE CARD ACTION / 4-COLUMN / COLOR FIX — 2026-06-06
+   ================================================================ */
+/* 썸네일 상단: 장르 배지 바로 오른쪽에 즐겨찾기/나중에 보기/평점 버튼 배치 */
+.thumb-top-info {
+  align-items: flex-start !important;
+  gap: 6px !important;
+  pointer-events: none;
+}
+.thumb-badge-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  pointer-events: none;
+}
+.thumb-badge-action .badge {
+  flex: 0 0 auto;
+}
+.thumb-badge-action .card-actions,
+.card-actions {
+  position: static !important;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  opacity: 1 !important;
+  transform: none !important;
+  z-index: 4 !important;
+  pointer-events: auto !important;
+}
+.card-actions .action-btn {
+  flex: 0 0 auto;
+}
+.card-user-rating {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+/* 카드 액션 색상 명확화: 하트=빨강, 시계=파랑, 별=노랑 */
+.fav-btn,
+.fav-btn .btn-glyph { color: #ef4444 !important; }
+.fav-btn.active {
+  background: rgba(254,242,242,.98) !important;
+  border-color: rgba(239,68,68,.52) !important;
+  color: #dc2626 !important;
+}
+.watch-btn,
+.watch-btn .btn-glyph { color: #2563eb !important; }
+.watch-btn .btn-glyph svg { stroke: #2563eb !important; }
+.watch-btn.active {
+  background: rgba(239,246,255,.98) !important;
+  border-color: rgba(37,99,235,.48) !important;
+  color: #2563eb !important;
+}
+.watch-btn.active .btn-glyph svg { stroke: #2563eb !important; }
+.rate-btn,
+.rate-btn .btn-glyph { color: #d97706 !important; }
+.rate-btn.active {
+  background: rgba(255,251,235,.98) !important;
+  border-color: rgba(217,119,6,.52) !important;
+  color: #d97706 !important;
+}
+
+/* 상단 저장 버튼 색상: 기능별로 고정 구분 */
+.saved-btn.fav-saved {
+  color: #dc2626;
+  border-color: rgba(239,68,68,.32);
+  background: rgba(254,242,242,.92);
+}
+.saved-btn.fav-saved .saved-btn-icon { background: rgba(239,68,68,.12); color: #ef4444; }
+.saved-btn.fav-saved:hover,
+.saved-btn.fav-saved.active {
+  color: #b91c1c;
+  border-color: rgba(239,68,68,.55);
+  background: rgba(254,226,226,.98);
+  box-shadow: 0 8px 18px rgba(239,68,68,.16);
+}
+.saved-btn.watch-saved {
+  color: #2563eb;
+  border-color: rgba(37,99,235,.32);
+  background: rgba(239,246,255,.92);
+}
+.saved-btn.watch-saved .saved-btn-icon { background: rgba(37,99,235,.12); color: #2563eb; }
+.saved-btn.watch-saved:hover,
+.saved-btn.watch-saved.active {
+  color: #1d4ed8;
+  border-color: rgba(37,99,235,.55);
+  background: rgba(219,234,254,.98);
+  box-shadow: 0 8px 18px rgba(37,99,235,.16);
+}
+.saved-btn.ratings-saved {
+  color: #d97706;
+  border-color: rgba(217,119,6,.34);
+  background: rgba(255,251,235,.94);
+}
+.saved-btn.ratings-saved .saved-btn-icon { background: rgba(217,119,6,.13); color: #d97706; }
+.saved-btn.ratings-saved:hover,
+.saved-btn.ratings-saved.active {
+  color: #b45309;
+  border-color: rgba(217,119,6,.58);
+  background: rgba(254,243,199,.98);
+  box-shadow: 0 8px 18px rgba(217,119,6,.17);
+}
+[data-theme="dark"] .saved-btn.fav-saved {
+  color: #fca5a5;
+  border-color: rgba(248,113,113,.42);
+  background: rgba(69,10,10,.74);
+}
+[data-theme="dark"] .saved-btn.watch-saved {
+  color: #93c5fd;
+  border-color: rgba(96,165,250,.42);
+  background: rgba(23,37,84,.74);
+}
+[data-theme="dark"] .saved-btn.ratings-saved {
+  color: #fcd34d;
+  border-color: rgba(251,191,36,.46);
+  background: rgba(69,40,0,.74);
+}
+
+@media (max-width: 720px) {
+  /* 모바일 탭/정렬 중앙 정렬 */
+  .ctrl-row1 {
+    justify-content: center !important;
+    text-align: center !important;
+  }
+  .type-tabs,
+  .ctrl-row1-right {
+    justify-content: center !important;
+  }
+
+  /* 모바일 저장 버튼 아이콘 PC와 동일하게 항상 노출 */
+  .saved-btn-icon {
+    display: inline-flex !important;
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  /* 모바일 리스트 4열 정렬 */
+  .results-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .card {
+    border-radius: 10px !important;
+  }
+  .meta {
+    min-height: 52px !important;
+    padding: 6px 4px 7px !important;
+    gap: 2px !important;
+  }
+  .name {
+    font-size: 10.5px !important;
+    line-height: 1.25 !important;
+  }
+  .sub {
+    font-size: 9.5px !important;
+  }
+  .user-rating-inline,
+  .rating-note-preview {
+    font-size: 8.8px !important;
+    padding: 2px 4px !important;
+  }
+
+  .thumb-top-info {
+    top: 5px !important;
+    left: 5px !important;
+    right: 5px !important;
+    gap: 3px !important;
+    flex-wrap: wrap !important;
+  }
+  .thumb-badge-action {
+    gap: 3px !important;
+  }
+  .thumb-top-info .badge {
+    max-width: none !important;
+    min-height: 17px !important;
+    padding: 2px 4px !important;
+    font-size: 8px !important;
+    line-height: 1 !important;
+  }
+  .card-user-rating {
+    min-height: 17px !important;
+    padding: 2px 4px !important;
+    font-size: 8px !important;
+    line-height: 1 !important;
+  }
+  .thumb-badge-action .card-actions,
+  .card-actions {
+    gap: 2px !important;
+  }
+  .action-btn {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    border-radius: 999px !important;
+    font-size: 10px !important;
+    box-shadow: 0 4px 10px rgba(15,23,42,.16) !important;
+  }
+  .action-btn .btn-glyph svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .results-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+  .saved-btn-icon {
+    display: inline-flex !important;
+  }
+  .tab {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    font-size: 11.5px !important;
+  }
+  .sort-select {
+    font-size: 11.5px !important;
+    padding-left: 10px !important;
+    padding-right: 25px !important;
+  }
+  .thumb-top-info {
+    top: 4px !important;
+    left: 4px !important;
+    right: 4px !important;
+  }
+  .thumb-top-info .badge {
+    padding: 1px 3px !important;
+    font-size: 7.4px !important;
+    min-height: 15px !important;
+  }
+  .card-user-rating {
+    padding: 1px 3px !important;
+    font-size: 7.4px !important;
+    min-height: 15px !important;
+  }
+  .thumb-badge-action {
+    gap: 2px !important;
+  }
+  .thumb-badge-action .card-actions,
+  .card-actions {
+    gap: 2px !important;
+  }
+  .action-btn {
+    width: 15px !important;
+    height: 15px !important;
+    min-width: 15px !important;
+    font-size: 8.5px !important;
+  }
+  .action-btn .btn-glyph svg {
+    width: 8.5px !important;
+    height: 8.5px !important;
+  }
+  .name {
+    font-size: 9.6px !important;
+  }
+  .sub {
+    font-size: 8.8px !important;
+  }
+  .meta {
+    min-height: 48px !important;
+    padding: 5px 3px 6px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .results-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+  }
+  .library-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  .saved-btn-icon {
+    display: inline-flex !important;
+  }
+  .saved-btn {
+    font-size: 10px !important;
+    gap: 2px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  .saved-btn-icon {
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 10px !important;
+  }
+  .tab {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
