@@ -4648,3 +4648,117 @@ html, body {
     height: 7.9px !important;
   }
 }
+
+/* ================================================================
+   FINAL MOBILE CLEANUP — remove duplicate green rating pill + exact centering
+   ================================================================ */
+@media (max-width: 720px) {
+  /* 모바일 헤더 로고는 좌우 버튼 폭과 무관하게 화면 정중앙 고정 */
+  .header-top {
+    position: relative !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .header-top-left {
+    justify-self: start !important;
+    z-index: 2 !important;
+  }
+  .header-top-right {
+    justify-self: end !important;
+    z-index: 2 !important;
+  }
+  .header-top-center {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: auto !important;
+    max-width: 52vw !important;
+    z-index: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: auto !important;
+  }
+  .header-top-center .logo {
+    justify-content: center !important;
+    margin: 0 auto !important;
+    white-space: nowrap !important;
+  }
+
+  /* 모바일 썸네일 우측에 생기던 초록색 내 평점 타원 제거 */
+  .results-grid .card .card-user-rating,
+  .results-grid .card .card-user-rating.hidden,
+  .thumb-top-info > .card-user-rating,
+  .thumb-top-info > .card-user-rating.hidden {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* 장르 + 액션 버튼만 한 줄에 깔끔하게 정렬 */
+  .results-grid .card .thumb-top-info {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+  }
+  .results-grid .card .thumb-badge-action {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+  }
+  .results-grid .card .thumb-badge-action .card-actions,
+  .results-grid .card .card-actions {
+    margin-left: auto !important;
+  }
+
+  /* 모바일 카드 제목/연도 완전 중앙 정렬 */
+  .results-grid .card .meta {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  .results-grid .card .meta .name,
+  .results-grid .card .meta .sub {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    text-align: center !important;
+    transform: none !important;
+    left: auto !important;
+    right: auto !important;
+  }
+  .results-grid .card .meta .name {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.35 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-top-center {
+    max-width: 50vw !important;
+  }
+  .header-top-center .logo-text {
+    max-width: none !important;
+  }
+}
