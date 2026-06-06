@@ -619,7 +619,8 @@ a { color: inherit; text-decoration: none; }
   color: currentColor;
 }
 .saved-btn.fav-saved .saved-btn-icon,
-.saved-btn.watch-saved .saved-btn-icon {
+.saved-btn.watch-saved .saved-btn-icon,
+.saved-btn.ratings-saved .saved-btn-icon {
   background: rgba(148,163,184,.12);
 }
 
@@ -656,6 +657,15 @@ a { color: inherit; text-decoration: none; }
 .saved-btn.watch-saved.active .saved-btn-icon {
   background: rgba(51,102,255,.14);
 }
+.saved-btn.ratings-saved.active {
+  background: rgba(255,245,217,.98);
+  border-color: rgba(224,158,0,.42);
+  color: #c98a00;
+  box-shadow: 0 8px 18px rgba(224,158,0,.18);
+}
+.saved-btn.ratings-saved.active .saved-btn-icon {
+  background: rgba(224,158,0,.14);
+}
 
 [data-theme="dark"] .saved-btn.fav-saved.active {
   background: rgba(89,62,0,.92);
@@ -672,6 +682,14 @@ a { color: inherit; text-decoration: none; }
 }
 [data-theme="dark"] .saved-btn.watch-saved.active .saved-btn-icon {
   background: rgba(207,224,255,.12);
+}
+[data-theme="dark"] .saved-btn.ratings-saved.active {
+  background: rgba(89,62,0,.92);
+  border-color: rgba(255,209,84,.55);
+  color: #ffd45c;
+}
+[data-theme="dark"] .saved-btn.ratings-saved.active .saved-btn-icon {
+  background: rgba(255,212,92,.12);
 }
 
 /* ================================================================
@@ -1023,6 +1041,8 @@ a { color: inherit; text-decoration: none; }
 /* 나중에 보기: 비활성 — 파란 시계 힌트 */
 .watch-btn { color: #2563eb; }
 .watch-btn .btn-glyph svg { stroke: #2563eb; }
+.rate-btn { color: var(--gold); }
+.rate-btn .btn-glyph { font-size: 16px; }
 
 /* 활성 상태 */
 .fav-btn.active {
@@ -1034,6 +1054,11 @@ a { color: inherit; text-decoration: none; }
   background: rgba(230,241,255,.98);
   border-color: rgba(51,102,255,.44);
   color: #2f66ff;
+}
+.rate-btn.active {
+  background: rgba(255,245,217,.98);
+  border-color: rgba(224,158,0,.52);
+  color: #d18c00;
 }
 [data-theme="dark"] .fav-btn { color: #ff6b6b; }
 [data-theme="dark"] .watch-btn { color: #60a5fa; }
@@ -1067,14 +1092,51 @@ a { color: inherit; text-decoration: none; }
   border-color: var(--blue-border);
   color: var(--blue);
 }
+.badge-anime {
+  background: var(--gold-bg);
+  border-color: var(--gold-border);
+  color: var(--gold);
+}
 .rating { font-size: 11px; color: var(--gold); font-weight: 600; margin-left: auto; }
+.rating.user-rating-score { color: #22c55e; font-weight: 800; }
+.user-rating-inline {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  background: var(--gold-bg);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-pill);
+  padding: 3px 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+.user-rating-inline.hidden { display: none; }
+.rating-note-preview {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rating-thumb {
+  flex-direction: column;
+  gap: 8px;
+  background: radial-gradient(circle at 50% 38%, var(--gold-bg), var(--surface2));
+  color: var(--gold);
+}
+.rating-thumb span { font-size: 34px; line-height: 1; }
+.rating-thumb strong { font-size: 24px; }
 .name {
   font-size: 13px; font-weight: 500;
   color: var(--text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   line-height: 1.3;
+  text-align: center;
 }
-.sub { font-size: 11px; color: var(--text-muted); }
+.sub { font-size: 11px; color: var(--text-muted); text-align: center; }
 
 /* ================================================================
    SKELETON
@@ -1980,6 +2042,76 @@ a { color: inherit; text-decoration: none; }
 }
 
 
+
+
+/* ================================================================
+   USER RATING UI
+   ================================================================ */
+.detail-rating-form {
+  display: grid;
+  grid-template-columns: minmax(92px, 130px) minmax(160px, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+}
+.rating-input,
+.rating-note-line,
+.rating-note-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.rating-input { padding: 8px 10px; }
+.rating-note-line { padding: 8px 10px; }
+.rating-note-input { padding: 10px 12px; resize: vertical; min-height: 86px; }
+.rating-input:focus,
+.rating-note-line:focus,
+.rating-note-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+.rating-editor-wrap { display: flex; flex-direction: column; gap: 16px; }
+.rating-editor-head { display: flex; flex-direction: column; gap: 8px; padding-right: 36px; }
+.rating-editor-head .badge { width: fit-content; }
+.rating-editor-panel {
+  display: grid;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+.rating-editor-panel label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+.rating-editor-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+
+/* 평점 버튼 텍스트는 좁은 상세 모달에서도 한 줄로 유지 */
+.detail-rating-form .modal-save-btn,
+.rating-editor-actions .modal-save-btn {
+  white-space: nowrap;
+  word-break: keep-all;
+  min-width: max-content;
+}
+.detail-rating-form {
+  grid-template-columns: minmax(92px, 130px) minmax(160px, 1fr) minmax(104px, max-content) minmax(104px, max-content);
+}
+
+.modal-rating-save { color: var(--gold); }
+.modal-rating-clear { color: #dc2626; }
+[data-theme="dark"] .modal-rating-clear { color: #f87171; }
+
+@media (max-width: 720px) {
+  .detail-rating-form { grid-template-columns: 1fr; }
+  .detail-rating-form .modal-save-btn { justify-content: center; }
+}
+
 /* ================================================================
    SAVED TOOLBAR  (즐겨찾기 / 나중에 보기 화면 전용)
    ================================================================ */
@@ -2459,5 +2591,1150 @@ a { color: inherit; text-decoration: none; }
 
   .cast-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ================================================================
+   CARD TOP BADGES / LOCAL RATING ONLY
+   ================================================================ */
+.thumb-top-info {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  z-index: 3;
+  pointer-events: none;
+}
+.thumb-top-info .badge {
+  background: rgba(255,255,255,.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 16px rgba(15,23,42,.16);
+}
+[data-theme="dark"] .thumb-top-info .badge {
+  background: rgba(10,15,25,.82);
+  box-shadow: 0 6px 18px rgba(0,0,0,.34);
+}
+.card-user-rating {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(240,253,244,.96);
+  border: 1px solid rgba(34,197,94,.35);
+  color: #16a34a;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(15,23,42,.16);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.card-user-rating.hidden { display: none; }
+[data-theme="dark"] .card-user-rating {
+  background: rgba(20,83,45,.9);
+  border-color: rgba(74,222,128,.45);
+  color: #86efac;
+}
+.card-actions {
+  top: 42px;
+  z-index: 4;
+}
+.meta {
+  min-height: 74px;
+  justify-content: center;
+}
+.meta .name,
+.meta .sub {
+  text-align: center;
+}
+.meta .name {
+  width: 100%;
+}
+@media (max-width: 720px) {
+  .thumb-top-info { top: 6px; left: 6px; right: 6px; }
+  .card-actions { top: 38px; right: 6px; }
+}
+
+/* ================================================================
+   FINAL REQUEST FIX — 2026-06-06
+   - 탐색 탭/저장 탭 그룹 분리
+   - 검색 제안 빈 박스 제거
+   - 저장/평점 탭에서도 검색어 유지
+   ================================================================ */
+@media (min-width: 601px) {
+  .controlbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    overflow: visible;
+    padding: 8px 22px 12px;
+  }
+  .ctrl-row1 {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-bottom: 0;
+  }
+  .ctrl-row1::after { display: none; }
+  .ctrl-row1-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ctrl-row2 {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .library-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    padding-right: 10px;
+    border-right: 1px solid var(--border2);
+  }
+  .ctrl-row2 .search-form {
+    flex: 1;
+    min-width: 220px;
+  }
+}
+.library-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.suggest:empty { display: none !important; }
+.suggest.hidden { display: none !important; }
+
+@media (max-width: 800px) {
+  .ctrl-row1 {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  .ctrl-row2 {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+  .library-actions {
+    width: 100%;
+    border-right: 0;
+    padding-right: 0;
+    flex-wrap: wrap;
+  }
+  .ctrl-row2 .search-form {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* ================================================================
+   FINAL HEADER SEARCH LAYOUT HOTFIX — search compact + library right
+   ================================================================ */
+.ctrl-row2 {
+  justify-content: flex-end;
+  gap: 10px;
+}
+.ctrl-row2 .search-form,
+.search-form {
+  flex: 0 1 520px;
+  width: clamp(280px, 36vw, 520px);
+  max-width: 520px;
+  min-width: 280px;
+}
+.searchbox-wrap {
+  min-width: 0;
+}
+.library-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+@media (min-width: 601px) {
+  .ctrl-row2 {
+    flex: 0 0 auto;
+    min-width: auto;
+  }
+  .ctrl-row2 .search-form {
+    flex: 0 1 520px;
+    width: clamp(300px, 34vw, 520px);
+    max-width: 520px;
+  }
+}
+@media (max-width: 900px) {
+  .ctrl-row2 {
+    gap: 7px;
+  }
+  .ctrl-row2 .search-form,
+  .search-form {
+    width: clamp(240px, 48vw, 420px);
+    min-width: 220px;
+    max-width: 420px;
+  }
+}
+@media (max-width: 600px) {
+  .ctrl-row2 {
+    flex-wrap: wrap;
+    justify-content: stretch;
+    gap: 7px;
+  }
+  .ctrl-row2 .search-form,
+  .search-form {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    order: 1;
+  }
+  .library-actions {
+    order: 2;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* ================================================================
+   FINAL HEADER SINGLE-LINE TOOLBAR FIX — 2026-06-06
+   - 탐색 탭 / 검색 / 저장 버튼을 PC에서 한 줄로 정리
+   ================================================================ */
+@media (min-width: 721px) {
+  .controlbar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    max-width: 1560px !important;
+    padding: 8px 22px 11px !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    white-space: nowrap !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .controlbar::-webkit-scrollbar { display: none !important; }
+
+  .ctrl-row1,
+  .ctrl-row2 {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .ctrl-row1 {
+    flex: 0 0 auto !important;
+  }
+
+  .ctrl-row2 {
+    flex: 0 1 auto !important;
+    justify-content: flex-start !important;
+  }
+
+  .ctrl-row1::after {
+    content: '' !important;
+    display: block !important;
+    width: 1px !important;
+    height: 24px !important;
+    margin-left: 2px !important;
+    background: var(--border2) !important;
+    opacity: .75 !important;
+    flex: 0 0 auto !important;
+  }
+
+  .type-tabs,
+  .ctrl-row1-right,
+  .library-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+    width: auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  .ctrl-row2 .search-form,
+  .search-form {
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    flex: 0 1 430px !important;
+    width: clamp(280px, 28vw, 430px) !important;
+    min-width: 280px !important;
+    max-width: 430px !important;
+    order: 0 !important;
+  }
+
+  .searchbox-wrap {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .library-actions {
+    border-left: 1px solid var(--border2) !important;
+    padding-left: 10px !important;
+    margin-left: 2px !important;
+    order: 0 !important;
+    justify-content: flex-start !important;
+  }
+
+  .tab,
+  .sort-select,
+  .saved-btn,
+  .btn-search {
+    min-height: 36px !important;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1180px) {
+  .controlbar {
+    justify-content: flex-start !important;
+  }
+  .tab { padding-left: 13px !important; padding-right: 13px !important; }
+  .saved-btn { padding-left: 12px !important; padding-right: 12px !important; }
+  .ctrl-row2 .search-form,
+  .search-form {
+    flex-basis: 340px !important;
+    width: clamp(240px, 26vw, 340px) !important;
+    min-width: 240px !important;
+    max-width: 340px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .controlbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+  .ctrl-row1,
+  .ctrl-row2 {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+  .ctrl-row1::after { display: none !important; }
+  .ctrl-row2 .search-form,
+  .search-form {
+    order: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    flex: 1 1 100% !important;
+  }
+  .library-actions {
+    order: 2 !important;
+    width: 100% !important;
+    justify-content: flex-end !important;
+    border: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* ================================================================
+   FINAL HEADER ALIGNMENT FIX — 2026-06-06
+   - 툴바 좌우 끝을 상단 필터/다크모드 세로선과 맞춤
+   - 검색창을 살짝 확장
+   ================================================================ */
+@media (min-width: 721px) {
+  .controlbar {
+    width: 100% !important;
+    max-width: 1560px !important;
+    margin: 0 auto !important;
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+    justify-content: space-between !important;
+    gap: 14px !important;
+    overflow: visible !important;
+  }
+
+  .ctrl-row1 {
+    flex: 0 0 auto !important;
+    justify-content: flex-start !important;
+  }
+
+  .ctrl-row2 {
+    flex: 1 1 auto !important;
+    justify-content: flex-end !important;
+    min-width: 0 !important;
+  }
+
+  .ctrl-row2 .search-form,
+  .search-form {
+    flex: 1 1 600px !important;
+    width: clamp(420px, 38vw, 640px) !important;
+    max-width: 640px !important;
+    min-width: 360px !important;
+  }
+
+  .library-actions {
+    flex: 0 0 auto !important;
+    margin-left: 4px !important;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1320px) {
+  .controlbar {
+    gap: 10px !important;
+  }
+  .tab { padding-left: 12px !important; padding-right: 12px !important; }
+  .saved-btn { padding-left: 11px !important; padding-right: 11px !important; }
+  .ctrl-row2 .search-form,
+  .search-form {
+    flex: 1 1 430px !important;
+    width: clamp(280px, 30vw, 470px) !important;
+    min-width: 260px !important;
+    max-width: 470px !important;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1080px) {
+  .controlbar {
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
+  .ctrl-row2 {
+    flex: 0 0 auto !important;
+  }
+}
+
+/* ================================================================
+   FINAL TOOLBAR SEARCH BALANCE FIX — 2026-06-06
+   - 좌측 탭 그룹과 우측 저장 버튼 사이의 남는 공간을 검색 영역이 채움
+   - 검색창을 좌우로 늘려 PC 상단 툴바 균형 보정
+   ================================================================ */
+@media (min-width: 721px) {
+  .controlbar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    max-width: 1560px !important;
+    margin: 0 auto !important;
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+    gap: 14px !important;
+    overflow: visible !important;
+  }
+
+  .ctrl-row1 {
+    flex: 0 0 auto !important;
+    min-width: max-content !important;
+    justify-content: flex-start !important;
+  }
+
+  .ctrl-row2 {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .ctrl-row2 .search-form,
+  .search-form {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 360px !important;
+    max-width: none !important;
+  }
+
+  .searchbox-wrap {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .library-actions {
+    flex: 0 0 auto !important;
+    margin-left: 2px !important;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1320px) {
+  .controlbar {
+    gap: 10px !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
+
+  .ctrl-row2 .search-form,
+  .search-form {
+    flex: 1 1 360px !important;
+    min-width: 300px !important;
+    max-width: none !important;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1100px) {
+  .controlbar {
+    justify-content: flex-start !important;
+  }
+
+  .ctrl-row2 {
+    flex: 0 0 auto !important;
+  }
+
+  .ctrl-row2 .search-form,
+  .search-form {
+    flex: 0 0 360px !important;
+    width: 360px !important;
+    min-width: 300px !important;
+  }
+}
+
+/* ================================================================
+   FINAL MOBILE UX OPTIMIZATION — 2026-06-06
+   - Mobile header/controlbar/card/modal cleanup
+   - Desktop one-line toolbar remains intact
+   ================================================================ */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .card:hover,
+  .card:hover img,
+  .action-btn:hover,
+  .tab:hover,
+  .saved-btn:hover,
+  .btn-search:hover {
+    transform: none !important;
+  }
+}
+
+@media (max-width: 720px) {
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 12px rgba(15, 23, 42, .06);
+  }
+
+  .header-top {
+    display: grid !important;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px !important;
+    width: 100%;
+    padding: calc(8px + env(safe-area-inset-top)) 12px 6px !important;
+  }
+
+  .header-top-left,
+  .header-top-right {
+    min-width: 0;
+  }
+
+  .header-top-center {
+    min-width: 0;
+    justify-content: center;
+  }
+
+  .header-top-right {
+    gap: 5px !important;
+  }
+
+  .logo {
+    max-width: 100%;
+    gap: 5px !important;
+  }
+
+  .logo-img {
+    width: 23px !important;
+    height: 23px !important;
+  }
+
+  .logo-text {
+    font-size: clamp(19px, 6vw, 23px) !important;
+    letter-spacing: .35px !important;
+    max-width: 42vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hdr-icon-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 10px !important;
+  }
+
+  .lang-select {
+    max-width: 70px !important;
+    min-width: 0 !important;
+    height: 34px !important;
+    padding: 0 7px !important;
+    font-size: 10.5px !important;
+    border-radius: 10px !important;
+  }
+
+  .controlbar {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 7px 12px 10px !important;
+    gap: 8px !important;
+    overflow: visible !important;
+  }
+
+  .ctrl-row1 {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 6px !important;
+    padding: 0 0 1px !important;
+    margin: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    white-space: nowrap !important;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .ctrl-row1::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .ctrl-row1::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  .type-tabs,
+  .ctrl-row1-right {
+    display: flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    gap: 5px !important;
+    width: auto !important;
+    min-width: max-content !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .tab,
+  .sort-select {
+    min-height: 34px !important;
+    height: 34px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    font-size: 12px !important;
+    box-shadow: var(--shadow-xs) !important;
+  }
+
+  .tab {
+    padding-left: 13px !important;
+    padding-right: 13px !important;
+  }
+
+  .sort-select {
+    padding-left: 12px !important;
+    padding-right: 28px !important;
+  }
+
+  .ctrl-row2 {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    flex: 0 0 auto !important;
+  }
+
+  .ctrl-row2 .search-form,
+  .search-form {
+    order: 1 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+    gap: 7px !important;
+  }
+
+  .searchbox-wrap {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  #searchInput {
+    width: 100% !important;
+    height: 38px !important;
+    padding: 0 36px 0 35px !important;
+    font-size: 14px !important;
+    border-radius: 999px !important;
+  }
+
+  .search-icon {
+    left: 13px !important;
+  }
+
+  .clear-btn {
+    right: 8px !important;
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .btn-search {
+    min-width: 58px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 14px !important;
+    border-radius: 999px !important;
+    font-size: 12.5px !important;
+    flex: 0 0 auto !important;
+  }
+
+  .library-actions {
+    order: 2 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 6px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    flex: none !important;
+  }
+
+  .saved-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    padding: 0 7px !important;
+    border-radius: 999px !important;
+    font-size: 11.5px !important;
+  }
+
+  .saved-btn > span:last-child {
+    display: inline !important;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .saved-btn-icon {
+    font-size: 13px !important;
+    flex: 0 0 auto;
+  }
+
+  .suggest {
+    top: calc(100% + 5px) !important;
+    max-height: min(320px, 48vh) !important;
+    border-radius: 16px !important;
+    z-index: 120 !important;
+  }
+
+  .suggest:empty,
+  .suggest.hidden {
+    display: none !important;
+  }
+
+  .status-msg {
+    min-height: 0 !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .active-filter-bar {
+    width: 100% !important;
+    padding: 6px 12px 2px !important;
+    gap: 5px !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none !important;
+  }
+
+  .active-filter-bar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .saved-toolbar {
+    padding: 0 12px !important;
+  }
+
+  .saved-toolbar-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 10px 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .saved-toolbar-label {
+    width: 100%;
+    text-align: left;
+    font-size: 12.5px !important;
+  }
+
+  .saved-toolbar-actions {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .io-divider {
+    display: none !important;
+  }
+
+  .io-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 32px !important;
+    justify-content: center !important;
+    padding: 0 8px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+
+  .results-grid {
+    width: 100% !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    padding: 10px 12px calc(82px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .card {
+    border-radius: 14px !important;
+    min-width: 0;
+  }
+
+  .thumb-top-info {
+    top: 6px !important;
+    left: 6px !important;
+    right: 6px !important;
+    gap: 5px !important;
+  }
+
+  .thumb-top-info .badge,
+  .card-user-rating {
+    max-width: 48%;
+    min-height: 20px !important;
+    padding: 3px 6px !important;
+    font-size: 9.5px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-actions {
+    top: 32px !important;
+    right: 6px !important;
+    gap: 4px !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .action-btn {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 10px !important;
+  }
+
+  .meta {
+    min-height: 66px !important;
+    padding: 8px 7px 9px !important;
+    gap: 3px !important;
+    justify-content: center !important;
+  }
+
+  .name {
+    width: 100% !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+
+  .sub {
+    font-size: 10.5px !important;
+  }
+
+  .user-rating-inline,
+  .rating-note-preview {
+    font-size: 10px !important;
+    padding: 3px 6px !important;
+  }
+
+  .empty-state {
+    padding: 48px 16px !important;
+  }
+
+  .empty-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: min(100%, 260px) !important;
+  }
+
+  .empty-actions button {
+    width: 100%;
+  }
+
+  .modal {
+    align-items: flex-end !important;
+    padding: max(8px, env(safe-area-inset-top)) 0 0 !important;
+  }
+
+  .modal-content {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: calc(100dvh - max(8px, env(safe-area-inset-top))) !important;
+    margin: 0 !important;
+    padding: calc(18px + env(safe-area-inset-top)) 14px calc(22px + env(safe-area-inset-bottom)) !important;
+    border-radius: 22px 22px 0 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  .modal-close {
+    top: calc(12px + env(safe-area-inset-top)) !important;
+    right: 12px !important;
+  }
+
+  .modal-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+
+  .modal-poster {
+    width: min(46vw, 156px) !important;
+    margin: 2px auto 0 !important;
+  }
+
+  .modal-body {
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 10px !important;
+  }
+
+  #modalTitle {
+    width: 100% !important;
+    padding: 0 38px !important;
+    text-align: center !important;
+    font-size: clamp(20px, 6.2vw, 24px) !important;
+    line-height: 1.18 !important;
+    word-break: keep-all !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .modal-save-actions,
+  .rating-editor-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    width: 100% !important;
+  }
+
+  .modal-save-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 36px !important;
+    justify-content: center !important;
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+
+  .detail-rating-form {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .detail-rating-form .rating-input {
+    grid-column: span 1;
+  }
+
+  .detail-rating-form .rating-note-line {
+    grid-column: span 1;
+  }
+
+  .detail-rating-form .modal-save-btn {
+    grid-column: span 1;
+  }
+
+  .rating-input,
+  .rating-note-line {
+    height: 38px !important;
+    font-size: 13px !important;
+  }
+
+  .rating-note-input {
+    min-height: 82px !important;
+  }
+
+  .detail-section,
+  .section {
+    padding: 12px 13px !important;
+    border-radius: 15px !important;
+  }
+
+  .detail-chip-row {
+    justify-content: center !important;
+    gap: 6px !important;
+  }
+
+  .detail-chip {
+    font-size: 11.5px !important;
+    padding: 5px 9px !important;
+  }
+
+  .detail-text,
+  .section > div {
+    font-size: 13px !important;
+    line-height: 1.65 !important;
+  }
+
+  .cast-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+
+  .scroll-top-btn {
+    right: 12px !important;
+    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    width: 38px !important;
+    height: 38px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .controlbar {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .saved-btn {
+    font-size: 11px !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+  }
+
+  .saved-btn-icon {
+    display: none !important;
+  }
+
+  .btn-search {
+    min-width: 54px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .meta {
+    min-height: 64px !important;
+  }
+
+  .name {
+    font-size: 12px !important;
+  }
+
+  .cast-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .header-top {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .logo-text {
+    max-width: 36vw;
+    font-size: 18px !important;
+  }
+
+  .lang-select {
+    display: none !important;
+  }
+
+  .tab {
+    padding-left: 11px !important;
+    padding-right: 11px !important;
+  }
+
+  .ctrl-row2 .search-form,
+  .search-form {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+
+  .btn-search {
+    width: 100% !important;
+  }
+
+  .library-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .saved-btn-icon {
+    display: inline !important;
+  }
+
+  .saved-toolbar-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .detail-rating-form {
+    grid-template-columns: 1fr !important;
   }
 }

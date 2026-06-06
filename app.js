@@ -281,6 +281,46 @@ const COUNTRY_NAMES = {
   zh: { '':'全部','KR':'韩国','US':'美国','JP':'日本','CN':'中国','TW':'台湾','HK':'香港','TH':'泰国','GB':'英国','FR':'法国','DE':'德国','IN':'印度','ES':'西班牙','IT':'意大利','BR':'巴西','MX':'墨西哥','AU':'澳大利亚','CA':'加拿大','RU':'俄罗斯','TR':'土耳其' },
   fr: { '':'Tous','KR':'Corée','US':'États-Unis','JP':'Japon','CN':'Chine','TW':'Taïwan','HK':'Hong Kong','TH':'Thaïlande','GB':'Royaume-Uni','FR':'France','DE':'Allemagne','IN':'Inde','ES':'Espagne','IT':'Italie','BR':'Brésil','MX':'Mexique','AU':'Australie','CA':'Canada','RU':'Russie','TR':'Turquie' },
 };
+Object.assign(I18N.ko, {
+  tab_anime:'애니', my_ratings:'내 평점', my_rating:'내 평점', anime:'애니', drama:'드라마', rating_score:'평점', rating_note:'메모',
+  save_rating:'평점 저장', clear_rating:'평점 삭제', edit_rating:'평점 수정', rate_this:'평점 매기기',
+  rating_placeholder:'0.0 ~ 10.0', note_placeholder:'메모 선택 입력', no_my_ratings:'저장된 내 평점이 없습니다',
+  toast_rating_saved:'평점 저장됨', toast_rating_removed:'평점 삭제됨', toast_ratings_exported:'평점 내보내기 완료',
+  toast_ratings_imported:'평점 가져오기 완료', toast_invalid_rating:'0~10 사이 숫자를 입력해주세요', toast_invalid_ratings_file:'올바른 평점 JSON 파일이 아닙니다',
+  status_resolving_ratings:'내 평점의 TMDB 정보 확인 중...', status_ratings_filtered:'검색되지 않는 항목은 제외했습니다'
+});
+Object.assign(I18N.en, {
+  tab_anime:'Anime', my_ratings:'My ratings', my_rating:'My rating', anime:'Anime', drama:'Drama', rating_score:'Rating', rating_note:'Note',
+  save_rating:'Save rating', clear_rating:'Remove rating', edit_rating:'Edit rating', rate_this:'Rate this',
+  rating_placeholder:'0.0 ~ 10.0', note_placeholder:'Optional note', no_my_ratings:'No ratings yet',
+  toast_rating_saved:'Rating saved', toast_rating_removed:'Rating removed', toast_ratings_exported:'Ratings exported',
+  toast_ratings_imported:'Ratings imported', toast_invalid_rating:'Enter a number from 0 to 10', toast_invalid_ratings_file:'Invalid ratings JSON file',
+  status_resolving_ratings:'Resolving TMDB data for your ratings...', status_ratings_filtered:'Unavailable items were excluded'
+});
+Object.assign(I18N.ja, {
+  tab_anime:'アニメ', my_ratings:'マイ評価', my_rating:'マイ評価', anime:'アニメ', drama:'ドラマ', rating_score:'評価', rating_note:'メモ',
+  save_rating:'評価を保存', clear_rating:'評価を削除', edit_rating:'評価を編集', rate_this:'評価する',
+  rating_placeholder:'0.0 ~ 10.0', note_placeholder:'メモ任意', no_my_ratings:'保存した評価はありません',
+  toast_rating_saved:'評価を保存しました', toast_rating_removed:'評価を削除しました', toast_ratings_exported:'評価を書き出しました',
+  toast_ratings_imported:'評価を読み込みました', toast_invalid_rating:'0〜10の数値を入力してください', toast_invalid_ratings_file:'正しい評価JSONではありません',
+  status_resolving_ratings:'マイ評価のTMDB情報を確認中...', status_ratings_filtered:'検索できない項目は除外しました'
+});
+Object.assign(I18N.zh, {
+  tab_anime:'动画', my_ratings:'我的评分', my_rating:'我的评分', anime:'动画', drama:'剧集', rating_score:'评分', rating_note:'备注',
+  save_rating:'保存评分', clear_rating:'删除评分', edit_rating:'编辑评分', rate_this:'评分',
+  rating_placeholder:'0.0 ~ 10.0', note_placeholder:'备注可选', no_my_ratings:'暂无保存的评分',
+  toast_rating_saved:'评分已保存', toast_rating_removed:'评分已删除', toast_ratings_exported:'评分已导出',
+  toast_ratings_imported:'评分已导入', toast_invalid_rating:'请输入 0 到 10 的数字', toast_invalid_ratings_file:'不是有效的评分 JSON 文件',
+  status_resolving_ratings:'正在确认我的评分 TMDB 信息...', status_ratings_filtered:'未搜索到的项目已排除'
+});
+Object.assign(I18N.fr, {
+  tab_anime:'Anime', my_ratings:'Mes notes', my_rating:'Ma note', anime:'Anime', drama:'Série', rating_score:'Note', rating_note:'Mémo',
+  save_rating:'Enregistrer', clear_rating:'Supprimer', edit_rating:'Modifier la note', rate_this:'Noter',
+  rating_placeholder:'0.0 ~ 10.0', note_placeholder:'Mémo facultatif', no_my_ratings:'Aucune note enregistrée',
+  toast_rating_saved:'Note enregistrée', toast_rating_removed:'Note supprimée', toast_ratings_exported:'Notes exportées',
+  toast_ratings_imported:'Notes importées', toast_invalid_rating:'Saisissez un nombre de 0 à 10', toast_invalid_ratings_file:'Fichier JSON de notes invalide',
+  status_resolving_ratings:'Recherche des données TMDB pour vos notes...', status_ratings_filtered:'Les éléments introuvables ont été exclus'
+});
 
 /* ═══════════════════════════════ localStorage ═══════════════════════════════ */
 function isQuotaError(err) {
@@ -294,7 +334,7 @@ function isQuotaError(err) {
 function clearVolatileStorageForSave() {
   // 즐겨찾기/나중에 보기 저장 실패의 주 원인은 결과/제목/포스터 캐시가 localStorage 용량을 차지하는 케이스입니다.
   // 사용자 저장 목록은 보존하고, 다시 받아올 수 있는 캐시만 정리합니다.
-  ['cinefinder_cache', 'cinefinder_title_store_v3', 'cinefinder_poster_store_v2', 'cinefinder_detail_filter_store_v1'].forEach(k => {
+  ['cinefinder_cache', 'cinefinder_title_store_v3', 'cinefinder_poster_store_v2', 'cinefinder_detail_filter_store_v1', 'cinefinder_rating_match_store_v1'].forEach(k => {
     try { localStorage.removeItem(k); } catch {}
   });
   try { TITLE_CACHE.clear(); } catch {}
@@ -609,6 +649,7 @@ function hasStrictFilterNeeds(list=[]){
   if(SELECTED_COUNTRY)return true;
   // 장르 필터가 있으면 detail 없이는 장르를 확정할 수 없는 아이템이 있을 수 있음
   if(MOVIE_INC.size||MOVIE_EXC.size||TV_INC.size||TV_EXC.size) return true;
+  if(CONTENT_TYPE === 'anime' && list.some(it=>!Array.isArray(it.genre_ids))) return true;
   return list.some(it=>!Array.isArray(it.genre_ids));
 }
 function getItemDate(it,detail=null){ return it.release_date || it.first_air_date || detail?.release_date || detail?.first_air_date || ''; }
@@ -616,6 +657,19 @@ function getItemGenres(it,detail=null){
   if(Array.isArray(it.genre_ids)&&it.genre_ids.length)return it.genre_ids;
   if(Array.isArray(detail?.genres))return detail.genres.map(g=>g.id).filter(Boolean);
   return [];
+}
+const ANIME_GENRE_ID = 16;
+function itemIsAnimeLike(it, detail=null){
+  const ids = getItemGenres(it, detail);
+  if(ids.includes(ANIME_GENRE_ID)) return true;
+  const text = `${it?.title||''} ${it?.name||''} ${it?.original_title||''} ${it?.original_name||''}`.toLowerCase();
+  return /anime|animation|アニメ|애니/.test(text);
+}
+function itemMatchesContentType(it, detail=null){
+  const type = it.media_type || (it.first_air_date ? 'tv' : 'movie');
+  if(CONTENT_TYPE === 'all') return true;
+  if(CONTENT_TYPE === 'anime') return itemIsAnimeLike(it, detail);
+  return type === CONTENT_TYPE;
 }
 function countryCodesFromItem(it,detail=null){
   const set=new Set();
@@ -636,6 +690,7 @@ async function getFilterDetail(type,id){
 }
 function itemMatchesFilters(it,detail=null){
   const type=it.media_type||(it.first_air_date?'tv':'movie');
+  if(!itemMatchesContentType(it, detail)) return false;
   const ids=getItemGenres(it,detail);
   const inc=type==='movie'?MOVIE_INC:TV_INC;
   const exc=type==='movie'?MOVIE_EXC:TV_EXC;
@@ -669,11 +724,12 @@ function itemMatchesFilters(it,detail=null){
   return true;
 }
 function cheapItemPass(it){
-  if(CONTENT_TYPE!=='all'){
-    const type=it.media_type||(it.first_air_date?'tv':'movie');
-    if(type!==CONTENT_TYPE)return false;
-  }
   const type=it.media_type||(it.first_air_date?'tv':'movie');
+  if(CONTENT_TYPE !== 'all' && CONTENT_TYPE !== 'anime' && type !== CONTENT_TYPE) return false;
+  if(CONTENT_TYPE === 'anime'){
+    const ids = Array.isArray(it.genre_ids) ? it.genre_ids : null;
+    if(ids && ids.length && !ids.includes(ANIME_GENRE_ID)) return false;
+  }
   const otherInc=type==='movie'?TV_INC:MOVIE_INC;
   const inc=type==='movie'?MOVIE_INC:TV_INC;
   const exc=type==='movie'?MOVIE_EXC:TV_EXC;
@@ -734,7 +790,7 @@ let SELECTED_COUNTRY='', YEAR_FROM='', YEAR_TO='', SORT_BY='popularity.desc', MI
 let BUSY=false, IO=null, acTimer=null, acCtrl=null, acIndex=-1;
 let ABORTS=new Set(), lastScrollLoad=0, RENDER_TOKEN=0, LAST_FOCUS=null;
 
-const SK = { filters:'cineScopeFilters', favs:'cinefinder_favs', watch:'cinefinder_watch', cache:'cinefinder_cache', lang:'cinefinderLang', theme:'cinefinderTheme' };
+const SK = { filters:'cineScopeFilters', favs:'cinefinder_favs', watch:'cinefinder_watch', ratings:'cinefinder_ratings', ratingViewCache:'cinefinder_rating_view_cache_v1', cache:'cinefinder_cache', lang:'cinefinderLang', theme:'cinefinderTheme' };
 const COUNTRY_CODES=['','KR','US','JP','CN','TW','HK','TH','GB','FR','DE','IN','ES','IT','BR','MX','AU','CA','RU','TR'];
 
 const MOVIE_TO_TV_GENRE={ 28:[10759],12:[10759],16:[16],35:[35],80:[80],99:[99],18:[18],10751:[10751,10762],14:[10765],36:[],27:[],10402:[],9648:[9648],10749:[],878:[10765],10770:[],53:[],10752:[10768],37:[37] };
@@ -837,11 +893,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const clearBtn = $('#clearSearch');
   const searchInput = $('#searchInput');
   searchInput.addEventListener('input', ()=>{ clearBtn.classList.toggle('visible', searchInput.value.length>0); });
-  clearBtn.addEventListener('click', ()=>{
+  clearBtn.addEventListener('click', async ()=>{
     searchInput.value=''; PAGE_STATE.query='';
     clearBtn.classList.remove('visible');
     searchInput.focus();
-    resetPaging(); runSearchOrDiscover(true);
+    resetPaging();
+    if(PAGE_STATE.lastMode === 'ratings'){ await showRatings(); return; }
+    if(String(PAGE_STATE.lastMode).startsWith('saved-')){ await showSaved(String(PAGE_STATE.lastMode).split('-')[1] || 'fav'); return; }
+    await runSearchOrDiscover(true);
   });
 
   // Scroll-to-top
@@ -866,6 +925,7 @@ function applyI18n() {
   set('#tabAll',           'textContent', t('tab_all'));
   set('#tabMovie',         'textContent', t('tab_movie'));
   set('#tabTV',            'textContent', t('tab_tv'));
+  set('#tabAnime',        'textContent', t('tab_anime'));
   set('#i18nFilters',      'textContent', t('filters'));
   set('#i18nCountry',      'textContent', t('country'));
   set('#i18nYearRange',    'textContent', t('year_range'));
@@ -882,6 +942,7 @@ function applyI18n() {
 
   const favSpan=$('#btnFav span:last-child'); if(favSpan)favSpan.textContent=t('favorite');
   const watchSpan=$('#btnWatch span:last-child'); if(watchSpan)watchSpan.textContent=t('watch_later');
+  const ratingsSpan=$('#btnRatings span:last-child'); if(ratingsSpan)ratingsSpan.textContent=t('my_ratings');
   const sortPop=$('#sortSelect option[value="popularity.desc"]'); if(sortPop)sortPop.textContent=t('sort_popularity');
   set('#i18nMinRating', 'textContent', t('min_rating'));
   // ratingSelect 옵션 텍스트 다국어화
@@ -905,22 +966,30 @@ function setSavedButtonState(btn, kind, active){
   btn.classList.toggle('active', !!active);
   const icon = btn.querySelector('.saved-btn-icon');
   if(icon){
-    icon.textContent = kind==='fav' ? (active ? '♥' : '♡') : (active ? '✓' : '⏱');
+    icon.textContent = kind==='fav' ? (active ? '♥' : '♡') : kind==='ratings' ? (active ? '★' : '☆') : (active ? '✓' : '⏱');
   }
-  const label = kind==='fav' ? t('favorite') : t('watch_later');
+  const label = kind==='fav' ? t('favorite') : kind==='ratings' ? t('my_ratings') : t('watch_later');
   btn.setAttribute('aria-pressed', active ? 'true' : 'false');
   btn.setAttribute('title', `${label} ${active ? t('selected') : t('not_selected')}`);
 }
+function isLibraryMode(){ return String(PAGE_STATE.lastMode).startsWith('saved-') || PAGE_STATE.lastMode === 'ratings'; }
 function setSavedModeUI(mode) {
   setSavedButtonState($('#btnFav'), 'fav', mode==='fav');
   setSavedButtonState($('#btnWatch'), 'watch', mode==='watch');
+  setSavedButtonState($('#btnRatings'), 'ratings', mode==='ratings');
   const toolbar = $('#savedToolbar');
   const label   = $('#savedToolbarLabel');
   if (toolbar) {
     if (mode) {
       toolbar.classList.remove('hidden');
       toolbar.dataset.mode = mode;
-      if (label) label.textContent = mode === 'fav' ? t('favorite') + ' ' + t('list_label') : t('watch_later') + ' ' + t('list_label');
+      if (label) {
+        label.textContent = mode === 'fav'
+          ? t('favorite') + ' ' + t('list_label')
+          : mode === 'watch'
+            ? t('watch_later') + ' ' + t('list_label')
+            : t('my_ratings');
+      }
     } else {
       toolbar.classList.add('hidden');
       toolbar.dataset.mode = '';
@@ -1049,6 +1118,47 @@ function closeDrawer() {
 }
 
 /* ═══════════════════════════════ EVENTS ═══════════════════════════════ */
+async function executeSearchFromInput(){
+  PAGE_STATE.query = ($('#searchInput').value || '').trim();
+  PAGE_STATE.personActive = null;
+  PAGE_STATE.personMeta = null;
+  resetPaging();
+  const currentMode = PAGE_STATE.lastMode;
+  if(currentMode === 'ratings'){
+    setSavedModeUI('ratings');
+    await showRatings();
+    return;
+  }
+  if(String(currentMode).startsWith('saved-')){
+    const kind = String(currentMode).split('-')[1] || 'fav';
+    setSavedModeUI(kind);
+    await showSaved(kind);
+    return;
+  }
+  setSavedModeUI(null);
+  await runSearchOrDiscover(true);
+}
+function itemSearchText(item){
+  const type = item.media_type || (item.first_air_date ? 'tv' : 'movie');
+  return [
+    item.title, item.name, item.original_title, item.original_name,
+    item.user_rating_title, item.user_rating_note, item.note,
+    getYear(item.release_date || item.first_air_date || ''),
+    type === 'tv' ? t('drama') : t('badge_movie')
+  ].filter(Boolean).join(' ').toLowerCase();
+}
+function itemPassesCurrentQuery(item){
+  const q = (PAGE_STATE.query || '').trim().toLowerCase();
+  if(!q) return true;
+  const normalizedQ = q.replace(/\s+/g, ' ');
+  const text = itemSearchText(item);
+  const compactText = text.replace(/\s+/g, '');
+  const compactQ = normalizedQ.replace(/\s+/g, '');
+  return text.includes(normalizedQ) || (!!compactQ && compactText.includes(compactQ));
+}
+function filterByCurrentQuery(items){
+  return (items || []).filter(itemPassesCurrentQuery);
+}
 function bindEvents() {
   $('#menuBtn').addEventListener('click', openDrawer);
   $('#closeDrawer').addEventListener('click', closeDrawer);
@@ -1063,8 +1173,15 @@ function bindEvents() {
 
   $$('.type-tabs .tab').forEach(btn=>{
     btn.addEventListener('click', async()=>{
-      if(CONTENT_TYPE===btn.dataset.type&&!String(PAGE_STATE.lastMode).startsWith('saved-'))return;
-      setActiveTab(btn.dataset.type); renderGenreChips(); setSavedModeUI(null); resetPaging(); await runSearchOrDiscover(true);
+      const nextType = btn.dataset.type;
+      // 영화/드라마/모두 탭은 항상 기존 탐색/검색 화면으로 복귀합니다.
+      // 내 평점/즐겨찾기 화면 안에서 탭을 누르면 저장 목록을 필터링하지 않고, 이전처럼 TMDB 목록을 다시 불러옵니다.
+      if(CONTENT_TYPE===nextType && !isLibraryMode())return;
+      setActiveTab(nextType); renderGenreChips();
+      setSavedModeUI(null);
+      PAGE_STATE.lastMode = PAGE_STATE.query ? 'search' : 'discover';
+      resetPaging();
+      await runSearchOrDiscover(true);
     });
   });
 
@@ -1076,15 +1193,22 @@ function bindEvents() {
     if(PAGE_STATE.lastMode==='saved-watch'){setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
     setSavedModeUI('watch'); await showSaved('watch');
   });
+  $('#btnRatings').addEventListener('click', async()=>{
+    if(PAGE_STATE.lastMode==='ratings'){setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
+    // 내 평점은 영화/드라마 탭 필터와 독립적으로 전체 평점 JSON을 보여줍니다.
+    // 진입 시 상단 탭은 '모두'로 맞춰 혼선을 줄입니다.
+    setActiveTab('all');
+    setSavedModeUI('ratings'); await showRatings();
+  });
 
   $('#searchForm').addEventListener('submit', async e=>{
     e.preventDefault();
-    PAGE_STATE.query=($('#searchInput').value||'').trim();
-    PAGE_STATE.personActive=null; PAGE_STATE.personMeta=null;
-    setSavedModeUI(null); resetPaging(); await runSearchOrDiscover(true); closeSuggest();
+    await executeSearchFromInput();
+    closeSuggest();
   });
   $('#sortSelect').addEventListener('change', async e=>{
     SORT_BY=e.target.value;
+    if(PAGE_STATE.lastMode==='ratings'){await showRatings();return;}
     if(String(PAGE_STATE.lastMode).startsWith('saved-')){await showSaved(String(PAGE_STATE.lastMode).split('-')[1]||'fav');return;}
     resetPaging(); await runSearchOrDiscover(true);
   });
@@ -1106,27 +1230,27 @@ function bindEvents() {
   // ── 내보내기 / 가져오기 ──
   $('#btnExport')?.addEventListener('click', () => {
     const kind = $('#savedToolbar')?.dataset.mode || 'fav';
-    exportSaved(kind);
+    if(kind === 'ratings') exportRatings(); else exportSaved(kind);
   });
   $('#btnImport')?.addEventListener('click', () => $('#importFileInput')?.click());
   $('#importFileInput')?.addEventListener('change', e => {
     const file = e.target.files?.[0];
     if (file) {
       const kind = $('#savedToolbar')?.dataset.mode || 'fav';
-      importSaved(file, kind);
+      if(kind === 'ratings') importRatings(file); else importSaved(file, kind);
     }
     e.target.value = '';
   });
   $('#btnClearList')?.addEventListener('click', () => {
     const kind = $('#savedToolbar')?.dataset.mode || 'fav';
-    clearSavedList(kind);
+    if(kind === 'ratings') clearRatingsList(); else clearSavedList(kind);
   });
 
   initAutocomplete();
   window.addEventListener('online',  ()=>$('#offlineBar').classList.add('hidden'));
   window.addEventListener('offline', ()=>{ $('#offlineBar').textContent=t('offline_using_cache'); $('#offlineBar').classList.remove('hidden'); });
   window.addEventListener('scroll', ()=>{
-    if(String(PAGE_STATE.lastMode).startsWith('saved-'))return;
+    if(isLibraryMode())return;
     const now=Date.now(); if(now-lastScrollLoad<700||BUSY)return;
     if(window.innerHeight+window.scrollY>=document.body.offsetHeight-800){ lastScrollLoad=now; BUSY=true; runSearchOrDiscover(false).finally(()=>BUSY=false); }
   },{passive:true});
@@ -1155,14 +1279,15 @@ function initAutocomplete() {
     const items=$$('#suggestBox .sitem'); if(!items.length)return;
     if(e.key==='ArrowDown'){acIndex=(acIndex+1)%items.length;updateActive(items);e.preventDefault();}
     else if(e.key==='ArrowUp'){acIndex=(acIndex-1+items.length)%items.length;updateActive(items);e.preventDefault();}
-    else if(e.key==='Enter'){if(acIndex>=0){input.value=items[acIndex].dataset.label;PAGE_STATE.query=input.value;PAGE_STATE.personActive=null;PAGE_STATE.personMeta=null;runSearch(true);closeSuggest();e.preventDefault();}}
+    else if(e.key==='Enter'){if(acIndex>=0){input.value=items[acIndex].dataset.label;executeSearchFromInput();closeSuggest();e.preventDefault();}}
     else if(e.key==='Escape'){closeSuggest();}
   });
   document.addEventListener('click', e=>{if(!box.contains(e.target)&&e.target!==input)closeSuggest();});
   function renderSuggest(list){
+    if(!list || !list.length){ closeSuggest(); return; }
     box.innerHTML=list.map(r=>{const label=r.media_type==='person'?(r.name||''):(r.title||r.name||'');return`<div class="sitem" role="option" data-label="${escapeHtml(label)}">${escapeHtml(label)}</div>`;}).join('');
     box.classList.remove('hidden'); acIndex=-1;
-    $$('#suggestBox .sitem').forEach(el=>el.addEventListener('click',()=>{input.value=el.dataset.label;PAGE_STATE.query=input.value;PAGE_STATE.personActive=null;PAGE_STATE.personMeta=null;runSearch(true);closeSuggest();}));
+    $$('#suggestBox .sitem').forEach(el=>el.addEventListener('click',async()=>{input.value=el.dataset.label;await executeSearchFromInput();closeSuggest();}));
   }
   function updateActive(items){items.forEach((el,i)=>el.setAttribute('aria-selected',i===acIndex?'true':'false'));}
   function closeSuggest(){box.classList.add('hidden');box.innerHTML='';acIndex=-1;}
@@ -1326,7 +1451,7 @@ function resetPaging(){ PAGE_STATE.pageMovie=1; PAGE_STATE.pageTV=1; PAGE_STATE.
 function initInfiniteScroll(){
   if(IO)IO.disconnect();
   IO=new IntersectionObserver(async entries=>{
-    if(String(PAGE_STATE.lastMode).startsWith('saved-'))return;
+    if(isLibraryMode())return;
     if(entries.some(e=>e.isIntersecting)){if(BUSY)return;BUSY=true;try{await runSearchOrDiscover(false);}finally{BUSY=false;}}
   },{root:null,rootMargin:'800px',threshold:0});
   IO.observe($('#sentinel'));
@@ -1343,7 +1468,11 @@ function beginFreshRun(clear){
 }
 function isStale(token){ return token!==RENDER_TOKEN; }
 async function runSearchOrDiscover(clear){
-  if(String(PAGE_STATE.lastMode).startsWith('saved-')){ if(!clear)return; PAGE_STATE.lastMode=PAGE_STATE.query?'search':'discover'; }
+  if(isLibraryMode()){
+    if(!clear)return;
+    setSavedModeUI(null);
+    PAGE_STATE.lastMode=PAGE_STATE.query?'search':'discover';
+  }
   if(PAGE_STATE.query){PAGE_STATE.lastMode='search';await runSearch(clear);}
   else{PAGE_STATE.lastMode='discover';await runDiscover(clear);}
 }
@@ -1355,15 +1484,15 @@ async function runDiscover(clear){
   // "모두" 탭: 반대 타입에만 포함 장르가 있으면 해당 API 요청 스킵
   const skipMovie = CONTENT_TYPE==='all' && TV_INC.size>0 && MOVIE_INC.size===0;
   const skipTV    = CONTENT_TYPE==='all' && MOVIE_INC.size>0 && TV_INC.size===0;
-  if((CONTENT_TYPE==='all'&&!skipMovie)||CONTENT_TYPE==='movie') tasks.push(fetchJson(`https://api.themoviedb.org/3/discover/movie?${buildDiscoverParams('movie',PAGE_STATE.pageMovie)}`));
-  if((CONTENT_TYPE==='all'&&!skipTV)||CONTENT_TYPE==='tv')       tasks.push(fetchJson(`https://api.themoviedb.org/3/discover/tv?${buildDiscoverParams('tv',PAGE_STATE.pageTV)}`));
+  if((CONTENT_TYPE==='all'&&!skipMovie)||CONTENT_TYPE==='movie'||CONTENT_TYPE==='anime') tasks.push(fetchJson(`https://api.themoviedb.org/3/discover/movie?${buildDiscoverParams('movie',PAGE_STATE.pageMovie)}`));
+  if((CONTENT_TYPE==='all'&&!skipTV)||CONTENT_TYPE==='tv'||CONTENT_TYPE==='anime')       tasks.push(fetchJson(`https://api.themoviedb.org/3/discover/tv?${buildDiscoverParams('tv',PAGE_STATE.pageTV)}`));
   try{
     let merged=mergeResults(await Promise.all(tasks));
     if(isStale(token))return;
-    if(CONTENT_TYPE!=='all')merged=merged.filter(x=>x.media_type===CONTENT_TYPE);
+    if(CONTENT_TYPE!=='all' && CONTENT_TYPE!=='anime')merged=merged.filter(x=>x.media_type===CONTENT_TYPE);
     merged=clientSort(await applyClientFiltersStrict(merged));
     clearSkeletons(); renderCards(merged,!clear); setStatusIfEmpty(t('status_empty'));
-    if(CONTENT_TYPE==='all'){PAGE_STATE.pageMovie++;PAGE_STATE.pageTV++;}
+    if(CONTENT_TYPE==='all'||CONTENT_TYPE==='anime'){PAGE_STATE.pageMovie++;PAGE_STATE.pageTV++;}
     else if(CONTENT_TYPE==='movie')PAGE_STATE.pageMovie++;
     else PAGE_STATE.pageTV++;
     await saveCache({mode:'discover',items:merged,state:snapshotState()});
@@ -1386,7 +1515,7 @@ async function runSearch(clear){
     const person=(multi.results||[]).find(r=>r.media_type==='person');
     if(person){ PAGE_STATE.personActive=person.id; PAGE_STATE.personMeta={id:person.id,known_for_department:person.known_for_department||''}; clearSkeletons(); await renderPersonFilmography(PAGE_STATE.personMeta,clear); return; }
     let items=(multi.results||[]).filter(r=>r.media_type==='movie'||r.media_type==='tv');
-    if(CONTENT_TYPE!=='all')items=items.filter(r=>r.media_type===CONTENT_TYPE);
+    if(CONTENT_TYPE!=='all' && CONTENT_TYPE!=='anime')items=items.filter(r=>r.media_type===CONTENT_TYPE);
     let merged=Array.from(new Map(items.map(it=>{const type=it.media_type||(it.first_air_date?'tv':'movie');return[`${type}-${it.id}`,{...it,media_type:type}];})).values());
     merged=clientSort(await applyClientFiltersStrict(merged));
     clearSkeletons(); renderCards(merged,!clear); setStatusIfEmpty(t('status_empty'));
@@ -1407,7 +1536,7 @@ async function renderPersonFilmography(meta, clear){
   try{pc=await fetchJson(`https://api.themoviedb.org/3/person/${pid}/combined_credits?api_key=${API_KEY}&language=${tmdbLang()}`);}catch{}
   let works=pc?[...(pc.cast||[]),...(pc.crew||[])].filter(x=>x.media_type==='movie'||x.media_type==='tv'):[];
   works=filterPersonCredits(works,fullMeta);
-  if(CONTENT_TYPE!=='all')works=works.filter(w=>(w.media_type||(w.first_air_date?'tv':'movie'))===CONTENT_TYPE);
+  if(CONTENT_TYPE!=='all' && CONTENT_TYPE!=='anime')works=works.filter(w=>(w.media_type||(w.first_air_date?'tv':'movie'))===CONTENT_TYPE);
   const map=new Map();
   for(const w of works){const type=w.media_type||(w.first_air_date?'tv':'movie');const key=`${type}-${w.id}`;if(!map.has(key))map.set(key,{...w,media_type:type});}
   let merged=clientSort(await applyClientFiltersStrict(Array.from(map.values())));
@@ -1422,7 +1551,9 @@ function buildDiscoverParams(type,page){
   p.set('include_adult','false'); p.set('page',String(page||1));
   const inc = type==='movie' ? MOVIE_INC : TV_INC;
   const exc = type==='movie' ? MOVIE_EXC : TV_EXC;
-  if(inc.size)p.set('with_genres',[...inc].join(','));
+  const genreFilter = new Set(inc);
+  if(CONTENT_TYPE === 'anime') genreFilter.add(ANIME_GENRE_ID);
+  if(genreFilter.size)p.set('with_genres',[...genreFilter].join(','));
   if(exc.size)p.set('without_genres',[...exc].join(','));
   if(SELECTED_COUNTRY)p.set('with_origin_country',SELECTED_COUNTRY);
   if(MIN_RATING>0){ p.set('vote_average.gte',String(MIN_RATING)); p.set('vote_count.gte','50'); }
@@ -1542,6 +1673,576 @@ async function toggleSaved(kind,item){
   return await getSaved(kind);
 }
 
+
+/* ═══════════════════════════════ USER RATINGS ═══════════════════════════════ */
+const RATING_TYPES = new Set(['movie','drama','anime']);
+const ratingTitleKey = title => cleanTitle(title || '').toLowerCase().replace(/\s+/g, ' ').trim();
+const contentTypeToRatingType = mediaType => mediaType === 'tv' ? 'drama' : (mediaType === 'anime' ? 'anime' : 'movie');
+const ratingTypeToMediaType = type => type === 'drama' ? 'tv' : (type === 'movie' ? 'movie' : 'anime');
+function normalizeRatingType(type){
+  const raw = String(type || '').toLowerCase().trim();
+  if(raw === 'tv' || raw === 'drama' || raw === 'series') return 'drama';
+  if(raw === 'anime' || raw === 'animation') return 'anime';
+  return 'movie';
+}
+function ratingKey(type, id, title=''){
+  const rt = normalizeRatingType(type);
+  const sid = String(id ?? '').trim();
+  return `${rt}-${sid || ratingTitleKey(title)}`;
+}
+function ratingLabel(type){
+  const rt = normalizeRatingType(type);
+  if(rt === 'anime') return t('anime');
+  if(rt === 'drama') return t('drama');
+  return t('badge_movie');
+}
+function normalizeRatingItem(item){
+  if(!item || typeof item !== 'object') return null;
+  const type = normalizeRatingType(item.type || item.media_type);
+  const title = cleanTitle(item.title || item.name || item.original_title || item.original_name || '');
+  const idRaw = item.id ?? item.k ?? '';
+  const id = String(idRaw).trim() || ratingTitleKey(title);
+  const rating = Math.round(Number(item.rating) * 10) / 10;
+  if(!title || !RATING_TYPES.has(type) || !Number.isFinite(rating) || rating < 0 || rating > 10) return null;
+  return {
+    k: ratingKey(type, id, title),
+    id,
+    type,
+    title,
+    rating,
+    note: String(item.note || '').trim()
+  };
+}
+function normalizeRatingList(list){
+  const map = new Map();
+  (Array.isArray(list) ? list : []).forEach(x => {
+    const item = normalizeRatingItem(x);
+    if(!item) return;
+    const titleKey = `${item.type}::${ratingTitleKey(item.title)}`;
+    const duplicateKey = Array.from(map.entries()).find(([, v]) => `${v.type}::${ratingTitleKey(v.title)}` === titleKey)?.[0];
+    map.set(duplicateKey || item.k, item);
+  });
+  return Array.from(map.values());
+}
+async function getRatings(){
+  const obj = await storage.get([SK.ratings]);
+  return normalizeRatingList(obj[SK.ratings]);
+}
+async function setRatings(list){
+  const normalized = normalizeRatingList(list);
+  clearRatingViewCache();
+  const ok = await storage.set({[SK.ratings]: normalized});
+  if(!ok) return false;
+  const check = await storage.get([SK.ratings]);
+  return normalizeRatingList(check[SK.ratings]).length === normalized.length;
+}
+function findRatingIndex(list, source){
+  const src = normalizeRatingItem(source);
+  if(!src) return -1;
+  let idx = list.findIndex(x => x.k === src.k || (x.id && src.id && String(x.id) === String(src.id) && x.type === src.type));
+  if(idx >= 0) return idx;
+  const titleKey = ratingTitleKey(src.title);
+  return list.findIndex(x => x.type === src.type && ratingTitleKey(x.title) === titleKey);
+}
+function findRating(list, source){
+  const idx = findRatingIndex(list, source);
+  return idx >= 0 ? list[idx] : null;
+}
+async function upsertRating(source){
+  const item = normalizeRatingItem(source);
+  if(!item){ showToast(t('toast_invalid_rating'), 2400); return null; }
+  const list = await getRatings();
+  const idx = findRatingIndex(list, item);
+  const next = list.slice();
+  if(idx >= 0){
+    const prev = next[idx];
+    next[idx] = {...prev, title:item.title || prev.title, rating:item.rating, note:item.note};
+  } else {
+    next.push(item);
+  }
+  if(!await setRatings(next)){ showToast(t('toast_save_failed'), 2800); return null; }
+  showToast(t('toast_rating_saved'));
+  await refreshRatingBadges();
+  if(PAGE_STATE.lastMode === 'ratings') await showRatings();
+  return item;
+}
+async function removeRating(source){
+  const list = await getRatings();
+  const idx = findRatingIndex(list, source);
+  if(idx < 0){ showToast(t('toast_rating_removed')); return; }
+  const next = list.slice();
+  next.splice(idx, 1);
+  if(!await setRatings(next)){ showToast(t('toast_save_failed'), 2800); return; }
+  showToast(t('toast_rating_removed'));
+  await refreshRatingBadges();
+  if(PAGE_STATE.lastMode === 'ratings') await showRatings();
+}
+function ratingSourceFromCard(card){
+  const mediaType = card.getAttribute('data-type') || 'movie';
+  const title = card.getAttribute('data-rating-title') || card.getAttribute('data-title') || card.querySelector('.name')?.textContent?.trim() || '';
+  return {
+    id: card.getAttribute('data-rating-id') || card.getAttribute('data-id') || ratingTitleKey(title),
+    type: normalizeRatingType(card.getAttribute('data-rating-type') || contentTypeToRatingType(mediaType)),
+    title,
+    rating: Number(card.getAttribute('data-user-rating') || card.getAttribute('data-vote') || 0),
+    note: card.getAttribute('data-user-note') || ''
+  };
+}
+function setRateButtonVisual(btn, rating){
+  if(!btn) return;
+  const active = Number.isFinite(Number(rating)) && Number(rating) > 0;
+  btn.classList.toggle('active', active);
+  btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  btn.setAttribute('title', active ? `${t('my_rating')} ${Number(rating).toFixed(1)}` : t('rate_this'));
+  btn.setAttribute('aria-label', active ? `${t('my_rating')} ${Number(rating).toFixed(1)}` : t('rate_this'));
+  btn.innerHTML = `<span class="btn-glyph">${active ? '★' : '☆'}</span>`;
+}
+function ratingViewMapForList(list){
+  const cached = getCachedRatingView(list);
+  const map = new Map();
+  (cached?.items || []).forEach(item => {
+    if(item && item.media_type && item.id != null){
+      map.set(`${item.media_type}-${item.id}`, item);
+    }
+  });
+  return map;
+}
+function ratingFromResolvedItem(item){
+  if(!item || !Number.isFinite(Number(item.user_rating_value))) return null;
+  return {
+    id: String(item.user_rating_id || item.id || ''),
+    type: normalizeRatingType(item.user_rating_type || contentTypeToRatingType(item.media_type)),
+    title: cleanTitle(item.user_rating_title || item.title || item.name || ''),
+    rating: Number(item.user_rating_value),
+    note: String(item.user_rating_note || '').trim()
+  };
+}
+async function refreshRatingBadges(){
+  const list = await getRatings();
+  const resolvedMap = ratingViewMapForList(list);
+  $$('#results .card').forEach(card => {
+    const source = ratingSourceFromCard(card);
+    const resolvedSaved = ratingFromResolvedItem(resolvedMap.get(`${card.getAttribute('data-type')}-${card.getAttribute('data-id')}`));
+    const saved = findRating(list, source) || resolvedSaved;
+    const holder = card.querySelector('.user-rating-inline');
+    const scoreEl = card.querySelector('.card-user-rating');
+    if(saved){
+      card.setAttribute('data-user-rating', String(saved.rating));
+      card.setAttribute('data-user-note', saved.note || '');
+      card.setAttribute('data-rating-id', String(saved.id || ''));
+      card.setAttribute('data-rating-title', saved.title || card.getAttribute('data-title') || '');
+      card.setAttribute('data-rating-type', normalizeRatingType(saved.type));
+      if(scoreEl){
+        scoreEl.textContent = `★ ${Number(saved.rating).toFixed(1)}`;
+        scoreEl.setAttribute('title', `${t('my_rating')} ${Number(saved.rating).toFixed(1)}`);
+        scoreEl.setAttribute('aria-label', `${t('my_rating')} ${Number(saved.rating).toFixed(1)}`);
+        scoreEl.classList.remove('hidden');
+      }
+      if(holder){
+        holder.textContent = saved.note || '';
+        holder.classList.toggle('hidden', !saved.note);
+      }
+      setRateButtonVisual(card.querySelector('.rate-btn'), saved.rating);
+    } else {
+      const mediaType = card.getAttribute('data-type') || 'movie';
+      card.removeAttribute('data-user-rating');
+      card.removeAttribute('data-user-note');
+      card.setAttribute('data-rating-id', '');
+      card.setAttribute('data-rating-title', card.getAttribute('data-title') || card.querySelector('.name')?.textContent?.trim() || '');
+      card.setAttribute('data-rating-type', normalizeRatingType(contentTypeToRatingType(mediaType)));
+      if(scoreEl){
+        scoreEl.textContent = '';
+        scoreEl.removeAttribute('title');
+        scoreEl.removeAttribute('aria-label');
+        scoreEl.classList.add('hidden');
+      }
+      if(holder){ holder.textContent = ''; holder.classList.add('hidden'); }
+      setRateButtonVisual(card.querySelector('.rate-btn'), null);
+    }
+  });
+}
+function getRatingInputValue(){
+  const input = $('#ratingEditorScore') || $('#detailUserRating');
+  const raw = String(input?.value ?? '').trim();
+  if(raw === '') return null;
+  const value = Math.round(Number(raw) * 10) / 10;
+  if(!Number.isFinite(value) || value < 0 || value > 10) return null;
+  return value;
+}
+async function openRatingEditor(source, sourceEl=null){
+  LAST_FOCUS = sourceEl || document.activeElement;
+  stopModalMedia();
+  const list = await getRatings();
+  const saved = findRating(list, source);
+  const base = normalizeRatingItem({...source, rating: saved?.rating ?? source.rating ?? 0, note: saved?.note ?? source.note ?? ''});
+  if(!base){ showToast(t('toast_invalid_rating')); return; }
+  $('#modalBody').innerHTML = `<div class="rating-editor-wrap">
+    <div class="rating-editor-head">
+      <span class="badge ${base.type === 'drama' ? 'badge-tv' : base.type === 'anime' ? 'badge-anime' : ''}">${escapeHtml(ratingLabel(base.type))}</span>
+      <h3 id="modalTitle">${escapeHtml(base.title)}</h3>
+    </div>
+    <div class="rating-editor-panel">
+      <label>${t('rating_score')}</label>
+      <input id="ratingEditorScore" class="rating-input" type="number" min="0" max="10" step="0.1" value="${saved ? Number(saved.rating).toFixed(1) : ''}" placeholder="${t('rating_placeholder')}" />
+      <label>${t('rating_note')}</label>
+      <textarea id="ratingEditorNote" class="rating-note-input" rows="4" placeholder="${t('note_placeholder')}">${escapeHtml(saved?.note || base.note || '')}</textarea>
+      <div class="rating-editor-actions">
+        <button id="ratingEditorSave" class="modal-save-btn modal-rating-save" type="button">★ ${t('save_rating')}</button>
+        <button id="ratingEditorClear" class="modal-save-btn modal-rating-clear" type="button">× ${t('clear_rating')}</button>
+      </div>
+    </div>
+  </div>`;
+  $('#ratingEditorSave')?.addEventListener('click', async () => {
+    const rating = getRatingInputValue();
+    if(rating === null){ showToast(t('toast_invalid_rating')); return; }
+    const note = $('#ratingEditorNote')?.value || '';
+    await upsertRating({...base, rating, note});
+    closeModal();
+  });
+  $('#ratingEditorClear')?.addEventListener('click', async () => {
+    await removeRating(base);
+    closeModal();
+  });
+  $('#modal').classList.remove('hidden');
+  document.body.classList.add('lock-scroll');
+  setTimeout(() => $('#ratingEditorScore')?.focus(), 30);
+}
+const RATING_MATCH_STORE_KEY = 'cinefinder_rating_match_store_v3';
+try { localStorage.removeItem('cinefinder_rating_match_store_v1'); } catch {}
+try { localStorage.removeItem('cinefinder_rating_match_store_v2'); } catch {}
+let RATING_MATCH_STORE = {};
+try { RATING_MATCH_STORE = JSON.parse(localStorage.getItem(RATING_MATCH_STORE_KEY) || '{}'); } catch { RATING_MATCH_STORE = {}; }
+function persistRatingMatchStore(){
+  try{
+    const entries = Object.entries(RATING_MATCH_STORE || {})
+      .sort((a,b)=>(b[1]?.when||0)-(a[1]?.when||0))
+      .slice(0, 900);
+    RATING_MATCH_STORE = Object.fromEntries(entries);
+    localStorage.setItem(RATING_MATCH_STORE_KEY, JSON.stringify(RATING_MATCH_STORE));
+  }catch{}
+}
+function ratingMatchCacheKey(item){
+  return `${normalizeRatingType(item.type)}::${ratingTitleKey(item.title)}`;
+}
+function simplifyRatingSearchTitle(title){
+  let v = cleanTitle(title)
+    .replace(/[\[\(（【].*?[\]\)）】]/g, ' ')
+    .replace(/[:：]\s*(파트|part|시즌|season)\s*\d+.*$/i, ' ')
+    .replace(/\s+(시즌|season)\s*\d+.*$/i, ' ')
+    .replace(/\s+\d+\s*기\s*(part\s*\d+)?\s*$/i, ' ')
+    .replace(/\s+part\s*\d+\s*$/i, ' ')
+    .replace(/\s+시리즈\s*$/i, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return v || cleanTitle(title);
+}
+function uniqueRatingQueries(item){
+  const raw = cleanTitle(item.title || '');
+  const simplified = simplifyRatingSearchTitle(raw);
+  const noPunct = raw.replace(/[·•:：\-–—_]/g, ' ').replace(/\s+/g,' ').trim();
+  const list = [raw, simplified, noPunct, simplifyRatingSearchTitle(noPunct)].filter(Boolean);
+  return Array.from(new Set(list));
+}
+function mediaTypesForRatingItem(item){
+  const rt = normalizeRatingType(item.type);
+  if(rt === 'movie') return ['movie'];
+  if(rt === 'drama') return ['tv'];
+  return ['tv', 'movie'];
+}
+function baseComparableTitle(v){
+  return simplifyRatingSearchTitle(v).toLowerCase().replace(/[^0-9a-z\uac00-\ud7a3\u3040-\u30ff\u3400-\u9fff]+/gi, '');
+}
+function scoreRatingCandidate(item, candidate, mediaType, query){
+  const wantType = normalizeRatingType(item.type);
+  const candidateTitle = itemTitle(candidate, mediaType);
+  const wantBase = baseComparableTitle(item.title);
+  const queryBase = baseComparableTitle(query);
+  const candBase = baseComparableTitle(candidateTitle || candidate.original_title || candidate.original_name || '');
+  if(!candBase) return -999;
+  let score = 0;
+  if(candBase === wantBase) score += 120;
+  else if(candBase === queryBase) score += 105;
+  else if(wantBase && (candBase.includes(wantBase) || wantBase.includes(candBase))) score += 70;
+  else if(queryBase && (candBase.includes(queryBase) || queryBase.includes(candBase))) score += 50;
+  if(wantType === 'movie' && mediaType === 'movie') score += 30;
+  if(wantType === 'drama' && mediaType === 'tv') score += 30;
+  if(wantType === 'anime'){
+    if(mediaType === 'tv') score += 20;
+    if((candidate.genre_ids || []).includes(16)) score += 45;
+    if(['ja','ko'].includes(candidate.original_language)) score += 10;
+  }
+  if(candidate.poster_path) score += 15;
+  if(candidate.overview) score += 8;
+  score += Math.min(Number(candidate.vote_count || 0), 500) / 100;
+  score += Math.min(Number(candidate.popularity || 0), 80) / 10;
+  return score;
+}
+async function findTmdbMatchForRating(item){
+  const cacheKey = ratingMatchCacheKey(item);
+  const cached = RATING_MATCH_STORE[cacheKey];
+  if(cached && Date.now() - (cached.when || 0) < 1000 * 60 * 60 * 24 * 30){
+    return cached.miss ? null : cached.data;
+  }
+
+  const numericId = /^\d+$/.test(String(item.id || '').trim()) ? String(item.id).trim() : '';
+  const directTypes = normalizeRatingType(item.type) === 'movie' ? ['movie'] : normalizeRatingType(item.type) === 'drama' ? ['tv'] : [];
+  if(numericId && directTypes.length){
+    for(const mediaType of directTypes){
+      try{
+        const detail = await fetchJson(`https://api.themoviedb.org/3/${mediaType}/${numericId}?api_key=${API_KEY}&language=${tmdbLang()}`);
+        const title = cleanTitle(item.title) || itemTitle(detail, mediaType);
+        const resolved = {
+          id: detail.id, media_type: mediaType, title, name: title,
+          poster_path: detail.poster_path || '', vote_average: Number(detail.vote_average || 0),
+          vote_count: Number(detail.vote_count || 0), overview: detail.overview || '',
+          release_date: detail.release_date || detail.first_air_date || '', first_air_date: detail.first_air_date || '',
+          popularity: Number(detail.popularity || 0),
+          genre_ids: Array.isArray(detail.genres) ? detail.genres.map(g => g.id).filter(Boolean) : [],
+          user_rating_id: item.id, user_rating_title: item.title, user_rating_type: item.type,
+          user_rating_value: item.rating, user_rating_note: item.note || ''
+        };
+        RATING_MATCH_STORE[cacheKey] = { when: Date.now(), data: resolved };
+        persistRatingMatchStore();
+        return resolved;
+      }catch{}
+    }
+  }
+
+  const queries = uniqueRatingQueries(item);
+  const mediaTypes = mediaTypesForRatingItem(item);
+  const candidates = [];
+  for(const query of queries){
+    for(const mediaType of mediaTypes){
+      try{
+        const url = `https://api.themoviedb.org/3/search/${mediaType}?api_key=${API_KEY}&language=${tmdbLang()}&query=${encodeURIComponent(query)}&include_adult=false&page=1`;
+        const data = await fetchJson(url);
+        (data.results || []).slice(0, 8).forEach(result => {
+          const score = scoreRatingCandidate(item, result, mediaType, query);
+          if(score >= 35) candidates.push({mediaType, result, score});
+        });
+      }catch{}
+      if(candidates.some(x => x.score >= 105)) break;
+    }
+    if(candidates.some(x => x.score >= 105)) break;
+  }
+  if(!candidates.length){
+    RATING_MATCH_STORE[cacheKey] = { when: Date.now(), miss: true };
+    persistRatingMatchStore();
+    return null;
+  }
+  candidates.sort((a,b) => b.score - a.score);
+  const picked = candidates[0];
+  try{
+    const detail = await fetchJson(`https://api.themoviedb.org/3/${picked.mediaType}/${picked.result.id}?api_key=${API_KEY}&language=${tmdbLang()}`);
+    const title = cleanTitle(item.title) || itemTitle(detail, picked.mediaType) || itemTitle(picked.result, picked.mediaType);
+    const poster_path = detail.poster_path || picked.result.poster_path || '';
+    // TMDB에 실제 상세 데이터가 확인되지 않으면 내 평점 목록에서는 제외합니다.
+    const resolved = {
+      id: detail.id || picked.result.id,
+      media_type: picked.mediaType,
+      title,
+      name: title,
+      poster_path,
+      vote_average: Number(detail.vote_average || picked.result.vote_average || 0),
+      vote_count: Number(detail.vote_count || picked.result.vote_count || 0),
+      overview: detail.overview || picked.result.overview || '',
+      release_date: detail.release_date || detail.first_air_date || picked.result.release_date || picked.result.first_air_date || '',
+      first_air_date: detail.first_air_date || picked.result.first_air_date || '',
+      popularity: Number(detail.popularity || picked.result.popularity || 0),
+      genre_ids: Array.isArray(picked.result.genre_ids) ? picked.result.genre_ids : (Array.isArray(detail.genres) ? detail.genres.map(g => g.id).filter(Boolean) : []),
+      user_rating_id: item.id,
+      user_rating_title: item.title,
+      user_rating_type: item.type,
+      user_rating_value: item.rating,
+      user_rating_note: item.note || ''
+    };
+    RATING_MATCH_STORE[cacheKey] = { when: Date.now(), data: resolved };
+    persistRatingMatchStore();
+    return resolved;
+  }catch{
+    RATING_MATCH_STORE[cacheKey] = { when: Date.now(), miss: true };
+    persistRatingMatchStore();
+    return null;
+  }
+}
+async function resolveRatingListToTmdb(list, onProgress){
+  const source = normalizeRatingList(list);
+  const resolved = [];
+  let done = 0;
+  await runLimited(source, 5, async item => {
+    const match = await findTmdbMatchForRating(item);
+    done += 1;
+    if(match) resolved.push(match);
+    if(typeof onProgress === 'function') onProgress(done, source.length, resolved.length);
+  });
+  const byKey = new Map();
+  resolved.forEach(it => {
+    // 동일 TMDB 작품으로 매칭된 항목은 한 번만 표시합니다.
+    // 예: 시즌별로 저장한 평점이 동일한 TV 시리즈로 매칭되면 카드 중복 노출 방지.
+    const key = `${it.media_type}-${it.id}`;
+    const prev = byKey.get(key);
+    if(!prev || Number(it.user_rating_value || 0) > Number(prev.user_rating_value || 0)){
+      byKey.set(key, it);
+    }
+  });
+  const unique = Array.from(byKey.values());
+  unique._ratingStats = {
+    total: source.length,
+    matched: resolved.length,
+    shown: unique.length,
+    missing: Math.max(0, source.length - resolved.length),
+    duplicate: Math.max(0, resolved.length - unique.length)
+  };
+  return unique;
+}
+function renderRatingFallbackEmpty(){
+  $('#results').innerHTML = `<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><p>${t('no_my_ratings')}</p><small>${t('status_ratings_filtered')}</small></div>`;
+}
+
+function ratingListSignature(list){
+  return normalizeRatingList(list)
+    .map(x => `${x.type}|${x.id}|${ratingTitleKey(x.title)}|${Number(x.rating).toFixed(1)}|${x.note||''}`)
+    .sort()
+    .join('||');
+}
+function getCachedRatingView(list){
+  try{
+    const cache = JSON.parse(localStorage.getItem(SK.ratingViewCache) || '{}');
+    const sig = ratingListSignature(list);
+    if(cache && cache.sig === sig && Array.isArray(cache.items)){
+      return { items: cache.items, stats: cache.stats || null };
+    }
+  }catch{}
+  return null;
+}
+function setCachedRatingView(list, items, stats){
+  try{
+    const payload = { sig: ratingListSignature(list), when: Date.now(), stats: stats || null, items: items || [] };
+    safeSetJsonItem(SK.ratingViewCache, payload);
+  }catch{}
+}
+function clearRatingViewCache(){
+  try{ localStorage.removeItem(SK.ratingViewCache); }catch{}
+}
+let PENDING_RATING_IMPORT_STATS_TOAST = false;
+function ratingStatusFromStats(shown, total, stats){
+  const statusParts = [];
+  if(stats?.missing > 0) statusParts.push(`검색 제외 ${stats.missing}개`);
+  if(stats?.duplicate > 0) statusParts.push(`중복 정리 ${stats.duplicate}개`);
+  return statusParts.length ? `표시 ${shown}개 / ${statusParts.join(' / ')}` : '';
+}
+async function showRatings(){
+  PAGE_STATE.lastMode = 'ratings';
+  setSavedModeUI('ratings');
+  let list = await getRatings();
+  list.sort((a,b) => a.title.localeCompare(b.title, 'ko'));
+  if(!list.length){ renderRatingFallbackEmpty(); setStatus(''); return; }
+
+  const maybeToastImportStats = (shown, stats) => {
+    if(!PENDING_RATING_IMPORT_STATS_TOAST) return;
+    PENDING_RATING_IMPORT_STATS_TOAST = false;
+    const msg = ratingStatusFromStats(shown, list.length, stats);
+    showToast(msg ? `${t('toast_ratings_imported')} · ${msg}` : `${t('toast_ratings_imported')} · 표시 ${shown}개`, 3600);
+  };
+
+  const cached = getCachedRatingView(list);
+  if(cached){
+    const cachedItems = clientSort(filterByCurrentQuery(cached.items || []));
+    if(cachedItems.length){
+      renderCards(cachedItems, false);
+      setStatus('');
+      maybeToastImportStats((cached.items || []).length, cached.stats);
+      return;
+    }
+    if(PAGE_STATE.query){
+      renderEmptyState();
+      setStatus('');
+      maybeToastImportStats((cached.items || []).length, cached.stats);
+      return;
+    }
+  }
+
+  $('#results').innerHTML='';
+  showSkeletons(14);
+  setStatus(`${t('status_resolving_ratings')} 0/${list.length}`);
+  const resolved = await resolveRatingListToTmdb(list, (done,total,ok) => {
+    setStatus(`${t('status_resolving_ratings')} ${done}/${total} · ${ok}`);
+  });
+  clearSkeletons();
+  if(!resolved.length){
+    renderRatingFallbackEmpty();
+    const emptyStats = { total:list.length, shown:0, missing:list.length, duplicate:0 };
+    setCachedRatingView(list, [], emptyStats);
+    setStatus('');
+    maybeToastImportStats(0, emptyStats);
+    return;
+  }
+  const stats = resolved._ratingStats || { missing: Math.max(0, list.length - resolved.length), duplicate: 0, shown: resolved.length };
+  const sortedResolved = clientSort(resolved);
+  setCachedRatingView(list, sortedResolved, stats);
+  const visibleResolved = filterByCurrentQuery(sortedResolved);
+  if(!visibleResolved.length && PAGE_STATE.query){
+    renderEmptyState();
+  } else {
+    renderCards(visibleResolved, false);
+  }
+  setStatus('');
+  maybeToastImportStats(sortedResolved.length, stats);
+}
+async function exportRatings(){
+  const list = await getRatings();
+  if(!list.length){ showToast(t('no_my_ratings')); return; }
+  const payload = list.map(x => ({ id: x.id, type: x.type, title: x.title, rating: Number(x.rating), note: x.note || '' }));
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().replace(/[:T]/g,'-').slice(0,19);
+  a.href = url;
+  a.download = `ratings-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+  showToast(`${t('toast_ratings_exported')} · ${list.length}개`, 2200);
+}
+async function importRatings(file){
+  try{
+    // 새 JSON을 불러올 때는 이전 매칭 실패 캐시를 초기화해 누락된 항목을 다시 검색합니다.
+    RATING_MATCH_STORE = {};
+    clearRatingViewCache();
+    try { localStorage.removeItem(RATING_MATCH_STORE_KEY); } catch {}
+    const text = await file.text();
+    const data = JSON.parse(text);
+    const incomingRaw = Array.isArray(data) ? data : (Array.isArray(data?.ratings) ? data.ratings : []);
+    const incoming = normalizeRatingList(incomingRaw);
+    if(!incoming.length){ showToast(t('toast_invalid_ratings_file'), 2600); return; }
+    const current = await getRatings();
+    const next = current.slice();
+    incoming.forEach(item => {
+      const idx = findRatingIndex(next, item);
+      if(idx >= 0) next[idx] = {...next[idx], ...item};
+      else next.push(item);
+    });
+    if(!await setRatings(next)){ showToast(t('toast_save_failed'), 2800); return; }
+    PENDING_RATING_IMPORT_STATS_TOAST = true;
+    await refreshRatingBadges();
+    if(PAGE_STATE.lastMode === 'ratings') await showRatings();
+    else showToast(`${t('toast_ratings_imported')} · ${incoming.length}개`, 2600);
+  }catch(e){
+    showToast(t('toast_invalid_ratings_file'), 2600);
+  }
+}
+async function clearRatingsList(){
+  const list = await getRatings();
+  if(!list.length){ showToast(t('no_my_ratings')); return; }
+  if(!confirm(`${t('my_ratings')} ${list.length}개를 모두 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
+  clearRatingViewCache();
+  if(!await setRatings([])){ showToast(t('toast_save_failed'), 2800); return; }
+  showToast(t('toast_rating_removed'), 2200);
+  await refreshRatingBadges();
+  if(PAGE_STATE.lastMode === 'ratings') await showRatings();
+}
+
 /* ═══════════════════════════════ CARDS ═══════════════════════════════ */
 function renderEmptyState(){
   $('#results').innerHTML=`<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><p>${t('status_empty')}</p><small>${t('no_results_hint')}</small><div class="empty-actions"><button id="emptyResetFilters" type="button">${t('empty_reset_filters')}</button><button id="emptyRetryAll" type="button">${t('empty_retry_all')}</button>${PAGE_STATE.query?`<button id="emptySearchTmdb" type="button">${t('empty_search_tmdb')}</button>`:''}</div></div>`;
@@ -1582,17 +2283,22 @@ function renderCards(items,append){
     const rating=ratingVal.toFixed(1);
     const ratingCls=ratingVal>=7.5?'rating rating-high':ratingVal>=6?'rating rating-mid':'rating rating-low';
     const key=`${type}-${it.id}`;
-    const badgeCls=type==='tv'?'badge badge-tv':'badge';
-    return`<div class="card" data-type="${type}" data-id="${it.id}" data-key="${key}" data-title="${escapeHtml(title)}" data-poster="${escapeHtml(it.poster_path||'')}" data-date="${escapeHtml(it.release_date||it.first_air_date||'')}" data-vote="${it.vote_average||0}">
-      <div class="thumb">${img?`<img src="${img}" alt="${escapeHtml(title)}" loading="lazy">`:`<div class="thumb-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>${t('poster_none')}</span></div>`}</div>
+    const userRatingType=normalizeRatingType(it.user_rating_type || (CONTENT_TYPE === 'anime' ? 'anime' : contentTypeToRatingType(type)));
+    const ratingTitle=cleanTitle(it.user_rating_title || title);
+    const ratingId=String(it.user_rating_id || '').trim();
+    const badgeCls=userRatingType==='anime'?'badge badge-anime':type==='tv'?'badge badge-tv':'badge';
+    const badgeLabel=userRatingType==='anime'?t('anime'):(type==='movie'?t('badge_movie'):t('badge_tv'));
+    return`<div class="card" data-type="${type}" data-id="${it.id}" data-key="${key}" data-title="${escapeHtml(title)}" data-rating-id="${escapeHtml(ratingId)}" data-rating-title="${escapeHtml(ratingTitle)}" data-rating-type="${escapeHtml(userRatingType)}" data-poster="${escapeHtml(it.poster_path||'')}" data-date="${escapeHtml(it.release_date||it.first_air_date||'')}" data-vote="${it.vote_average||0}">
+      <div class="thumb">${img?`<img src="${img}" alt="${escapeHtml(title)}" loading="lazy">`:`<div class="thumb-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>${t('poster_none')}</span></div>`}<div class="thumb-top-info"><span class="${badgeCls}">${escapeHtml(badgeLabel)}</span><span class="card-user-rating user-rating-score hidden"></span></div></div>
       <div class="card-actions">
         <button class="action-btn fav-btn" type="button" aria-pressed="false" aria-label="${t('favorite')} ${t('not_selected')}" title="${t('favorite')} ${t('not_selected')}"><span class="btn-glyph">♡</span></button>
         <button class="action-btn watch-btn" type="button" aria-pressed="false" aria-label="${t('watch_later')} ${t('not_selected')}" title="${t('watch_later')} ${t('not_selected')}"><span class="btn-glyph"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span></button>
+        <button class="action-btn rate-btn" type="button" aria-pressed="false" aria-label="${t('rate_this')}" title="${t('rate_this')}"><span class="btn-glyph">☆</span></button>
       </div>
       <div class="meta">
-        <div class="title-line"><span class="${badgeCls}">${type==='movie'?t('badge_movie'):t('badge_tv')}</span><span class="${ratingCls}">★ ${rating}</span></div>
         <div class="name" title="${escapeHtml(title)}">${escapeHtml(title)||'&nbsp;'}</div>
         <div class="sub">${year||t('year_unknown')}</div>
+        <div class="user-rating-inline hidden"></div>
       </div>
     </div>`;
   }).join('');
@@ -1606,10 +2312,11 @@ function renderCards(items,append){
   $$('#results .card:not([data-bound="true"])').forEach(card=>{
     card.dataset.bound='true';
     const type=card.getAttribute('data-type'),id=card.getAttribute('data-id');
-    const fb=card.querySelector('.fav-btn'),wb=card.querySelector('.watch-btn');
+    const fb=card.querySelector('.fav-btn'),wb=card.querySelector('.watch-btn'),rb=card.querySelector('.rate-btn');
     card.addEventListener('click',e=>{if(e.target.closest('.action-btn'))return;openDetail(type,id,card);});
     fb.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();const s=pickStub(card);const l=await toggleSaved('fav',s);updateSavedButtons('fav',l);});
     wb.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();const s=pickStub(card);const l=await toggleSaved('watch',s);updateSavedButtons('watch',l);});
+    rb?.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();await openRatingEditor(ratingSourceFromCard(card),card);});
   });
   Promise.all([getSaved('fav'),getSaved('watch')]).then(([fl,wl])=>{
     const fs=new Set(fl.map(x=>x.k)),ws=new Set(wl.map(x=>x.k));
@@ -1622,6 +2329,7 @@ function renderCards(items,append){
   const renderedCards = $$('#results .card');
   refreshCardTitles(renderedCards);
   refreshCardPosters(renderedCards);
+  refreshRatingBadges();
 }
 function pickStub(card){ return{id:Number(card.getAttribute('data-id')),media_type:card.getAttribute('data-type'),title:card.querySelector('.name').textContent.trim(),poster_path:card.getAttribute('data-poster')||'',vote_average:parseFloat(card.getAttribute('data-vote')||'0'),release_date:card.getAttribute('data-date')||''}; }
 function reflectUI(card,list,kind){
@@ -1727,7 +2435,8 @@ async function showSaved(kind){
 
   // 탭 필터만 적용 (장르/국가 필터 미적용)
   let items = list.slice();
-  if(CONTENT_TYPE!=='all') items = items.filter(x=>x.media_type===CONTENT_TYPE);
+  if(CONTENT_TYPE!=='all' && CONTENT_TYPE!=='anime') items = items.filter(x=>x.media_type===CONTENT_TYPE);
+  items = filterByCurrentQuery(items);
   if(!items.length){ renderEmptyState(); return; }
 
   // 정렬
@@ -1788,13 +2497,24 @@ async function openDetail(type,id,sourceEl=null){
       ...genres
     ].filter(Boolean);
     const itemStub={id:Number(id),media_type:type,title,poster_path:resolvedPosterPath||'',vote_average:data.vote_average||0,release_date:data.release_date||data.first_air_date||'',popularity:data.popularity||0};
-    const [favList,watchList]=await Promise.all([getSaved('fav'),getSaved('watch')]);
+    const [favList,watchList,userRatings]=await Promise.all([getSaved('fav'),getSaved('watch'),getRatings()]);
     const key=`${type}-${id}`;
+    const ratingType = contentTypeToRatingType(type);
+    const ratingLookupType = normalizeRatingType(sourceEl?.getAttribute?.('data-rating-type') || ratingType);
+    const ratingLookupTitle = sourceEl?.getAttribute?.('data-rating-title') || title;
+    const ratingLookupId = sourceEl?.getAttribute?.('data-rating-id') || String(id);
+    const existingUserRating = findRating(userRatings, {id:ratingLookupId, type:ratingLookupType, title:ratingLookupTitle, rating:0, note:''});
     const sectionBlock=(label, body, extra='') => body ? `<div class="section detail-section ${extra}"><strong>${label}</strong><div>${body}</div></div>` : '';
     const safeYoutubeKey=/^[A-Za-z0-9_-]{6,}$/.test(trailer?.key||'') ? trailer.key : '';
     const trailerBlock=safeYoutubeKey?sectionBlock(t('modal_trailer'), `<div class="yt-preview"><img src="https://i.ytimg.com/vi/${safeYoutubeKey}/hqdefault.jpg" alt="Trailer" loading="lazy"/><button class="yt-link" data-url="https://www.youtube.com/watch?v=${safeYoutubeKey}">▶ ${t('trailer_youtube')}</button></div>`, 'media-section'):'';
     const overviewBlock=sectionBlock(t('modal_overview'), `<div class="detail-chip-row">${detailChips.map(x=>`<span class="detail-chip">${escapeHtml(String(x))}</span>`).join('')}</div>`, 'summary-section');
     const descriptionBlock=data.overview?sectionBlock(t('modal_description'), `<p class="detail-text">${escapeHtml(data.overview)}</p>`, 'description-section'):'';
+    const userRatingBlock = sectionBlock(t('my_rating'), `<div class="detail-rating-form">
+      <input id="detailUserRating" class="rating-input" type="number" min="0" max="10" step="0.1" value="${existingUserRating ? Number(existingUserRating.rating).toFixed(1) : ''}" placeholder="${t('rating_placeholder')}" />
+      <input id="detailUserNote" class="rating-note-line" type="text" value="${escapeHtml(existingUserRating?.note || '')}" placeholder="${t('note_placeholder')}" />
+      <button id="detailSaveRating" class="modal-save-btn modal-rating-save" type="button">★ ${t('save_rating')}</button>
+      <button id="detailClearRating" class="modal-save-btn modal-rating-clear" type="button">× ${t('clear_rating')}</button>
+    </div>`, 'user-rating-section');
     const renderCastMembers = members => members.map(c => {
       const name = c.name || c.original_name || '';
       const character = c.character || '';
@@ -1818,6 +2538,7 @@ async function openDetail(type,id,sourceEl=null){
           <button class="modal-save-btn modal-watch-btn" data-kind="watch" aria-pressed="${watchList.some(x=>x.k===key)?'true':'false'}">${watchList.some(x=>x.k===key)?'✓':'⏱'} ${t('modal_add_watch')}</button>
         </div>
         ${overviewBlock}
+        ${userRatingBlock}
         ${descriptionBlock}
         ${trailerBlock}
         ${castBlock}
@@ -1826,7 +2547,7 @@ async function openDetail(type,id,sourceEl=null){
       </div>
     </div>`;
     $$('#modalBody [data-url]').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();window.open(btn.getAttribute('data-url'),'_blank','noopener,noreferrer');}));
-    $$('#modalBody .modal-save-btn').forEach(btn=>btn.addEventListener('click',async e=>{
+    $$('#modalBody .modal-save-btn[data-kind]').forEach(btn=>btn.addEventListener('click',async e=>{
       e.preventDefault(); e.stopPropagation();
       const kind=btn.dataset.kind;
       const list=await toggleSaved(kind,itemStub);
@@ -1836,6 +2557,17 @@ async function openDetail(type,id,sourceEl=null){
       btn.textContent=`${kind==='fav'?(active?'♥':'♡'):(active?'✓':'⏱')} ${kind==='fav'?t('modal_add_fav'):t('modal_add_watch')}`;
       updateSavedButtons(kind, list);
     }));
+    $('#detailSaveRating')?.addEventListener('click', async e=>{
+      e.preventDefault(); e.stopPropagation();
+      const rating = getRatingInputValue();
+      if(rating === null){ showToast(t('toast_invalid_rating')); return; }
+      await upsertRating({id:ratingLookupId, type:ratingLookupType, title:ratingLookupTitle, rating, note:$('#detailUserNote')?.value || ''});
+    });
+    $('#detailClearRating')?.addEventListener('click', async e=>{
+      e.preventDefault(); e.stopPropagation();
+      await removeRating({id:ratingLookupId, type:ratingLookupType, title:ratingLookupTitle, rating:0, note:''});
+      const ri=$('#detailUserRating'), rn=$('#detailUserNote'); if(ri)ri.value=''; if(rn)rn.value='';
+    });
     const modalContent=document.querySelector('.modal-content');
     if(modalContent) modalContent.scrollTop=0;
     $('#modal').classList.remove('hidden');
