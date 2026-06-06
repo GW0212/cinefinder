@@ -5054,3 +5054,40 @@ html, body {
   border-color: #f59e0b !important;
   color: #ffffff !important;
 }
+
+
+/* ================================================================
+   PC DETAIL POSTER STICKY CENTER FIX — 2026-06-06
+   - PC 상세설명 좌측 포스터를 화면 좌측 중앙 위치에 sticky 고정
+   - 스크롤해도 포스터가 좌측 중앙 기준으로 유지
+   ================================================================ */
+@media (min-width: 721px) {
+  .modal:not(.hidden) {
+    align-items: flex-start !important;
+    justify-content: center !important;
+    overflow-y: auto !important;
+    padding: 24px 16px !important;
+  }
+
+  .modal-content {
+    overflow: visible !important;
+    margin: 0 auto !important;
+  }
+
+  .modal-header {
+    align-items: flex-start !important;
+  }
+
+  .modal-poster {
+    position: sticky !important;
+    top: max(24px, calc(50dvh - 142px)) !important;
+    align-self: flex-start !important;
+    z-index: 5 !important;
+  }
+
+  @supports not (height: 100dvh) {
+    .modal-poster {
+      top: max(24px, calc(50vh - 142px)) !important;
+    }
+  }
+}
