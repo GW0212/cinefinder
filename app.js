@@ -1894,9 +1894,9 @@ async function openRatingEditor(source, sourceEl=null){
     </div>
     <div class="rating-editor-panel">
       <label>${t('rating_score')}</label>
-      <input id="ratingEditorScore" class="rating-input" type="number" min="0" max="10" step="0.1" value="${saved ? Number(saved.rating).toFixed(1) : ''}" placeholder="${t('rating_placeholder')}" />
+      <input id="ratingEditorScore" class="rating-input" type="number" inputmode="decimal" autocomplete="off" enterkeyhint="done" min="0" max="10" step="0.1" value="${saved ? Number(saved.rating).toFixed(1) : ''}" placeholder="${t('rating_placeholder')}" />
       <label>${t('rating_note')}</label>
-      <textarea id="ratingEditorNote" class="rating-note-input" rows="4" placeholder="${t('note_placeholder')}">${escapeHtml(saved?.note || base.note || '')}</textarea>
+      <textarea id="ratingEditorNote" class="rating-note-input" rows="4" autocomplete="off" enterkeyhint="done" placeholder="${t('note_placeholder')}">${escapeHtml(saved?.note || base.note || '')}</textarea>
       <div class="rating-editor-actions">
         <button id="ratingEditorSave" class="modal-save-btn modal-rating-save" type="button">★ ${t('save_rating')}</button>
         <button id="ratingEditorClear" class="modal-save-btn modal-rating-clear" type="button">× ${t('clear_rating')}</button>
@@ -1916,7 +1916,7 @@ async function openRatingEditor(source, sourceEl=null){
   });
   $('#modal').classList.remove('hidden');
   document.body.classList.add('lock-scroll');
-  setTimeout(() => $('#ratingEditorScore')?.focus(), 30);
+  // iOS Safari에서 입력창 자동 포커스가 화면 확대를 유발할 수 있어 수동 입력만 허용합니다.
 }
 const RATING_MATCH_STORE_KEY = 'cinefinder_rating_match_store_v3';
 try { localStorage.removeItem('cinefinder_rating_match_store_v1'); } catch {}
@@ -2514,8 +2514,8 @@ async function openDetail(type,id,sourceEl=null){
     const overviewBlock=sectionBlock(t('modal_overview'), `<div class="detail-chip-row">${detailChips.map(x=>`<span class="detail-chip">${escapeHtml(String(x))}</span>`).join('')}</div>`, 'summary-section');
     const descriptionBlock=data.overview?sectionBlock(t('modal_description'), `<p class="detail-text">${escapeHtml(data.overview)}</p>`, 'description-section'):'';
     const userRatingBlock = sectionBlock(t('my_rating'), `<div class="detail-rating-form">
-      <input id="detailUserRating" class="rating-input" type="number" min="0" max="10" step="0.1" value="${existingUserRating ? Number(existingUserRating.rating).toFixed(1) : ''}" placeholder="${t('rating_placeholder')}" />
-      <input id="detailUserNote" class="rating-note-line" type="text" value="${escapeHtml(existingUserRating?.note || '')}" placeholder="${t('note_placeholder')}" />
+      <input id="detailUserRating" class="rating-input" type="number" inputmode="decimal" autocomplete="off" enterkeyhint="done" min="0" max="10" step="0.1" value="${existingUserRating ? Number(existingUserRating.rating).toFixed(1) : ''}" placeholder="${t('rating_placeholder')}" />
+      <input id="detailUserNote" class="rating-note-line" type="text" autocomplete="off" enterkeyhint="done" value="${escapeHtml(existingUserRating?.note || '')}" placeholder="${t('note_placeholder')}" />
       <button id="detailSaveRating" class="modal-save-btn modal-rating-save" type="button">★ ${t('save_rating')}</button>
       <button id="detailClearRating" class="modal-save-btn modal-rating-clear" type="button">× ${t('clear_rating')}</button>
     </div>`, 'user-rating-section');
@@ -2611,6 +2611,7 @@ function renderProviders(p){
   ].join('');
 }
 function closeModal(){
+  try{ document.activeElement?.blur?.(); }catch{}
   stopModalMedia();
   $('#modal').classList.add('hidden');
   document.body.classList.remove('lock-scroll');

@@ -5091,3 +5091,100 @@ html, body {
     }
   }
 }
+
+
+/* ================================================================
+   MOBILE RATING INPUT + THUMBNAIL SCORE HOTFIX — 2026-06-07
+   - iOS Safari: 평점/메모 입력 시 자동 줌 방지
+   - 모바일: 저장된 내 평점을 썸네일 우측 상단에 다시 노출
+   ================================================================ */
+@media (max-width: 720px) {
+  .rating-input,
+  .rating-note-line,
+  .rating-note-input,
+  .detail-rating-form .rating-input,
+  .detail-rating-form .rating-note-line,
+  .rating-editor-panel .rating-input,
+  .rating-editor-panel .rating-note-input,
+  #detailUserRating,
+  #detailUserNote,
+  #ratingEditorScore,
+  #ratingEditorNote {
+    font-size: 16px !important;
+    line-height: 1.45 !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+    transform: translateZ(0);
+  }
+
+  .rating-input,
+  .rating-note-line,
+  .detail-rating-form .rating-input,
+  .detail-rating-form .rating-note-line,
+  #detailUserRating,
+  #detailUserNote {
+    min-height: 44px !important;
+  }
+
+  .rating-note-input,
+  #ratingEditorNote {
+    min-height: 104px !important;
+  }
+
+  .results-grid .card .thumb-top-info > .card-user-rating:not(.hidden) {
+    display: inline-flex !important;
+    visibility: visible !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+    width: auto !important;
+    min-width: 38px !important;
+    max-width: calc(100% - 38px) !important;
+    height: 20px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
+    padding: 0 6px !important;
+    margin: 0 !important;
+    border: 1px solid rgba(217,119,6,.42) !important;
+    border-radius: 999px !important;
+    box-sizing: border-box !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255,247,237,.97) !important;
+    color: #b45309 !important;
+    font-size: 9.5px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    z-index: 6 !important;
+    pointer-events: none !important;
+    box-shadow: 0 6px 14px rgba(15,23,42,.18) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+  }
+
+  .results-grid .card .thumb-top-info > .card-user-rating.hidden {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .results-grid .card .thumb-top-info > .card-user-rating:not(.hidden) {
+    min-width: 34px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    max-height: 18px !important;
+    padding: 0 4px !important;
+    font-size: 8.5px !important;
+  }
+}
+
+[data-theme="dark"] .results-grid .card .thumb-top-info > .card-user-rating:not(.hidden) {
+  background: rgba(92,53,7,.94) !important;
+  border-color: rgba(251,191,36,.5) !important;
+  color: #facc15 !important;
+}
