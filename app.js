@@ -393,6 +393,25 @@ const todayISO   = () => { const d=new Date(); return `${d.getFullYear()}-${Stri
 const toNumDate  = s => s ? Number(String(s).replace(/-/g,'')) : 0;
 const lc         = s => (s||'').toLowerCase();
 
+/* ═══════════════════════════════ MOBILE PERF / TRAFFIC ═══════════════════════════════
+   모바일에서는 카드 1개마다 추가로 발생하던 번역/포스터 보정 API 호출을 제한하고,
+   이미지 사이즈·무한스크롤·자동완성 요청을 줄여 체감 렉과 데이터 사용량을 낮춥니다. */
+const IS_MOBILE = (() => {
+  try { return window.matchMedia('(max-width: 720px), (pointer: coarse)').matches; }
+  catch { return Math.min(window.innerWidth || 9999, window.screen?.width || 9999) <= 720; }
+})();
+const IS_LOW_POWER = IS_MOBILE || ((navigator.hardwareConcurrency || 8) <= 4);
+const mobilePageLimit = () => {
+  if(!IS_MOBILE) return Infinity;
+  if(PAGE_STATE?.lastMode === 'ratings') return Infinity;
+  return CONTENT_TYPE === 'all' ? 18 : 16;
+};
+const limitPageItemsForDevice = list => (IS_MOBILE ? (list || []).slice(0, mobilePageLimit()) : (list || []));
+const cardPosterUrl = p => posterUrl(p, IS_MOBILE ? 'w185' : 'w342');
+const detailPosterUrl = p => posterUrl(p, IS_MOBILE ? 'w342' : 'w500');
+const tinyPosterUrl = (p, fallback='w185') => posterUrl(p, IS_MOBILE ? 'w92' : fallback);
+function isMobileOptimizationActive(){ return IS_MOBILE; }
+
 /* ═══════════════════════════════ TITLE FALLBACK ═══════════════════════════════
    TMDB에서 선택 언어 제목이 없을 때 원어 제목이 그대로 내려오는 경우가 있어,
    카드/상세창에서는 현재 언어 → 한국어 → 영어 → 원제 순서로 보기 쉬운 제목을 보강합니다. */
@@ -568,8 +587,10 @@ function refreshCardTitles(cards){
       if(nameEl&&nameEl.textContent!==cached){ nameEl.textContent=cached; nameEl.setAttribute('title',cached); card.setAttribute('data-title',cached); const img=card.querySelector('.thumb img'); if(img)img.setAttribute('alt',cached); }
     }
   });
-  // 2) 캐시 미스는 병렬 API 호출 (동시 8개)
-  runLimited(cards, 8, async card=>{
+  // 모바일 최적화: 카드별 translations API 호출을 중단합니다. TMDB 기본 language 응답과 캐시만 사용합니다.
+  if(IS_MOBILE) return;
+  // 2) 캐시 미스는 병렬 API 호출 (저전력 환경에서는 동시성 축소)
+  runLimited(cards, IS_LOW_POWER ? 2 : 4, async card=>{
     if(!document.body.contains(card))return;
     const type=card.getAttribute('data-type');
     const id=card.getAttribute('data-id');
@@ -598,7 +619,9 @@ async function syncSavedTitle(type, id, title) {
 }
 
 function refreshCardPosters(cards){
-  runLimited(cards, 3, async card=>{
+  // 모바일 최적화: 카드별 images API 호출을 중단해 트래픽과 렌더링 부하를 줄입니다.
+  if(IS_MOBILE) return;
+  runLimited(cards, IS_LOW_POWER ? 1 : 2, async card=>{
     if(!document.body.contains(card))return;
     const type=card.getAttribute('data-type');
     const id=card.getAttribute('data-id');
@@ -612,10 +635,10 @@ function refreshCardPosters(cards){
     let img=thumb.querySelector('img');
     const title=card.getAttribute('data-title')||card.querySelector('.name')?.textContent?.trim()||'';
     if(!img){
-      thumb.innerHTML=`<img src="${posterUrl(resolved)}" alt="${escapeHtml(title)}" loading="lazy">`;
+      thumb.innerHTML=`<img src="${cardPosterUrl(resolved)}" alt="${escapeHtml(title)}" loading="lazy" decoding="async" fetchpriority="low">`;
       return;
     }
-    const nextSrc=posterUrl(resolved);
+    const nextSrc=cardPosterUrl(resolved);
     if(img.getAttribute('src')!==nextSrc)img.setAttribute('src',nextSrc);
     if(title)img.setAttribute('alt',title);
   });
@@ -752,11 +775,11 @@ function cheapItemPass(it){
   return true;
 }
 async function applyClientFiltersStrict(list){
-  const cheap=list.filter(cheapItemPass);
+  const cheap=(IS_MOBILE ? list.filter(cheapItemPass).slice(0, 24) : list.filter(cheapItemPass));
   if(!hasStrictFilterNeeds(cheap))return cheap.filter(it=>itemMatchesFilters(it,null));
   // 순서 보존: 인덱스 기반으로 결과를 수집한 뒤 원래 순서대로 반환
   const results=new Array(cheap.length).fill(null);
-  await runLimited(cheap.map((it,i)=>({it,i})), 6, async ({it,i})=>{
+  await runLimited(cheap.map((it,i)=>({it,i})), IS_MOBILE ? 2 : 5, async ({it,i})=>{
     const type=it.media_type||(it.first_air_date?'tv':'movie');
     let detail=null;
     try{ detail=await getFilterDetail(type,it.id); }catch{}
@@ -1195,10 +1218,11 @@ function bindEvents() {
   });
   $('#btnRatings').addEventListener('click', async()=>{
     if(PAGE_STATE.lastMode==='ratings'){setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
-    // 내 평점은 영화/드라마 탭 필터와 독립적으로 전체 평점 JSON을 보여줍니다.
-    // 진입 시 상단 탭은 '모두'로 맞춰 혼선을 줄입니다.
-    setActiveTab('all');
-    setSavedModeUI('ratings'); await showRatings();
+    // 내 평점은 로컬 저장 데이터를 즉시 그려서 클릭 시 로딩/대기 화면이 보이지 않도록 처리합니다.
+    CONTENT_TYPE = 'all';
+    $$('.type-tabs .tab').forEach(b=>{ const on=b.dataset.type==='all'; b.classList.toggle('active',on); b.setAttribute('aria-selected',on?'true':'false'); });
+    showRatingsInstant();
+    setTimeout(()=>{ try{ renderGenreChips(); }catch{} }, 0);
   });
 
   $('#searchForm').addEventListener('submit', async e=>{
@@ -1220,6 +1244,7 @@ function bindEvents() {
     POSTER_CACHE.clear(); POSTER_STORE={}; try{localStorage.removeItem(POSTER_STORE_KEY);}catch{}
     DETAIL_STORE={};      try{localStorage.removeItem(DETAIL_STORE_KEY);}catch{}
     await storage.remove(SK.cache); // 앱 내부 결과 캐시도 제거
+    FETCH_MEMORY_CACHE.clear(); FETCH_INFLIGHT.clear();
     PAGE_STATE.personActive=null;
     PAGE_STATE.personMeta=null;
     applyI18n(); renderCountryOptions();
@@ -1251,8 +1276,11 @@ function bindEvents() {
   window.addEventListener('offline', ()=>{ $('#offlineBar').textContent=t('offline_using_cache'); $('#offlineBar').classList.remove('hidden'); });
   window.addEventListener('scroll', ()=>{
     if(isLibraryMode())return;
-    const now=Date.now(); if(now-lastScrollLoad<700||BUSY)return;
-    if(window.innerHeight+window.scrollY>=document.body.offsetHeight-800){ lastScrollLoad=now; BUSY=true; runSearchOrDiscover(false).finally(()=>BUSY=false); }
+    const now=Date.now();
+    const throttle = IS_MOBILE ? 1200 : 700;
+    const threshold = IS_MOBILE ? 360 : 800;
+    if(now-lastScrollLoad<throttle||BUSY)return;
+    if(window.innerHeight+window.scrollY>=document.body.offsetHeight-threshold){ lastScrollLoad=now; BUSY=true; runSearchOrDiscover(false).finally(()=>BUSY=false); }
   },{passive:true});
   document.addEventListener('keydown', e=>{
     if(e.key==='Escape'){
@@ -1266,14 +1294,14 @@ function bindEvents() {
 function initAutocomplete() {
   const input=$('#searchInput'), box=$('#suggestBox');
   input.addEventListener('input', ()=>{
-    clearTimeout(acTimer); const q=input.value.trim(); if(!q){closeSuggest();return;}
+    clearTimeout(acTimer); const q=input.value.trim(); if(!q || (IS_MOBILE && q.length < 2)){closeSuggest();return;}
     acTimer=setTimeout(async()=>{
       acCtrl?.abort(); acCtrl=new AbortController();
       try{
         const j=await fetchJson(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=${tmdbLang()}&query=${encodeURIComponent(q)}&page=1`,{signal:acCtrl.signal});
-        renderSuggest((j.results||[]).filter(r=>['movie','tv','person'].includes(r.media_type)).slice(0,8));
+        renderSuggest((j.results||[]).filter(r=>['movie','tv','person'].includes(r.media_type)).slice(0, IS_MOBILE ? 5 : 8));
       }catch{}
-    },220);
+    }, IS_MOBILE ? 420 : 220);
   });
   input.addEventListener('keydown', e=>{
     const items=$$('#suggestBox .sitem'); if(!items.length)return;
@@ -1453,7 +1481,7 @@ function initInfiniteScroll(){
   IO=new IntersectionObserver(async entries=>{
     if(isLibraryMode())return;
     if(entries.some(e=>e.isIntersecting)){if(BUSY)return;BUSY=true;try{await runSearchOrDiscover(false);}finally{BUSY=false;}}
-  },{root:null,rootMargin:'800px',threshold:0});
+  },{root:null,rootMargin: IS_MOBILE ? '360px' : '800px',threshold:0});
   IO.observe($('#sentinel'));
 }
 
@@ -1461,6 +1489,7 @@ function initInfiniteScroll(){
 function abortActiveRequests(){
   ABORTS.forEach(ctrl=>{try{ctrl.abort();}catch{}});
   ABORTS.clear();
+  try{ FETCH_INFLIGHT.clear(); }catch{}
 }
 function beginFreshRun(clear){
   if(clear){ abortActiveRequests(); RENDER_TOKEN++; }
@@ -1490,7 +1519,7 @@ async function runDiscover(clear){
     let merged=mergeResults(await Promise.all(tasks));
     if(isStale(token))return;
     if(CONTENT_TYPE!=='all' && CONTENT_TYPE!=='anime')merged=merged.filter(x=>x.media_type===CONTENT_TYPE);
-    merged=clientSort(await applyClientFiltersStrict(merged));
+    merged=limitPageItemsForDevice(clientSort(await applyClientFiltersStrict(merged)));
     clearSkeletons(); renderCards(merged,!clear); setStatusIfEmpty(t('status_empty'));
     if(CONTENT_TYPE==='all'||CONTENT_TYPE==='anime'){PAGE_STATE.pageMovie++;PAGE_STATE.pageTV++;}
     else if(CONTENT_TYPE==='movie')PAGE_STATE.pageMovie++;
@@ -1517,7 +1546,7 @@ async function runSearch(clear){
     let items=(multi.results||[]).filter(r=>r.media_type==='movie'||r.media_type==='tv');
     if(CONTENT_TYPE!=='all' && CONTENT_TYPE!=='anime')items=items.filter(r=>r.media_type===CONTENT_TYPE);
     let merged=Array.from(new Map(items.map(it=>{const type=it.media_type||(it.first_air_date?'tv':'movie');return[`${type}-${it.id}`,{...it,media_type:type}];})).values());
-    merged=clientSort(await applyClientFiltersStrict(merged));
+    merged=limitPageItemsForDevice(clientSort(await applyClientFiltersStrict(merged)));
     clearSkeletons(); renderCards(merged,!clear); setStatusIfEmpty(t('status_empty'));
     if((multi.page||1)<(multi.total_pages||1))PAGE_STATE.pageSearch++;
     await saveCache({mode:'search',items:merged,state:snapshotState()});
@@ -1539,7 +1568,7 @@ async function renderPersonFilmography(meta, clear){
   if(CONTENT_TYPE!=='all' && CONTENT_TYPE!=='anime')works=works.filter(w=>(w.media_type||(w.first_air_date?'tv':'movie'))===CONTENT_TYPE);
   const map=new Map();
   for(const w of works){const type=w.media_type||(w.first_air_date?'tv':'movie');const key=`${type}-${w.id}`;if(!map.has(key))map.set(key,{...w,media_type:type});}
-  let merged=clientSort(await applyClientFiltersStrict(Array.from(map.values())));
+  let merged=limitPageItemsForDevice(clientSort(await applyClientFiltersStrict(Array.from(map.values()))));
   renderCards(merged,!clear); setStatusIfEmpty(t('status_empty'));
   await saveCache({mode:'search',items:merged,state:snapshotState()});
 }
@@ -1602,7 +1631,7 @@ function mergeResults(arr){
 }
 
 /* ═══════════════════════════════ SKELETONS ═══════════════════════════════ */
-function showSkeletons(n=12){
+function showSkeletons(n=(IS_MOBILE ? 6 : 12)){
   $('#results').insertAdjacentHTML('beforeend',Array(n).fill(`<div class="skeleton"><div class="skeleton-thumb"></div><div class="skeleton-meta"><div class="skeleton-line short"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div></div>`).join(''));
 }
 function clearSkeletons(){ $$('.skeleton').forEach(el=>el.remove()); }
@@ -1724,9 +1753,16 @@ function normalizeRatingList(list){
   });
   return Array.from(map.values());
 }
+function getRatingsSync(){
+  try{
+    const raw = localStorage.getItem(SK.ratings);
+    return normalizeRatingList(raw ? JSON.parse(raw) : []);
+  }catch{
+    return [];
+  }
+}
 async function getRatings(){
-  const obj = await storage.get([SK.ratings]);
-  return normalizeRatingList(obj[SK.ratings]);
+  return getRatingsSync();
 }
 async function setRatings(list){
   const normalized = normalizeRatingList(list);
@@ -1829,7 +1865,7 @@ function ratingFromResolvedItem(item){
   };
 }
 async function refreshRatingBadges(){
-  const list = await getRatings();
+  const list = getRatingsSync();
   const resolvedMap = ratingViewMapForList(list);
   $$('#results .card').forEach(card => {
     const source = ratingSourceFromCard(card);
@@ -2080,7 +2116,7 @@ async function resolveRatingListToTmdb(list, onProgress){
   const source = normalizeRatingList(list);
   const resolved = [];
   let done = 0;
-  await runLimited(source, 5, async item => {
+  await runLimited(source, IS_MOBILE ? 2 : 5, async item => {
     const match = await findTmdbMatchForRating(item);
     done += 1;
     if(match) resolved.push(match);
@@ -2142,10 +2178,100 @@ function ratingStatusFromStats(shown, total, stats){
   if(stats?.duplicate > 0) statusParts.push(`중복 정리 ${stats.duplicate}개`);
   return statusParts.length ? `표시 ${shown}개 / ${statusParts.join(' / ')}` : '';
 }
-async function showRatings(){
+
+let RATING_BACKGROUND_RESOLVE_TOKEN = 0;
+function ratingCachedMaps(list){
+  const cached = getCachedRatingView(list);
+  const byRatingKey = new Map();
+  const byTmdbKey = new Map();
+  (cached?.items || []).forEach(item => {
+    if(!item) return;
+    if(item.media_type && item.id != null) byTmdbKey.set(`${item.media_type}-${item.id}`, item);
+    const sourceKey = ratingKey(item.user_rating_type || contentTypeToRatingType(item.media_type), item.user_rating_id || item.id, item.user_rating_title || item.title || item.name || '');
+    byRatingKey.set(sourceKey, item);
+  });
+  return { cached, byRatingKey, byTmdbKey };
+}
+function ratingItemToFastCard(item, maps=null){
+  const normalized = normalizeRatingItem(item);
+  if(!normalized) return null;
+  const mediaType = ratingTypeToMediaType(normalized.type);
+  const ratingId = String(normalized.id || '').trim();
+  const tmdbKey = `${mediaType}-${ratingId}`;
+  const resolved = maps?.byRatingKey?.get(normalized.k) || maps?.byTmdbKey?.get(tmdbKey) || null;
+  const resolvedMediaType = resolved?.media_type || mediaType;
+  const resolvedId = resolved?.id ?? ratingId;
+  const title = cleanTitle(normalized.title || resolved?.user_rating_title || resolved?.title || resolved?.name || '');
+  return {
+    id: resolvedId,
+    media_type: resolvedMediaType,
+    title,
+    name: title,
+    original_title: title,
+    original_name: title,
+    poster_path: resolved?.poster_path || '',
+    vote_average: Number(resolved?.vote_average || 0),
+    vote_count: Number(resolved?.vote_count || 0),
+    overview: resolved?.overview || '',
+    release_date: resolved?.release_date || resolved?.first_air_date || '',
+    first_air_date: resolved?.first_air_date || resolved?.release_date || '',
+    popularity: Number(resolved?.popularity || 0),
+    genre_ids: Array.isArray(resolved?.genre_ids) ? resolved.genre_ids : [],
+    user_rating_id: normalized.id,
+    user_rating_title: normalized.title,
+    user_rating_type: normalized.type,
+    user_rating_value: normalized.rating,
+    user_rating_note: normalized.note || ''
+  };
+}
+function renderRatingsInstant(list, maps=null){
+  const fastItems = list.map(item => ratingItemToFastCard(item, maps)).filter(Boolean);
+  const visible = filterByCurrentQuery(clientSort(fastItems));
+  if(!visible.length){
+    PAGE_STATE.query ? renderEmptyState() : renderRatingFallbackEmpty();
+    setStatus('');
+    return 0;
+  }
+  renderCards(visible, false, { skipEnrich: true, skipRatingRefresh: true });
+  setStatus('');
+  return visible.length;
+}
+function scheduleRatingBackgroundResolve(list){
+  const source = normalizeRatingList(list);
+  if(!source.length) return;
+  const token = ++RATING_BACKGROUND_RESOLVE_TOKEN;
+  const sig = ratingListSignature(source);
+  const start = async () => {
+    try{
+      if(token !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings') return;
+      const resolved = await resolveRatingListToTmdb(source);
+      if(token !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings') return;
+      if(ratingListSignature(await getRatings()) !== sig) return;
+      const stats = resolved._ratingStats || { missing: Math.max(0, source.length - resolved.length), duplicate: 0, shown: resolved.length };
+      const sortedResolved = clientSort(resolved || []);
+      setCachedRatingView(source, sortedResolved, stats);
+      if(sortedResolved.length){
+        const visibleResolved = filterByCurrentQuery(sortedResolved);
+        if(visibleResolved.length) renderCards(visibleResolved, false, { skipEnrich: true, skipRatingRefresh: true });
+      }
+      setStatus('');
+    }catch{
+      setStatus('');
+    }
+  };
+  if('requestIdleCallback' in window) window.requestIdleCallback(start, { timeout: 1200 });
+  else setTimeout(start, 80);
+}
+function showRatingsInstant(){
+  abortActiveRequests();
+  RENDER_TOKEN++;
+  RATING_BACKGROUND_RESOLVE_TOKEN++;
   PAGE_STATE.lastMode = 'ratings';
   setSavedModeUI('ratings');
-  let list = await getRatings();
+  clearSkeletons();
+  setStatus('');
+
+  let list = getRatingsSync();
   list.sort((a,b) => a.title.localeCompare(b.title, 'ko'));
   if(!list.length){ renderRatingFallbackEmpty(); setStatus(''); return; }
 
@@ -2156,49 +2282,29 @@ async function showRatings(){
     showToast(msg ? `${t('toast_ratings_imported')} · ${msg}` : `${t('toast_ratings_imported')} · 표시 ${shown}개`, 3600);
   };
 
-  const cached = getCachedRatingView(list);
-  if(cached){
-    const cachedItems = clientSort(filterByCurrentQuery(cached.items || []));
+  const maps = ratingCachedMaps(list);
+  if(maps.cached?.items?.length){
+    const cachedItems = clientSort(filterByCurrentQuery(maps.cached.items || []));
     if(cachedItems.length){
-      renderCards(cachedItems, false);
+      renderCards(cachedItems, false, { skipEnrich: true, skipRatingRefresh: true });
       setStatus('');
-      maybeToastImportStats((cached.items || []).length, cached.stats);
+      maybeToastImportStats((maps.cached.items || []).length, maps.cached.stats);
       return;
     }
     if(PAGE_STATE.query){
       renderEmptyState();
       setStatus('');
-      maybeToastImportStats((cached.items || []).length, cached.stats);
+      maybeToastImportStats((maps.cached.items || []).length, maps.cached.stats);
       return;
     }
   }
 
-  $('#results').innerHTML='';
-  showSkeletons(14);
-  setStatus(`${t('status_resolving_ratings')} 0/${list.length}`);
-  const resolved = await resolveRatingListToTmdb(list, (done,total,ok) => {
-    setStatus(`${t('status_resolving_ratings')} ${done}/${total} · ${ok}`);
-  });
-  clearSkeletons();
-  if(!resolved.length){
-    renderRatingFallbackEmpty();
-    const emptyStats = { total:list.length, shown:0, missing:list.length, duplicate:0 };
-    setCachedRatingView(list, [], emptyStats);
-    setStatus('');
-    maybeToastImportStats(0, emptyStats);
-    return;
-  }
-  const stats = resolved._ratingStats || { missing: Math.max(0, list.length - resolved.length), duplicate: 0, shown: resolved.length };
-  const sortedResolved = clientSort(resolved);
-  setCachedRatingView(list, sortedResolved, stats);
-  const visibleResolved = filterByCurrentQuery(sortedResolved);
-  if(!visibleResolved.length && PAGE_STATE.query){
-    renderEmptyState();
-  } else {
-    renderCards(visibleResolved, false);
-  }
-  setStatus('');
-  maybeToastImportStats(sortedResolved.length, stats);
+  const shown = renderRatingsInstant(list, maps);
+  maybeToastImportStats(shown, null);
+  scheduleRatingBackgroundResolve(list);
+}
+async function showRatings(){
+  showRatingsInstant();
 }
 async function exportRatings(){
   const list = await getRatings();
@@ -2274,7 +2380,7 @@ function setActionButtonVisual(btn,kind,active){
     : actionClockSvg(active);
   btn.innerHTML = `<span class="btn-glyph">${glyph}</span>`;
 }
-function renderCards(items,append){
+function renderCards(items,append,options={}){
   if(!items.length&&!append){
     renderEmptyState();
     return;
@@ -2287,7 +2393,7 @@ function renderCards(items,append){
       ? rawTitle
       : (cleanTitle(type==='movie'?(it.original_title||it.title||''):(it.original_name||it.name||''))||rawTitle);
     const year=getYear(it.release_date||it.first_air_date);
-    const img=posterUrl(it.poster_path);
+    const img=cardPosterUrl(it.poster_path);
     const ratingVal=(it.vote_average||0);
     const rating=ratingVal.toFixed(1);
     const ratingCls=ratingVal>=7.5?'rating rating-high':ratingVal>=6?'rating rating-mid':'rating rating-low';
@@ -2295,14 +2401,17 @@ function renderCards(items,append){
     const userRatingType=normalizeRatingType(it.user_rating_type || (CONTENT_TYPE === 'anime' ? 'anime' : contentTypeToRatingType(type)));
     const ratingTitle=cleanTitle(it.user_rating_title || title);
     const ratingId=String(it.user_rating_id || '').trim();
+    const userRatingValue=Number(it.user_rating_value);
+    const hasUserRating=Number.isFinite(userRatingValue) && userRatingValue > 0;
+    const userRatingNote=String(it.user_rating_note || '').trim();
     const badgeCls=userRatingType==='anime'?'badge badge-anime':type==='tv'?'badge badge-tv':'badge';
     const badgeLabel=userRatingType==='anime'?t('anime'):(type==='movie'?t('badge_movie'):t('badge_tv'));
-    return`<div class="card" data-type="${type}" data-id="${it.id}" data-key="${key}" data-title="${escapeHtml(title)}" data-rating-id="${escapeHtml(ratingId)}" data-rating-title="${escapeHtml(ratingTitle)}" data-rating-type="${escapeHtml(userRatingType)}" data-poster="${escapeHtml(it.poster_path||'')}" data-date="${escapeHtml(it.release_date||it.first_air_date||'')}" data-vote="${it.vote_average||0}">
-      <div class="thumb">${img?`<img src="${img}" alt="${escapeHtml(title)}" loading="lazy">`:`<div class="thumb-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>${t('poster_none')}</span></div>`}<div class="thumb-top-info"><div class="thumb-badge-action"><span class="${badgeCls}">${escapeHtml(badgeLabel)}</span><div class="card-actions"><button class="action-btn fav-btn" type="button" aria-pressed="false" aria-label="${t('favorite')} ${t('not_selected')}" title="${t('favorite')} ${t('not_selected')}"><span class="btn-glyph">${actionHeartSvg(false)}</span></button><button class="action-btn watch-btn" type="button" aria-pressed="false" aria-label="${t('watch_later')} ${t('not_selected')}" title="${t('watch_later')} ${t('not_selected')}"><span class="btn-glyph">${actionClockSvg(false)}</span></button><button class="action-btn rate-btn" type="button" aria-pressed="false" aria-label="${t('rate_this')}" title="${t('rate_this')}"><span class="btn-glyph">${actionStarSvg(false)}</span></button></div></div><span class="card-user-rating user-rating-score hidden"></span></div></div>
+    return`<div class="card" data-type="${type}" data-id="${it.id}" data-key="${key}" data-title="${escapeHtml(title)}" data-rating-id="${escapeHtml(ratingId)}" data-rating-title="${escapeHtml(ratingTitle)}" data-rating-type="${escapeHtml(userRatingType)}" data-user-rating="${hasUserRating?userRatingValue.toFixed(1):''}" data-user-note="${escapeHtml(userRatingNote)}" data-poster="${escapeHtml(it.poster_path||'')}" data-date="${escapeHtml(it.release_date||it.first_air_date||'')}" data-vote="${it.vote_average||0}">
+      <div class="thumb">${img?`<img src="${img}" alt="${escapeHtml(title)}" loading="lazy" decoding="async" fetchpriority="low">`:`<div class="thumb-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>${t('poster_none')}</span></div>`}<div class="thumb-top-info"><div class="thumb-badge-action"><span class="${badgeCls}">${escapeHtml(badgeLabel)}</span><div class="card-actions"><button class="action-btn fav-btn" type="button" aria-pressed="false" aria-label="${t('favorite')} ${t('not_selected')}" title="${t('favorite')} ${t('not_selected')}"><span class="btn-glyph">${actionHeartSvg(false)}</span></button><button class="action-btn watch-btn" type="button" aria-pressed="false" aria-label="${t('watch_later')} ${t('not_selected')}" title="${t('watch_later')} ${t('not_selected')}"><span class="btn-glyph">${actionClockSvg(false)}</span></button><button class="action-btn rate-btn${hasUserRating?' active':''}" type="button" aria-pressed="${hasUserRating?'true':'false'}" aria-label="${hasUserRating?`${t('my_rating')} ${userRatingValue.toFixed(1)}`:t('rate_this')}" title="${hasUserRating?`${t('my_rating')} ${userRatingValue.toFixed(1)}`:t('rate_this')}"><span class="btn-glyph">${actionStarSvg(hasUserRating)}</span></button></div></div><span class="card-user-rating user-rating-score${hasUserRating?'':' hidden'}"${hasUserRating?` title="${t('my_rating')} ${userRatingValue.toFixed(1)}" aria-label="${t('my_rating')} ${userRatingValue.toFixed(1)}"`:''}>${hasUserRating?`★ ${userRatingValue.toFixed(1)}`:''}</span></div></div>
       <div class="meta">
         <div class="name" title="${escapeHtml(title)}">${escapeHtml(title)||'&nbsp;'}</div>
         <div class="sub">${year||t('year_unknown')}</div>
-        <div class="user-rating-inline hidden"></div>
+        <div class="user-rating-inline${userRatingNote?'':' hidden'}">${escapeHtml(userRatingNote)}</div>
       </div>
     </div>`;
   }).join('');
@@ -2331,9 +2440,11 @@ function renderCards(items,append){
     });
   });
   const renderedCards = $$('#results .card');
-  refreshCardTitles(renderedCards);
-  refreshCardPosters(renderedCards);
-  refreshRatingBadges();
+  if(!options.skipEnrich){
+    refreshCardTitles(renderedCards);
+    refreshCardPosters(renderedCards);
+  }
+  if(!options.skipRatingRefresh) refreshRatingBadges();
 }
 function pickStub(card){ return{id:Number(card.getAttribute('data-id')),media_type:card.getAttribute('data-type'),title:card.querySelector('.name').textContent.trim(),poster_path:card.getAttribute('data-poster')||'',vote_average:parseFloat(card.getAttribute('data-vote')||'0'),release_date:card.getAttribute('data-date')||''}; }
 function reflectUI(card,list,kind){
@@ -2482,9 +2593,9 @@ async function openDetail(type,id,sourceEl=null){
   try{
     const data=await fetchJson(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=${tmdbLang()}&append_to_response=videos,credits,watch/providers`);
     const rawTitle=itemTitle(data,type);
-    const title=await resolveTmdbDisplayTitle(type,id,rawTitle);
-    const resolvedPosterPath = await resolveTmdbPosterPath(type,id,data.poster_path||'');
-    const poster=posterUrl(resolvedPosterPath,'w500');
+    const title = IS_MOBILE ? rawTitle : await resolveTmdbDisplayTitle(type,id,rawTitle);
+    const resolvedPosterPath = IS_MOBILE ? (data.poster_path || '') : await resolveTmdbPosterPath(type,id,data.poster_path||'');
+    const poster=detailPosterUrl(resolvedPosterPath);
     const year=getYear(data.release_date||data.first_air_date);
     const trailer=(data.videos?.results||[]).find(v=>v.site==='YouTube'&&(v.type==='Trailer'||v.type==='Teaser'));
     const cast=(data.credits?.cast||[]).slice(0,12);
@@ -2510,7 +2621,7 @@ async function openDetail(type,id,sourceEl=null){
     const existingUserRating = findRating(userRatings, {id:ratingLookupId, type:ratingLookupType, title:ratingLookupTitle, rating:0, note:''});
     const sectionBlock=(label, body, extra='') => body ? `<div class="section detail-section ${extra}"><strong>${label}</strong><div>${body}</div></div>` : '';
     const safeYoutubeKey=/^[A-Za-z0-9_-]{6,}$/.test(trailer?.key||'') ? trailer.key : '';
-    const trailerBlock=safeYoutubeKey?sectionBlock(t('modal_trailer'), `<div class="yt-preview"><img src="https://i.ytimg.com/vi/${safeYoutubeKey}/hqdefault.jpg" alt="Trailer" loading="lazy"/><button class="yt-link" data-url="https://www.youtube.com/watch?v=${safeYoutubeKey}">▶ ${t('trailer_youtube')}</button></div>`, 'media-section'):'';
+    const trailerBlock=safeYoutubeKey?sectionBlock(t('modal_trailer'), `<div class="yt-preview"><img src="https://i.ytimg.com/vi/${safeYoutubeKey}/mqdefault.jpg" alt="Trailer" loading="lazy" decoding="async" fetchpriority="low"/><button class="yt-link" data-url="https://www.youtube.com/watch?v=${safeYoutubeKey}">▶ ${t('trailer_youtube')}</button></div>`, 'media-section'):'';
     const overviewBlock=sectionBlock(t('modal_overview'), `<div class="detail-chip-row">${detailChips.map(x=>`<span class="detail-chip">${escapeHtml(String(x))}</span>`).join('')}</div>`, 'summary-section');
     const descriptionBlock=data.overview?sectionBlock(t('modal_description'), `<p class="detail-text">${escapeHtml(data.overview)}</p>`, 'description-section'):'';
     const userRatingBlock = sectionBlock(t('my_rating'), `<div class="detail-rating-form">
@@ -2522,10 +2633,10 @@ async function openDetail(type,id,sourceEl=null){
     const renderCastMembers = members => members.map(c => {
       const name = c.name || c.original_name || '';
       const character = c.character || '';
-      const profile = posterUrl(c.profile_path, 'w185');
+      const profile = tinyPosterUrl(c.profile_path, 'w185');
       const initials = (name || '?').trim().slice(0, 1).toUpperCase();
       return `<article class="cast-card">
-        <div class="cast-photo">${profile ? `<img src="${profile}" alt="${escapeHtml(name)}" loading="lazy">` : ''}<span>${escapeHtml(initials)}</span></div>
+        <div class="cast-photo">${profile ? `<img src="${profile}" alt="${escapeHtml(name)}" loading="lazy" decoding="async" fetchpriority="low">` : ''}<span>${escapeHtml(initials)}</span></div>
         <div class="cast-info">
           <span class="cast-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span>
           ${character ? `<span class="cast-role" title="${escapeHtml(character)}">${escapeHtml(character)}</span>` : ''}
@@ -2534,7 +2645,7 @@ async function openDetail(type,id,sourceEl=null){
     }).join('');
     const castBlock=cast.length?sectionBlock(t('modal_cast'), `<div class="cast-grid">${renderCastMembers(cast)}</div>`, 'people-section cast-section'):'';
     $('#modalBody').innerHTML=`<div class="modal-header">
-      <div class="modal-poster">${poster?`<img src="${poster}" alt="${escapeHtml(title)}">`:''}</div>
+      <div class="modal-poster">${poster?`<img src="${poster}" alt="${escapeHtml(title)}" loading="eager" decoding="async">`:''}</div>
       <div class="modal-body">
         <h3 id="modalTitle">${escapeHtml(title)}${year?` (${year})`:''}</h3>
         <div class="modal-save-actions">
@@ -2603,7 +2714,7 @@ function groupCrew(crew){
   return `<div class="crew-wrap"><div class="crew-basic">${rows.slice(0,3).join('')}</div>${hidden?`<div class="crew-extra">${hidden}</div><button type="button" class="crew-more-btn">${t('crew_more')}</button>`:''}</div>`;
 }
 function renderProviders(p){
-  const providerBlock=(label,items=[])=>items.length?`<div class="section detail-section provider-section"><strong>${label} <small>${t('provider_region')}</small></strong><div class="providers">${items.map(x=>`<span class="provider">${x.logo_path?`<img src="${posterUrl(x.logo_path,'w45')}" alt="${escapeHtml(x.provider_name)}" loading="lazy">`:''}<span>${escapeHtml(x.provider_name)}</span></span>`).join('')}</div></div>`:'';
+  const providerBlock=(label,items=[])=>items.length?`<div class="section detail-section provider-section"><strong>${label} <small>${t('provider_region')}</small></strong><div class="providers">${items.map(x=>`<span class="provider">${x.logo_path?`<img src="${posterUrl(x.logo_path, IS_MOBILE ? 'w45' : 'w45')}" alt="${escapeHtml(x.provider_name)}" loading="lazy" decoding="async" fetchpriority="low">`:''}<span>${escapeHtml(x.provider_name)}</span></span>`).join('')}</div></div>`:'';
   return [
     providerBlock(t('modal_providers'),p.flatrate||[]),
     providerBlock(t('modal_buy'),p.buy||[]),
@@ -2632,10 +2743,36 @@ function setupModalScrollGuards(){
 function cacheKeyForState(){
   return [CUR_LANG,CONTENT_TYPE,SORT_BY,SELECTED_COUNTRY,YEAR_FROM,YEAR_TO,String(MIN_RATING),PAGE_STATE.query||'',PAGE_STATE.personActive||'', [...MOVIE_INC].join('-'),[...MOVIE_EXC].join('-'),[...TV_INC].join('-'),[...TV_EXC].join('-')].join('|');
 }
+function compactCacheItem(it){
+  const type = it?.media_type || (it?.first_air_date ? 'tv' : 'movie');
+  return {
+    id: it?.id,
+    media_type: type,
+    title: it?.title || it?.name || '',
+    name: it?.name || it?.title || '',
+    original_title: it?.original_title || '',
+    original_name: it?.original_name || '',
+    poster_path: it?.poster_path || '',
+    vote_average: Number(it?.vote_average || 0),
+    vote_count: Number(it?.vote_count || 0),
+    popularity: Number(it?.popularity || 0),
+    release_date: it?.release_date || '',
+    first_air_date: it?.first_air_date || '',
+    genre_ids: Array.isArray(it?.genre_ids) ? it.genre_ids.slice(0, 12) : [],
+    origin_country: Array.isArray(it?.origin_country) ? it.origin_country.slice(0, 4) : [],
+    user_rating_id: it?.user_rating_id || '',
+    user_rating_title: it?.user_rating_title || '',
+    user_rating_type: it?.user_rating_type || '',
+    user_rating_value: it?.user_rating_value,
+    user_rating_note: it?.user_rating_note || ''
+  };
+}
 async function saveCache(payload){
   const {[SK.cache]:bag={}}=await storage.get([SK.cache]);
-  bag[cacheKeyForState()]={when:Date.now(),...payload};
-  const entries=Object.entries(bag).sort((a,b)=>(b[1].when||0)-(a[1].when||0)).slice(0,10);
+  const compactPayload = {...payload, items: (payload.items || []).map(compactCacheItem)};
+  bag[cacheKeyForState()]={when:Date.now(),...compactPayload};
+  const keepCount = IS_MOBILE ? 5 : 10;
+  const entries=Object.entries(bag).sort((a,b)=>(b[1].when||0)-(a[1].when||0)).slice(0,keepCount);
   await storage.set({[SK.cache]:Object.fromEntries(entries)});
 }
 function snapshotState(){return{CONTENT_TYPE,SELECTED_COUNTRY,YEAR_FROM,YEAR_TO,MIN_RATING,MOVIE_INC:[...MOVIE_INC],MOVIE_EXC:[...MOVIE_EXC],TV_INC:[...TV_INC],TV_EXC:[...TV_EXC],SORT_BY,CUR_LANG,query:PAGE_STATE.query,personActive:PAGE_STATE.personActive,personMeta:PAGE_STATE.personMeta};}
@@ -2654,25 +2791,61 @@ function restorePagingFromCache(cache){
 }
 
 /* ═══════════════════════════════ FETCH ═══════════════════════════════ */
+const FETCH_MEMORY_CACHE = new Map();
+const FETCH_INFLIGHT = new Map();
+const FETCH_CACHE_TTL = IS_MOBILE ? 1000 * 60 * 10 : 1000 * 60 * 3;
+function canMemoryCache(url, opts={}){
+  const method = String(opts.method || 'GET').toUpperCase();
+  return method === 'GET' && !opts.signal && typeof url === 'string' && url.includes('api.themoviedb.org/3/');
+}
+function pruneFetchMemoryCache(){
+  const max = IS_MOBILE ? 80 : 140;
+  if(FETCH_MEMORY_CACHE.size <= max) return;
+  const entries = [...FETCH_MEMORY_CACHE.entries()].sort((a,b)=>(a[1].when||0)-(b[1].when||0));
+  entries.slice(0, Math.ceil(max * 0.25)).forEach(([k])=>FETCH_MEMORY_CACHE.delete(k));
+}
 async function fetchJson(url,opts={}){
-  const fetchOpts={cache:'no-store',...opts}; // iOS Safari 캐시 방지
+  const cacheable = canMemoryCache(url, opts);
+  const now = Date.now();
+  if(cacheable){
+    const hit = FETCH_MEMORY_CACHE.get(url);
+    if(hit && now - (hit.when || 0) < FETCH_CACHE_TTL) return hit.data;
+    if(FETCH_INFLIGHT.has(url)) return FETCH_INFLIGHT.get(url);
+  }
+
+  const fetchOpts={cache:'default',...opts};
   const ctrl=fetchOpts.signal?null:new AbortController();
   if(!fetchOpts.signal){fetchOpts.signal=ctrl.signal;ABORTS.add(ctrl);}
-  let attempt=0;
-  while(true){
-    try{
-      const r=await fetch(url,fetchOpts);
-      if(!r.ok)throw new Error('HTTP '+r.status);
-      const j=await r.json();
-      if(ctrl)ABORTS.delete(ctrl);
-      return j;
+  const requestPromise = (async()=>{
+    let attempt=0;
+    while(true){
+      try{
+        const r=await fetch(url,fetchOpts);
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        const j=await r.json();
+        if(ctrl)ABORTS.delete(ctrl);
+        return j;
+      }
+      catch(e){
+        const m=String(e);
+        if(m.includes('AbortError')){if(ctrl)ABORTS.delete(ctrl);throw e;}
+        if(m.includes('HTTP 429')&&attempt<2){await new Promise(res=>setTimeout(res,500*Math.pow(2,attempt)));attempt++;continue;}
+        if(ctrl)ABORTS.delete(ctrl);
+        throw e;
+      }
     }
-    catch(e){
-      const m=String(e);
-      if(m.includes('AbortError')){if(ctrl)ABORTS.delete(ctrl);throw e;}
-      if(m.includes('HTTP 429')&&attempt<2){await new Promise(res=>setTimeout(res,500*Math.pow(2,attempt)));attempt++;continue;}
-      if(ctrl)ABORTS.delete(ctrl);
-      throw e;
+  })();
+
+  if(cacheable){
+    FETCH_INFLIGHT.set(url, requestPromise);
+    try{
+      const data = await requestPromise;
+      FETCH_MEMORY_CACHE.set(url, {when:Date.now(), data});
+      pruneFetchMemoryCache();
+      return data;
+    } finally {
+      FETCH_INFLIGHT.delete(url);
     }
   }
+  return requestPromise;
 }

@@ -5188,3 +5188,93 @@ html, body {
   border-color: rgba(251,191,36,.5) !important;
   color: #facc15 !important;
 }
+
+/* ================================================================
+   MOBILE PERFORMANCE OPTIMIZATION — 2026-06-07
+   - 모바일 렌더링 비용 축소
+   - blur / 큰 shadow / hover animation 최소화
+   - 카드 리스트 스크롤 성능 개선
+   ================================================================ */
+@media (max-width: 720px), (pointer: coarse) {
+  html { scroll-behavior: auto !important; }
+  body { transition: none !important; }
+
+  .site-header,
+  .drawer-overlay,
+  .modal,
+  .modal-content,
+  .action-btn,
+  .results-grid .card .thumb-top-info > .card-user-rating:not(.hidden) {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .card,
+  .newly-added,
+  .thumb img,
+  .thumb::before,
+  .thumb::after,
+  .action-btn,
+  .saved-btn,
+  .hdr-icon-btn,
+  .btn-search,
+  .tab,
+  .toast,
+  .scroll-top-btn {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .card {
+    will-change: auto !important;
+    contain: layout paint style;
+    content-visibility: auto;
+    contain-intrinsic-size: 235px 360px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, .08) !important;
+  }
+
+  .card:hover,
+  .card:active,
+  .card:focus-within {
+    transform: none !important;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, .08) !important;
+  }
+
+  .card:hover .thumb img,
+  .card:hover .thumb::before,
+  .card:hover .thumb::after {
+    transform: none !important;
+    opacity: 0 !important;
+  }
+
+  .action-btn {
+    box-shadow: 0 1px 4px rgba(15, 23, 42, .14) !important;
+    transform: none !important;
+  }
+
+  .action-btn:hover,
+  .action-btn:active {
+    transform: none !important;
+  }
+
+  .site-header {
+    box-shadow: 0 1px 8px rgba(15, 23, 42, .08) !important;
+  }
+
+  .saved-toolbar-inner,
+  .modal-content,
+  .drawer,
+  .suggest-box,
+  .empty-state {
+    box-shadow: 0 2px 10px rgba(15, 23, 42, .08) !important;
+  }
+
+  .skeleton-thumb,
+  .skeleton-line {
+    animation-duration: 1.8s !important;
+  }
+
+  .results-grid img {
+    transform: translateZ(0);
+  }
+}
