@@ -1490,10 +1490,9 @@ function bindEvents() {
   });
   $('#btnRatings').addEventListener('click', async()=>{
     if(PAGE_STATE.lastMode==='ratings'){setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
-    // 내 평점은 로컬 저장 데이터를 즉시 그려서 클릭 시 로딩/대기 화면이 보이지 않도록 처리합니다.
     CONTENT_TYPE = 'all';
     $$('.type-tabs .tab').forEach(b=>{ const on=b.dataset.type==='all'; b.classList.toggle('active',on); b.setAttribute('aria-selected',on?'true':'false'); });
-    showRatingsInstant();
+    await showRatings();
     setTimeout(()=>{ try{ renderGenreChips(); }catch{} }, 0);
   });
 
@@ -1530,11 +1529,19 @@ function bindEvents() {
     if(kind === 'ratings') exportRatings(); else exportSaved(kind);
   });
   $('#btnImport')?.addEventListener('click', () => $('#importFileInput')?.click());
-  $('#importFileInput')?.addEventListener('change', e => {
+  $('#importFileInput')?.addEventListener('change', async e => {
     const file = e.target.files?.[0];
     if (file) {
       const kind = $('#savedToolbar')?.dataset.mode || 'fav';
-      if(kind === 'ratings') importRatings(file); else importSaved(file, kind);
+      const importBtn = $('#btnImport');
+      // 이전 파일을 병합 저장하는 도중에 다음 파일을 또 불러오면 경쟁 상태로
+      // 앞서 가져온 목록이 반영되지 않을 수 있어, 처리 중에는 버튼을 잠깐 막습니다.
+      if(importBtn) importBtn.disabled = true;
+      try{
+        if(kind === 'ratings') await importRatings(file); else await importSaved(file, kind);
+      } finally {
+        if(importBtn) importBtn.disabled = false;
+      }
     }
     e.target.value = '';
   });
@@ -2657,52 +2664,10 @@ function ratingItemToFastCard(item, maps=null){
     user_rating_note: normalized.note || ''
   };
 }
-function renderRatingsInstant(list, maps=null){
-  const fastItems = list.map(item => ratingItemToFastCard(item, maps)).filter(Boolean);
-  const visible = filterByCurrentQuery(clientSort(fastItems));
-  if(!visible.length){
-    PAGE_STATE.query ? renderEmptyState() : renderRatingFallbackEmpty();
-    setStatus('');
-    return 0;
-  }
-  renderCards(visible, false, { skipEnrich: true, skipRatingRefresh: true });
-  setStatus('');
-  return visible.length;
-}
-function scheduleRatingBackgroundResolve(list, immediate=false){
-  const source = normalizeRatingList(list);
-  if(!source.length) return;
-  const token = ++RATING_BACKGROUND_RESOLVE_TOKEN;
-  const sig = ratingListSignature(source);
-  const start = async () => {
-    try{
-      if(token !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings') return;
-      const resolved = await resolveRatingListToTmdb(source);
-      if(token !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings') return;
-      if(ratingListSignature(await getRatings()) !== sig) return;
-      const stats = resolved._ratingStats || { missing: Math.max(0, source.length - resolved.length), duplicate: 0, shown: resolved.length };
-      const sortedResolved = clientSort(resolved || []);
-      setCachedRatingView(source, sortedResolved, stats);
-      if(sortedResolved.length){
-        const visibleResolved = filterByCurrentQuery(sortedResolved);
-        if(visibleResolved.length) renderCards(visibleResolved, false, { skipEnrich: true, skipRatingRefresh: true });
-      }
-      setStatus('');
-    }catch{
-      setStatus('');
-    }
-  };
-  // 캐시된 포스터 정보가 전혀 없는 첫 조회(예: 화면이 최소화/백그라운드 상태였던 직후)에는
-  // requestIdleCallback이 크게 지연될 수 있어 썸네일이 비어 보이는 문제가 있었습니다.
-  // 이런 경우엔 idle 대기 없이 즉시 리졸브를 시작합니다.
-  if(immediate){ start(); return; }
-  if('requestIdleCallback' in window) window.requestIdleCallback(start, { timeout: 1200 });
-  else setTimeout(start, 80);
-}
-function showRatingsInstant(){
+async function showRatings(){
   abortActiveRequests();
   RENDER_TOKEN++;
-  RATING_BACKGROUND_RESOLVE_TOKEN++;
+  const myToken = ++RATING_BACKGROUND_RESOLVE_TOKEN;
   PAGE_STATE.lastMode = 'ratings';
   setSavedModeUI('ratings');
   clearSkeletons();
@@ -2721,6 +2686,7 @@ function showRatingsInstant(){
 
   const maps = ratingCachedMaps(list);
   if(maps.cached?.items?.length){
+    // 이미 리졸브(포스터 확인)된 캐시가 있으면 바로 보여줍니다 — 대기 없음.
     const cachedItems = clientSort(filterByCurrentQuery(maps.cached.items || []));
     if(cachedItems.length){
       renderCards(cachedItems, false, { skipEnrich: true, skipRatingRefresh: true });
@@ -2736,12 +2702,25 @@ function showRatingsInstant(){
     }
   }
 
-  const shown = renderRatingsInstant(list, maps);
-  maybeToastImportStats(shown, null);
-  scheduleRatingBackgroundResolve(list, !(maps.cached?.items?.length));
-}
-async function showRatings(){
-  showRatingsInstant();
+  // 캐시가 없을 때는 포스터 없는 카드가 먼저 떴다가 나중에 하나씩 채워지는 대신,
+  // 전체 조회가 끝날 때까지 로딩 화면을 유지한 뒤 한 번에 제대로 보여줍니다.
+  $('#results').innerHTML = '';
+  showSkeletons();
+  setStatus(t('status_resolving_ratings'));
+  const resolved = await resolveRatingListToTmdb(list);
+  if(myToken !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings') return; // 그 사이 화면이 바뀌었으면 중단
+  const sortedResolved = clientSort(resolved || []);
+  setCachedRatingView(list, sortedResolved, resolved._ratingStats || null);
+  clearSkeletons();
+  const visible = filterByCurrentQuery(sortedResolved);
+  if(!visible.length){
+    PAGE_STATE.query ? renderEmptyState() : renderRatingFallbackEmpty();
+    setStatus('');
+    return;
+  }
+  renderCards(visible, false, { skipEnrich: true, skipRatingRefresh: true });
+  setStatus('');
+  maybeToastImportStats(sortedResolved.length, resolved._ratingStats || null);
 }
 async function exportRatings(){
   const list = await getRatings();
@@ -2777,8 +2756,17 @@ async function importRatings(file){
     const next = current.slice();
     incoming.forEach(item => {
       const idx = findRatingIndex(next, item);
-      if(idx >= 0) next[idx] = {...next[idx], ...item};
-      else next.push(item);
+      if(idx >= 0){
+        const prev = next[idx];
+        // 겹치는 항목은 더 높은 평점 쪽의 점수+메모를 유지합니다 (낮은 쪽으로 덮어쓰지 않음).
+        if(Number(item.rating) > Number(prev.rating)){
+          next[idx] = {...prev, title: item.title || prev.title, rating: item.rating, note: item.note};
+        } else {
+          next[idx] = {...prev, title: prev.title || item.title};
+        }
+      } else {
+        next.push(item);
+      }
     });
     if(!await setRatings(next)){ showToast(t('toast_save_failed'), 2800); return; }
     PENDING_RATING_IMPORT_STATS_TOAST = true;

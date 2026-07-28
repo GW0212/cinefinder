@@ -2490,6 +2490,12 @@ body::before {
   box-shadow: var(--shadow-sm);
 }
 .io-btn:active { transform: translateY(0); }
+.io-btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none !important;
+  pointer-events: none;
+}
 
 @media (max-width: 600px) {
   .saved-toolbar { padding: 0 12px; }
