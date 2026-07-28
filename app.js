@@ -2279,7 +2279,10 @@ function attachRatingScoreMask(input, previewEl=null){
   })();
   const syncPreview = () => updateRatingStarPreview(previewEl, input.value);
   const setDisplay = digits => {
-    const display = digits.length <= 1 ? digits : `${digits[0]}.${digits[1]}`;
+    // "10"은 평점 만점이라 예외적으로 소수점 없이 그대로 표시합니다.
+    // (1만 입력해도 이미 평점 1.0이 되므로, 1 다음에 0을 누르는 경우는
+    // 거의 항상 "10점 만점"을 의도한 것으로 봅니다.)
+    const display = digits === '10' ? '10' : (digits.length <= 1 ? digits : `${digits[0]}.${digits[1]}`);
     input.value = display;
     input.dataset.digits = digits;
     try { input.setSelectionRange(display.length, display.length); } catch {}
