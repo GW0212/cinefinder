@@ -58,12 +58,18 @@
         <div class="year-inputs">
           <div class="year-field">
             <label class="year-field-label" id="labelFrom">From</label>
-            <input id="yearFrom" type="number" placeholder="1900" min="1900" max="2100" class="year-input" />
+            <div class="custom-select-wrap year-select-wrap">
+              <select id="yearFrom" class="custom-select year-select"></select>
+              <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
           </div>
           <div class="year-dash">—</div>
           <div class="year-field">
             <label class="year-field-label" id="labelTo">To</label>
-            <input id="yearTo" type="number" placeholder="2026" min="1900" max="2100" class="year-input" />
+            <div class="custom-select-wrap year-select-wrap">
+              <select id="yearTo" class="custom-select year-select"></select>
+              <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
           </div>
         </div>
         <p class="filter-hint" id="i18nYearHint">비워두면 전체 연도</p>

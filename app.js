@@ -32,6 +32,7 @@ const I18N = {
     runtime_min:"분",
     season_label:"시즌",
     list_label:"목록",
+    library_label:"저장 목록",
     favorite:"즐겨찾기",
     watch_later:"나중에 보기",
     selected:"선택됨",
@@ -64,6 +65,21 @@ const I18N = {
     crew_music:"음악",
     crew_camera:"촬영",
     crew_art:"미술",
+    home:"홈",
+    theme_toggle:"테마 전환",
+    theme_toggle_desc:"다크/라이트 모드",
+    search_clear:"지우기",
+    active_filters_label:"적용된 필터",
+    export_label:"내보내기",
+    import_label:"가져오기",
+    modal_close:"닫기",
+    scroll_top:"맨위로",
+    rating_min_5:"5.0 이상",
+    rating_min_6:"6.0 이상",
+    rating_min_7:"7.0 이상",
+    rating_min_75:"7.5 이상",
+    rating_min_8:"8.0 이상",
+    rating_min_9:"9.0 이상",
   },
   en: {
     search_placeholder:'Search movies, TV, directors, actors', search_button:'Search',
@@ -84,6 +100,7 @@ const I18N = {
     runtime_min:"min",
     season_label:"Season",
     list_label:"List",
+    library_label:"Saved lists",
     favorite:"Favorite",
     watch_later:"Watch later",
     selected:"Selected",
@@ -116,6 +133,21 @@ const I18N = {
     crew_music:"Music",
     crew_camera:"Camera",
     crew_art:"Art",
+    home:"Home",
+    theme_toggle:"Toggle theme",
+    theme_toggle_desc:"Dark/Light mode",
+    search_clear:"Clear",
+    active_filters_label:"Active filters",
+    export_label:"Export",
+    import_label:"Import",
+    modal_close:"Close",
+    scroll_top:"Scroll to top",
+    rating_min_5:"5.0+",
+    rating_min_6:"6.0+",
+    rating_min_7:"7.0+",
+    rating_min_75:"7.5+",
+    rating_min_8:"8.0+",
+    rating_min_9:"9.0+",
   },
   ja: {
     search_placeholder:'映画・ドラマ・監督・俳優を検索', search_button:'検索',
@@ -136,6 +168,7 @@ const I18N = {
     runtime_min:"分",
     season_label:"シーズン",
     list_label:"リスト",
+    library_label:"保存済みリスト",
     favorite:"お気に入り",
     watch_later:"あとで見る",
     selected:"選択済み",
@@ -168,6 +201,21 @@ const I18N = {
     crew_music:"音楽",
     crew_camera:"撮影",
     crew_art:"美術",
+    home:"ホーム",
+    theme_toggle:"テーマ切替",
+    theme_toggle_desc:"ダーク/ライトモード",
+    search_clear:"クリア",
+    active_filters_label:"適用中のフィルター",
+    export_label:"書き出し",
+    import_label:"読み込み",
+    modal_close:"閉じる",
+    scroll_top:"トップへ戻る",
+    rating_min_5:"5.0以上",
+    rating_min_6:"6.0以上",
+    rating_min_7:"7.0以上",
+    rating_min_75:"7.5以上",
+    rating_min_8:"8.0以上",
+    rating_min_9:"9.0以上",
   },
   zh: {
     search_placeholder:'搜索电影·剧集·导演·演员', search_button:'搜索',
@@ -188,6 +236,7 @@ const I18N = {
     runtime_min:"分钟",
     season_label:"季",
     list_label:"列表",
+    library_label:"已保存列表",
     favorite:"收藏",
     watch_later:"稍后观看",
     selected:"已选择",
@@ -220,6 +269,21 @@ const I18N = {
     crew_music:"音乐",
     crew_camera:"摄影",
     crew_art:"美术",
+    home:"首页",
+    theme_toggle:"切换主题",
+    theme_toggle_desc:"深色/浅色模式",
+    search_clear:"清除",
+    active_filters_label:"已应用的筛选",
+    export_label:"导出",
+    import_label:"导入",
+    modal_close:"关闭",
+    scroll_top:"回到顶部",
+    rating_min_5:"5.0以上",
+    rating_min_6:"6.0以上",
+    rating_min_7:"7.0以上",
+    rating_min_75:"7.5以上",
+    rating_min_8:"8.0以上",
+    rating_min_9:"9.0以上",
   },
   fr: {
     search_placeholder:'Rechercher films, séries, réalisateurs, acteurs', search_button:'Chercher',
@@ -240,6 +304,7 @@ const I18N = {
     runtime_min:"min",
     season_label:"Saison",
     list_label:"Liste",
+    library_label:"Listes enregistrées",
     favorite:"Favori",
     watch_later:"À regarder",
     selected:"Sélectionné",
@@ -272,6 +337,21 @@ const I18N = {
     crew_music:"Musique",
     crew_camera:"Caméra",
     crew_art:"Art",
+    home:"Accueil",
+    theme_toggle:"Changer de thème",
+    theme_toggle_desc:"Mode sombre/clair",
+    search_clear:"Effacer",
+    active_filters_label:"Filtres actifs",
+    export_label:"Exporter",
+    import_label:"Importer",
+    modal_close:"Fermer",
+    scroll_top:"Retour en haut",
+    rating_min_5:"5.0+",
+    rating_min_6:"6.0+",
+    rating_min_7:"7.0+",
+    rating_min_75:"7.5+",
+    rating_min_8:"8.0+",
+    rating_min_9:"9.0+",
   },
 };
 const COUNTRY_NAMES = {
@@ -284,41 +364,111 @@ const COUNTRY_NAMES = {
 Object.assign(I18N.ko, {
   tab_anime:'애니', my_ratings:'내 평점', my_rating:'내 평점', anime:'애니', drama:'드라마', rating_score:'평점', rating_note:'메모',
   save_rating:'평점 저장', clear_rating:'평점 삭제', edit_rating:'평점 수정', rate_this:'평점 매기기',
-  rating_placeholder:'0.0 ~ 10.0', note_placeholder:'메모 선택 입력', no_my_ratings:'저장된 내 평점이 없습니다',
+  rating_placeholder:'0.0 ~ 10.0 (소수점 첫째 자리까지)', note_placeholder:'메모 선택 입력', no_my_ratings:'저장된 내 평점이 없습니다',
   toast_rating_saved:'평점 저장됨', toast_rating_removed:'평점 삭제됨', toast_ratings_exported:'평점 내보내기 완료',
   toast_ratings_imported:'평점 가져오기 완료', toast_invalid_rating:'0~10 사이 숫자를 입력해주세요', toast_invalid_ratings_file:'올바른 평점 JSON 파일이 아닙니다',
+  toast_rating_decimal_limit:'평점은 소수점 첫째 자리까지만 입력할 수 있어요',
+  confirm_delete_list:'{name} {count}개를 모두 삭제할까요?\n이 작업은 되돌릴 수 없습니다.',
+  toast_list_empty:'{name} 목록이 이미 비어 있습니다',
+  toast_list_cleared:'{name} 목록을 초기화했습니다',
+  toast_no_saved_items:'저장된 항목이 없습니다',
+  toast_export_done:'내보내기 완료 · {name} {count}개',
+  toast_import_done:'가져오기 완료 · {name} +{count}개',
+  toast_wrong_list_file:'이 파일은 {name} 목록입니다',
+  toast_invalid_file:'올바른 cinefinder 파일이 아닙니다',
+  toast_file_read_fail:'파일을 읽을 수 없습니다',
+  count_items:'{count}개',
+  status_shown_count:'표시 {count}개',
+  status_excluded_count:'검색 제외 {count}개',
+  status_duplicate_count:'중복 정리 {count}개',
   status_resolving_ratings:'내 평점의 TMDB 정보 확인 중...', status_ratings_filtered:'검색되지 않는 항목은 제외했습니다'
 });
 Object.assign(I18N.en, {
   tab_anime:'Anime', my_ratings:'My ratings', my_rating:'My rating', anime:'Anime', drama:'Drama', rating_score:'Rating', rating_note:'Note',
   save_rating:'Save rating', clear_rating:'Remove rating', edit_rating:'Edit rating', rate_this:'Rate this',
-  rating_placeholder:'0.0 ~ 10.0', note_placeholder:'Optional note', no_my_ratings:'No ratings yet',
+  rating_placeholder:'0.0 ~ 10.0 (one decimal place)', note_placeholder:'Optional note', no_my_ratings:'No ratings yet',
   toast_rating_saved:'Rating saved', toast_rating_removed:'Rating removed', toast_ratings_exported:'Ratings exported',
   toast_ratings_imported:'Ratings imported', toast_invalid_rating:'Enter a number from 0 to 10', toast_invalid_ratings_file:'Invalid ratings JSON file',
+  toast_rating_decimal_limit:'You can only enter up to one decimal place',
+  confirm_delete_list:'Delete all {count} {name}?\nThis action cannot be undone.',
+  toast_list_empty:'{name} list is already empty',
+  toast_list_cleared:'{name} list cleared',
+  toast_no_saved_items:'No saved items',
+  toast_export_done:'Export complete · {name} {count}',
+  toast_import_done:'Import complete · {name} +{count}',
+  toast_wrong_list_file:'This file is a {name} list',
+  toast_invalid_file:'Not a valid cinefinder file',
+  toast_file_read_fail:'Could not read the file',
+  count_items:'{count}',
+  status_shown_count:'Showing {count}',
+  status_excluded_count:'{count} excluded',
+  status_duplicate_count:'{count} duplicates removed',
   status_resolving_ratings:'Resolving TMDB data for your ratings...', status_ratings_filtered:'Unavailable items were excluded'
 });
 Object.assign(I18N.ja, {
   tab_anime:'アニメ', my_ratings:'マイ評価', my_rating:'マイ評価', anime:'アニメ', drama:'ドラマ', rating_score:'評価', rating_note:'メモ',
   save_rating:'評価を保存', clear_rating:'評価を削除', edit_rating:'評価を編集', rate_this:'評価する',
-  rating_placeholder:'0.0 ~ 10.0', note_placeholder:'メモ任意', no_my_ratings:'保存した評価はありません',
+  rating_placeholder:'0.0 ~ 10.0（小数点第一位まで）', note_placeholder:'メモ任意', no_my_ratings:'保存した評価はありません',
   toast_rating_saved:'評価を保存しました', toast_rating_removed:'評価を削除しました', toast_ratings_exported:'評価を書き出しました',
   toast_ratings_imported:'評価を読み込みました', toast_invalid_rating:'0〜10の数値を入力してください', toast_invalid_ratings_file:'正しい評価JSONではありません',
+  toast_rating_decimal_limit:'評価は小数点第一位までしか入力できません',
+  confirm_delete_list:'{name}を{count}件すべて削除しますか？\nこの操作は元に戻せません。',
+  toast_list_empty:'{name}リストはすでに空です',
+  toast_list_cleared:'{name}リストを初期化しました',
+  toast_no_saved_items:'保存された項目がありません',
+  toast_export_done:'書き出し完了 · {name} {count}件',
+  toast_import_done:'読み込み完了 · {name} +{count}件',
+  toast_wrong_list_file:'このファイルは{name}リストです',
+  toast_invalid_file:'正しいcinefinderファイルではありません',
+  toast_file_read_fail:'ファイルを読み込めません',
+  count_items:'{count}件',
+  status_shown_count:'表示 {count}件',
+  status_excluded_count:'検索除外 {count}件',
+  status_duplicate_count:'重複整理 {count}件',
   status_resolving_ratings:'マイ評価のTMDB情報を確認中...', status_ratings_filtered:'検索できない項目は除外しました'
 });
 Object.assign(I18N.zh, {
   tab_anime:'动画', my_ratings:'我的评分', my_rating:'我的评分', anime:'动画', drama:'剧集', rating_score:'评分', rating_note:'备注',
   save_rating:'保存评分', clear_rating:'删除评分', edit_rating:'编辑评分', rate_this:'评分',
-  rating_placeholder:'0.0 ~ 10.0', note_placeholder:'备注可选', no_my_ratings:'暂无保存的评分',
+  rating_placeholder:'0.0 ~ 10.0（仅限小数点后一位）', note_placeholder:'备注可选', no_my_ratings:'暂无保存的评分',
   toast_rating_saved:'评分已保存', toast_rating_removed:'评分已删除', toast_ratings_exported:'评分已导出',
   toast_ratings_imported:'评分已导入', toast_invalid_rating:'请输入 0 到 10 的数字', toast_invalid_ratings_file:'不是有效的评分 JSON 文件',
+  toast_rating_decimal_limit:'评分最多只能输入到小数点后一位',
+  confirm_delete_list:'要删除全部 {count} 个{name}吗？\n此操作无法撤销。',
+  toast_list_empty:'{name}列表已经是空的',
+  toast_list_cleared:'{name}列表已清空',
+  toast_no_saved_items:'没有已保存的项目',
+  toast_export_done:'导出完成 · {name} {count}个',
+  toast_import_done:'导入完成 · {name} +{count}个',
+  toast_wrong_list_file:'此文件是{name}列表',
+  toast_invalid_file:'不是有效的 cinefinder 文件',
+  toast_file_read_fail:'无法读取文件',
+  count_items:'{count}个',
+  status_shown_count:'显示 {count}个',
+  status_excluded_count:'排除 {count}个',
+  status_duplicate_count:'去重 {count}个',
   status_resolving_ratings:'正在确认我的评分 TMDB 信息...', status_ratings_filtered:'未搜索到的项目已排除'
 });
 Object.assign(I18N.fr, {
   tab_anime:'Anime', my_ratings:'Mes notes', my_rating:'Ma note', anime:'Anime', drama:'Série', rating_score:'Note', rating_note:'Mémo',
   save_rating:'Enregistrer', clear_rating:'Supprimer', edit_rating:'Modifier la note', rate_this:'Noter',
-  rating_placeholder:'0.0 ~ 10.0', note_placeholder:'Mémo facultatif', no_my_ratings:'Aucune note enregistrée',
+  rating_placeholder:'0.0 ~ 10.0 (une décimale)', note_placeholder:'Mémo facultatif', no_my_ratings:'Aucune note enregistrée',
   toast_rating_saved:'Note enregistrée', toast_rating_removed:'Note supprimée', toast_ratings_exported:'Notes exportées',
   toast_ratings_imported:'Notes importées', toast_invalid_rating:'Saisissez un nombre de 0 à 10', toast_invalid_ratings_file:'Fichier JSON de notes invalide',
+  toast_rating_decimal_limit:'Vous ne pouvez saisir qu\'une seule décimale',
+  confirm_delete_list:'Supprimer les {count} {name} ?\nCette action est irréversible.',
+  toast_list_empty:'La liste {name} est déjà vide',
+  toast_list_cleared:'Liste {name} réinitialisée',
+  toast_no_saved_items:'Aucun élément enregistré',
+  toast_export_done:'Export terminé · {name} {count}',
+  toast_import_done:'Import terminé · {name} +{count}',
+  toast_wrong_list_file:'Ce fichier est une liste {name}',
+  toast_invalid_file:'Fichier cinefinder invalide',
+  toast_file_read_fail:'Impossible de lire le fichier',
+  count_items:'{count}',
+  status_shown_count:'{count} affichés',
+  status_excluded_count:'{count} exclus',
+  status_duplicate_count:'{count} doublons supprimés',
   status_resolving_ratings:'Recherche des données TMDB pour vos notes...', status_ratings_filtered:'Les éléments introuvables ont été exclus'
 });
 
@@ -369,7 +519,10 @@ const storage = {
   },
   set(obj) {
     let ok = true;
-    Object.entries(obj).forEach(([k,v]) => { if (!safeSetJsonItem(k, v)) ok = false; });
+    Object.entries(obj).forEach(([k,v]) => {
+      if (!safeSetJsonItem(k, v)) ok = false;
+      else backupPersistedKeyToIdb(k, v);
+    });
     return Promise.resolve(ok);
   },
   remove(key) {
@@ -378,10 +531,77 @@ const storage = {
   }
 };
 
+/* ═══════════════════════════════ PERSISTENT BACKUP (IndexedDB) ═══════════════════════════════
+   즐겨찾기 / 나중에 보기 / 내 평점은 브라우저 자체의 저장공간 정리 정책(예: 오랫동안 방문하지 않은
+   사이트의 localStorage를 자동으로 비우는 브라우저 동작)에 의해 유실될 수 있습니다.
+   사용자가 화면에서 직접 "초기화" 버튼을 누르지 않는 한 데이터가 사라지지 않도록,
+   같은 데이터를 IndexedDB에도 이중으로 저장해두고 localStorage가 비어있을 때 자동 복구합니다. */
+const PERSIST_STORAGE_KEYS = ['cinefinder_favs', 'cinefinder_watch', 'cinefinder_ratings'];
+const IDB_BACKUP_NAME = 'cinefinder_persist_v1';
+const IDB_BACKUP_STORE = 'kv';
+function openBackupIdb(){
+  return new Promise(resolve => {
+    try {
+      if(!('indexedDB' in window)){ resolve(null); return; }
+      const req = indexedDB.open(IDB_BACKUP_NAME, 1);
+      req.onupgradeneeded = () => { try { req.result.createObjectStore(IDB_BACKUP_STORE); } catch {} };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    } catch { resolve(null); }
+  });
+}
+function idbBackupGet(key){
+  return openBackupIdb().then(db => new Promise(resolve => {
+    if(!db){ resolve(undefined); return; }
+    try {
+      const tx = db.transaction(IDB_BACKUP_STORE, 'readonly');
+      const req = tx.objectStore(IDB_BACKUP_STORE).get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(undefined);
+    } catch { resolve(undefined); }
+  }));
+}
+function idbBackupSet(key, value){
+  return openBackupIdb().then(db => new Promise(resolve => {
+    if(!db){ resolve(false); return; }
+    try {
+      const tx = db.transaction(IDB_BACKUP_STORE, 'readwrite');
+      tx.objectStore(IDB_BACKUP_STORE).put(value, key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    } catch { resolve(false); }
+  }));
+}
+function backupPersistedKeyToIdb(key, value){
+  if(!PERSIST_STORAGE_KEYS.includes(key)) return;
+  try { idbBackupSet(key, value); } catch {}
+}
+async function restorePersistedListsIfMissing(){
+  try {
+    if(!('indexedDB' in window)) return;
+    for(const key of PERSIST_STORAGE_KEYS){
+      let localList = [];
+      try { localList = JSON.parse(localStorage.getItem(key) || '[]'); } catch { localList = []; }
+      if(Array.isArray(localList) && localList.length) continue; // 로컬에 이미 데이터가 있으면 건드리지 않습니다.
+      const backup = await idbBackupGet(key);
+      if(Array.isArray(backup) && backup.length){
+        try { localStorage.setItem(key, JSON.stringify(backup)); } catch {}
+      }
+    }
+  } catch {}
+}
+function requestPersistentStorage(){
+  try {
+    if(navigator?.storage?.persist) navigator.storage.persist().catch(()=>{});
+  } catch {}
+}
+
 /* ═══════════════════════════════ UTILS ═══════════════════════════════ */
 const $  = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 const t  = k => (I18N[CUR_LANG]?.[k]) || (I18N.en[k] || k);
+// 번역 문자열에 {name}, {count} 같은 자리표시자를 치환합니다 (다국어 토스트/확인창 메시지용)
+const tf = (k, vars={}) => Object.entries(vars).reduce((s,[key,val]) => s.replaceAll(`{${key}}`, val), t(k));
 const tmdbLang   = () => LANGS[CUR_LANG]?.tmdb || 'ko-KR';
 const posterUrl  = (p, s='w342') => p ? `https://image.tmdb.org/t/p/${s}${p}` : '';
 const getYear    = d => (d||'').slice(0,4) || '';
@@ -653,7 +873,8 @@ function normalizeFilterInputs(){
   const normalizeYear=v=>{
     const n=parseInt(String(v||'').trim(),10);
     if(!Number.isFinite(n))return '';
-    return String(Math.min(2100, Math.max(1900,n)));
+    const maxYear=new Date().getFullYear(); // 미래 연도는 선택할 수 없도록 현재 연도로 상한 고정
+    return String(Math.min(maxYear, Math.max(1900,n)));
   };
   YEAR_FROM=normalizeYear(YEAR_FROM);
   YEAR_TO=normalizeYear(YEAR_TO);
@@ -809,6 +1030,8 @@ let CONTENT_TYPE='all';
 let PAGE_STATE={ query:'', pageMovie:1, pageTV:1, pageSearch:1, lastMode:'discover', personActive:null, personMeta:null };
 let GENRES={ movie:[], tv:[] };
 let MOVIE_INC=new Set(), MOVIE_EXC=new Set(), TV_INC=new Set(), TV_EXC=new Set();
+// 장르 그룹(포함/제외 × 영화/드라마) 펼침·접힘 상태. 기본값은 접힘(true)입니다.
+let GENRE_GROUP_COLLAPSED = {};
 let SELECTED_COUNTRY='', YEAR_FROM='', YEAR_TO='', SORT_BY='popularity.desc', MIN_RATING=0;
 let BUSY=false, IO=null, acTimer=null, acCtrl=null, acIndex=-1;
 let ABORTS=new Set(), lastScrollLoad=0, RENDER_TOKEN=0, LAST_FOCUS=null;
@@ -856,6 +1079,8 @@ function toggleTheme() {
 initTheme(); // 렌더 전 즉시 테마 적용 (깜빡임 방지)
 
 document.addEventListener('DOMContentLoaded', async () => {
+  requestPersistentStorage();
+  await restorePersistedListsIfMissing();
   const bag = await storage.get([SK.filters, SK.lang]);
   API_KEY = DEFAULT_TMDB_KEY;
 
@@ -864,6 +1089,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   applyI18n();
   renderCountryOptions();
+  populateYearSelects();
 
   if (bag[SK.filters]) {
     const f = bag[SK.filters];
@@ -934,10 +1160,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     siteHeader?.classList.toggle('scrolled', window.scrollY>10);
   }, {passive:true});
   stBtn.addEventListener('click', ()=>window.scrollTo({top:0,behavior:'smooth'}));
-
-  // yearTo placeholder를 현재 연도로
-  const ytInput = $('#yearTo');
-  if(ytInput && !ytInput.value) ytInput.setAttribute('placeholder', String(new Date().getFullYear()));
 });
 
 /* ═══════════════════════════════ I18N ═══════════════════════════════ */
@@ -973,11 +1195,45 @@ function applyI18n() {
   if(ratingAll) ratingAll.textContent=CUR_LANG==='ko'?'전체':CUR_LANG==='ja'?'すべて':CUR_LANG==='zh'?'全部':CUR_LANG==='fr'?'Tous':'All';
   const sortVote=$('#sortSelect option[value="vote_average.desc"]'); if(sortVote)sortVote.textContent=t('sort_vote');
   const sortDate=$('#sortSelect option[value="date.desc"]'); if(sortDate)sortDate.textContent=t('sort_date');
+
+  // 접근성 라벨/타이틀 (언어 전환 시에도 갱신)
+  const setAttrs = (id, attrs) => { const el=$(id); if(!el) return; Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v)); };
+  setAttrs('#menuBtn', { 'aria-label': t('filters'), title: t('filters') });
+  setAttrs('#homeBtn', { 'aria-label': t('home') });
+  setAttrs('#themeToggle', { 'aria-label': t('theme_toggle'), title: t('theme_toggle_desc') });
+  setAttrs('#clearSearch', { 'aria-label': t('search_clear') });
+  setAttrs('#activeFilterBar', { 'aria-label': t('active_filters_label') });
+  setAttrs('.library-actions', { 'aria-label': t('library_label') });
+  setAttrs('#modalClose', { 'aria-label': t('modal_close') });
+  setAttrs('#closeDrawer', { 'aria-label': t('modal_close') });
+  setAttrs('#scrollTopBtn', { 'aria-label': t('scroll_top') });
+  set('#btnExport span', 'textContent', t('export_label'));
+  set('#btnImport span', 'textContent', t('import_label'));
+  set('#btnClearList span', 'textContent', t('reset'));
+
+  // 최소 평점 드롭다운 옵션 다국어화
+  const ratingOptionKeys = { '5':'rating_min_5', '6':'rating_min_6', '7':'rating_min_7', '7.5':'rating_min_75', '8':'rating_min_8', '9':'rating_min_9' };
+  Object.entries(ratingOptionKeys).forEach(([val,key]) => {
+    const opt=$(`#ratingSelect option[value="${val}"]`); if(opt) opt.textContent=t(key);
+  });
 }
 function renderCountryOptions() {
   const names = COUNTRY_NAMES[CUR_LANG] || COUNTRY_NAMES.en;
   $('#countrySelect').innerHTML = COUNTRY_CODES.map(c=>`<option value="${c}">${names[c]||c}</option>`).join('');
   if (SELECTED_COUNTRY) $('#countrySelect').value = SELECTED_COUNTRY;
+}
+function populateYearSelects() {
+  // From/To 연도를 직접 타이핑하는 숫자 입력 대신, 목록에서 선택(+ 타이핑 시 해당 연도로 바로 이동)이
+  // 가능한 select로 제공합니다. 최근 연도가 먼저 보이도록 내림차순으로 정렬합니다.
+  const allLabel = CUR_LANG==='ko'?'전체':CUR_LANG==='ja'?'すべて':CUR_LANG==='zh'?'全部':CUR_LANG==='fr'?'Tous':'All';
+  const nowYear = new Date().getFullYear();
+  const maxYear = nowYear; // 미래 연도는 선택할 수 없도록 현재 연도까지만 제공
+  const minYear = 1900;
+  let opts = `<option value="">${allLabel}</option>`;
+  for (let y = maxYear; y >= minYear; y--) opts += `<option value="${y}">${y}</option>`;
+  const yf = $('#yearFrom'), yt = $('#yearTo');
+  if (yf) { yf.innerHTML = opts; yf.value = YEAR_FROM || ''; }
+  if (yt) { yt.innerHTML = opts; yt.value = YEAR_TO || ''; }
 }
 function setActiveTab(name) {
   CONTENT_TYPE = name;
@@ -1131,11 +1387,14 @@ function openDrawer() {
   const d=$('#drawer'), o=$('#drawerOverlay');
   d.classList.add('open'); d.removeAttribute('inert'); d.setAttribute('aria-hidden','false');
   o.classList.add('active'); document.body.classList.add('lock-scroll');
-  (d.querySelector('select,input,button')||{}).focus?.();
+  (d.querySelector('select,input,button')||{}).focus?.({preventScroll:true});
 }
 function closeDrawer() {
   const d=$('#drawer'), o=$('#drawerOverlay');
-  if(d.contains(document.activeElement)) $('#menuBtn').focus();
+  // 포커스를 메뉴 버튼으로 되돌릴 때 preventScroll을 주지 않으면 브라우저가 해당 요소를
+  // 보이게 하려고 페이지를 맨 위로 스크롤시켜, 필터를 닫을 때 화면이 최상단으로 튀는
+  // 문제가 있었습니다. preventScroll로 현재 스크롤 위치를 유지합니다.
+  if(d.contains(document.activeElement)) $('#menuBtn').focus({preventScroll:true});
   d.setAttribute('aria-hidden','true'); d.setAttribute('inert',''); d.classList.remove('open');
   o.classList.remove('active'); document.body.classList.remove('lock-scroll');
 }
@@ -1188,6 +1447,16 @@ function bindEvents() {
   $('#drawerOverlay').addEventListener('click', closeDrawer);
   $('#themeToggle').addEventListener('click', toggleTheme);
 
+  // 카드 위에서 커서를 따라다니는 스포트라이트 효과 (터치 기기는 pointer:coarse CSS로 자동 비활성화)
+  $('#results')?.addEventListener('pointermove', e => {
+    if(e.pointerType === 'touch') return;
+    const card = e.target.closest('.card');
+    if(!card) return;
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--spot-x', `${((e.clientX - rect.left) / rect.width) * 100}%`);
+    card.style.setProperty('--spot-y', `${((e.clientY - rect.top) / rect.height) * 100}%`);
+  });
+
 
   $('#applyBtn').addEventListener('click', async()=>{ await onApplyFilters(); setSavedModeUI(null); });
   $('#resetBtn').addEventListener('click', async()=>{ await onResetFilters(); setSavedModeUI(null); });
@@ -1199,8 +1468,11 @@ function bindEvents() {
       const nextType = btn.dataset.type;
       // 영화/드라마/모두 탭은 항상 기존 탐색/검색 화면으로 복귀합니다.
       // 내 평점/즐겨찾기 화면 안에서 탭을 누르면 저장 목록을 필터링하지 않고, 이전처럼 TMDB 목록을 다시 불러옵니다.
-      if(CONTENT_TYPE===nextType && !isLibraryMode())return;
-      setActiveTab(nextType); renderGenreChips();
+      const isReclick = CONTENT_TYPE===nextType && !isLibraryMode();
+      if(isReclick && nextType === 'all') return;
+      // 이미 선택된 탭을 다시 클릭하면 선택을 해제(=모두)합니다.
+      const targetType = isReclick ? 'all' : nextType;
+      setActiveTab(targetType); renderGenreChips();
       setSavedModeUI(null);
       PAGE_STATE.lastMode = PAGE_STATE.query ? 'search' : 'discover';
       resetPaging();
@@ -1247,7 +1519,7 @@ function bindEvents() {
     FETCH_MEMORY_CACHE.clear(); FETCH_INFLIGHT.clear();
     PAGE_STATE.personActive=null;
     PAGE_STATE.personMeta=null;
-    applyI18n(); renderCountryOptions();
+    applyI18n(); renderCountryOptions(); populateYearSelects();
     await Promise.all([loadGenres('movie'),loadGenres('tv')]);
     renderGenreChips(); updateFilterBadge(); setSavedModeUI(null); resetPaging(); await runSearchOrDiscover(true);
   });
@@ -1440,27 +1712,51 @@ function renderGenreChips(){
     groups.push(['tv', t('genre_tv'), GENRES.tv, TV_INC, TV_EXC]);
   }
 
-  const addChip=(row,kind,g,set)=>{
+  const addChip=(row,kind,g,set,countEl)=>{
     const chip=document.createElement('span');
     chip.className='genre-chip'+(set.has(g.id)?' selected':'');
     chip.dataset.id=g.id;
     chip.dataset.kind=kind;
     chip.textContent=g.name;
-    chip.addEventListener('click',()=>{chip.classList.toggle('selected');applyPendingFilterCount();});
+    chip.addEventListener('click',()=>{
+      chip.classList.toggle('selected');
+      applyPendingFilterCount();
+      if(countEl){
+        const n = row.querySelectorAll('.genre-chip.selected').length;
+        countEl.textContent = n || '';
+        countEl.classList.toggle('hidden', !n);
+      }
+    });
     row.appendChild(chip);
   };
 
-  const makeGroup=(kind,label,list,set)=>{
+  const makeGroup=(kind,label,list,set,listKind)=>{
+    const groupKey = `${listKind}-${kind}`;
+    if(!(groupKey in GENRE_GROUP_COLLAPSED)) GENRE_GROUP_COLLAPSED[groupKey] = true; // 기본값: 접힘
+    const collapsed = GENRE_GROUP_COLLAPSED[groupKey];
+
     const group=document.createElement('div');
-    group.className=`genre-group genre-group-${kind}`;
+    group.className=`genre-group genre-group-${kind}${collapsed?' collapsed':''}`;
 
     const title=document.createElement('div');
     title.className='genre-group-title';
-    title.innerHTML=`<span class="genre-group-dot"></span><span>${escapeHtml(label)}</span>`;
+    // 접혀 있어도 이미 선택된 장르 수를 바로 알 수 있도록 작은 배지를 함께 표시합니다.
+    title.innerHTML=`<span class="genre-group-spacer" aria-hidden="true"></span><span class="genre-group-label"><span class="genre-group-dot"></span><span class="genre-group-label-text">${escapeHtml(label)}</span><span class="genre-group-count${set.size?'':' hidden'}">${set.size||''}</span></span><button type="button" class="genre-group-toggle" aria-expanded="${collapsed?'false':'true'}" aria-label="${escapeHtml(label)}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button>`;
 
     const row=document.createElement('div');
     row.className='genre-chip-row';
-    (list||[]).forEach(g=>addChip(row,kind,g,set));
+    const inner=document.createElement('div');
+    inner.className='genre-chip-row-inner';
+    const countEl = title.querySelector('.genre-group-count');
+    (list||[]).forEach(g=>addChip(inner,kind,g,set,countEl));
+    row.appendChild(inner);
+
+    title.querySelector('.genre-group-toggle').addEventListener('click', () => {
+      const nowCollapsed = !group.classList.contains('collapsed');
+      group.classList.toggle('collapsed', nowCollapsed);
+      GENRE_GROUP_COLLAPSED[groupKey] = nowCollapsed;
+      title.querySelector('.genre-group-toggle').setAttribute('aria-expanded', nowCollapsed ? 'false' : 'true');
+    });
 
     group.appendChild(title);
     group.appendChild(row);
@@ -1468,8 +1764,8 @@ function renderGenreChips(){
   };
 
   groups.forEach(([kind,label,list,incSet,excSet])=>{
-    incEl.appendChild(makeGroup(kind,label,list,incSet));
-    excEl.appendChild(makeGroup(kind,label,list,excSet));
+    incEl.appendChild(makeGroup(kind,label,list,incSet,'inc'));
+    excEl.appendChild(makeGroup(kind,label,list,excSet,'exc'));
   });
   applyFilterControlsState();
 }
@@ -1764,9 +2060,40 @@ function getRatingsSync(){
 async function getRatings(){
   return getRatingsSync();
 }
+// setRatings가 호출될 때마다 캐시된 뷰(포스터 등 리졸브 결과)를 통째로 지우면,
+// 평점 하나만 수정해도 전체 목록을 다시 TMDB에서 검색해야 해서 포스터가 한동안
+// 안 보이는 지연이 생겼습니다. 이미 리졸브된 항목은 그대로 재사용하고, 평점/메모
+// 값만 최신으로 교체합니다. 새로 추가된(아직 리졸브 안 된) 항목이 있을 때만
+// 캐시를 무효화해서 새 항목이 리졸브되도록 합니다.
+function patchRatingViewCacheForList(newList){
+  try{
+    const raw = localStorage.getItem(SK.ratingViewCache);
+    if(!raw) return;
+    const cache = JSON.parse(raw);
+    if(!cache || !Array.isArray(cache.items) || !cache.items.length) return;
+    const cachedByKey = new Map();
+    cache.items.forEach(item => {
+      if(!item) return;
+      const rKey = ratingKey(item.user_rating_type || contentTypeToRatingType(item.media_type), item.user_rating_id || item.id, item.user_rating_title || item.title || item.name || '');
+      cachedByKey.set(rKey, item);
+    });
+    const patchedItems = [];
+    let allKnown = true;
+    for(const entry of newList){
+      const cachedItem = cachedByKey.get(entry.k);
+      if(!cachedItem){ allKnown = false; break; }
+      patchedItems.push({ ...cachedItem, user_rating_value: entry.rating, user_rating_note: entry.note || '' });
+    }
+    if(allKnown){
+      setCachedRatingView(newList, patchedItems, cache.stats || null);
+    } else {
+      clearRatingViewCache();
+    }
+  }catch{ clearRatingViewCache(); }
+}
 async function setRatings(list){
   const normalized = normalizeRatingList(list);
-  clearRatingViewCache();
+  patchRatingViewCacheForList(normalized);
   const ok = await storage.set({[SK.ratings]: normalized});
   if(!ok) return false;
   const check = await storage.get([SK.ratings]);
@@ -1835,6 +2162,16 @@ function actionStarSvg(active=false){
   return `<svg class="action-icon action-icon-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.05" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2.7 14.85 8.48 21.23 9.41 16.62 13.9 17.71 20.23 12 17.22 6.29 20.23 7.38 13.9 2.77 9.41 9.15 8.48 12 2.7"/></svg>`;
 }
 
+// 평점 저장 시 해당 카드의 별 배지에 짧은 성공 플러시 효과를 줍니다.
+function flashRatingSaved(card){
+  if(!card) return;
+  [card.querySelector('.rate-btn'), card.querySelector('.card-user-rating')].filter(Boolean).forEach(el=>{
+    el.classList.remove('rating-just-saved');
+    void el.offsetWidth; // 리플로우 강제 → 애니메이션 재시작
+    el.classList.add('rating-just-saved');
+    setTimeout(()=>el.classList.remove('rating-just-saved'), 700);
+  });
+}
 function setRateButtonVisual(btn, rating){
   if(!btn) return;
   const active = Number.isFinite(Number(rating)) && Number(rating) > 0;
@@ -1908,6 +2245,81 @@ async function refreshRatingBadges(){
     }
   });
 }
+/* 평점 점수 옆에 실시간으로 채워지는 별점 미리보기(별 1개 = 2점) */
+function ratingStarPreviewMarkup(){
+  let stars = '';
+  for(let i=0;i<5;i++){
+    stars += `<span class="star-slot"><svg class="star-bg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><polygon points="12 2.7 14.85 8.48 21.23 9.41 16.62 13.9 17.71 20.23 12 17.22 6.29 20.23 7.38 13.9 2.77 9.41 9.15 8.48 12 2.7"/></svg><svg class="star-fill" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="12 2.7 14.85 8.48 21.23 9.41 16.62 13.9 17.71 20.23 12 17.22 6.29 20.23 7.38 13.9 2.77 9.41 9.15 8.48 12 2.7"/></svg></span>`;
+  }
+  return `<div class="rating-star-preview" aria-hidden="true">${stars}</div>`;
+}
+function updateRatingStarPreview(previewEl, value){
+  if(!previewEl) return;
+  const v = Math.max(0, Math.min(10, Number(value) || 0));
+  previewEl.querySelectorAll('.star-slot').forEach((slot, i) => {
+    const starValue = v - i * 2;
+    const pct = Math.max(0, Math.min(1, starValue / 2)) * 100;
+    const fill = slot.querySelector('.star-fill');
+    if(fill) fill.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+  });
+}
+/* 평점 입력칸: 숫자를 순서대로 입력하면 두 번째 숫자가 자동으로 소수점 뒤에 붙고,
+   세 번째 숫자는 입력되지 않도록 막습니다(예: 9→9, 2→9.2, 그 다음 숫자는 무시).
+   실수로 세 번째 숫자를 입력하면 소수점 첫째 자리까지만 입력 가능하다는 안내를
+   화면 중앙 토스트로 보여줍니다. */
+function attachRatingScoreMask(input, previewEl=null){
+  if(!input || input.dataset.maskBound === 'true') return;
+  input.dataset.maskBound = 'true';
+  input.setAttribute('type', 'text');
+  input.setAttribute('inputmode', 'decimal');
+  input.setAttribute('maxlength', '4');
+  input.dataset.digits = (() => {
+    const raw = String(input.value || '').replace(/[^0-9]/g, '');
+    return raw.slice(0, 2);
+  })();
+  const syncPreview = () => updateRatingStarPreview(previewEl, input.value);
+  const setDisplay = digits => {
+    const display = digits.length <= 1 ? digits : `${digits[0]}.${digits[1]}`;
+    input.value = display;
+    input.dataset.digits = digits;
+    try { input.setSelectionRange(display.length, display.length); } catch {}
+    syncPreview();
+  };
+  input.addEventListener('focus', () => {
+    // 편집을 시작할 때는 항상 새로 입력하는 것으로 간주해 버퍼를 비웁니다.
+    input.dataset.digits = '';
+    requestAnimationFrame(() => { try { input.select(); } catch {} });
+  });
+  input.addEventListener('keydown', e => {
+    if(e.ctrlKey || e.metaKey || e.altKey) return; // 복사/붙여넣기 등 단축키는 그대로 허용
+    if(['Tab','Enter','Escape','ArrowLeft','ArrowRight','Home','End','Delete'].includes(e.key)) return;
+    let digits = input.dataset.digits || '';
+    if(e.key === 'Backspace'){
+      e.preventDefault();
+      setDisplay(digits.slice(0, -1));
+      return;
+    }
+    if(/^[0-9]$/.test(e.key)){
+      e.preventDefault();
+      if(digits.length >= 2){
+        showToast(t('toast_rating_decimal_limit'), 2600);
+        return;
+      }
+      setDisplay(digits + e.key);
+      return;
+    }
+    // 그 외 문자(마침표 등 직접 입력)는 자동으로 막습니다.
+    e.preventDefault();
+  });
+  input.addEventListener('paste', e => {
+    e.preventDefault();
+    const text = ((e.clipboardData || window.clipboardData)?.getData('text')) || '';
+    const onlyDigits = text.replace(/[^0-9]/g, '').slice(0, 2);
+    if(text.replace(/[^0-9]/g, '').length > 2) showToast(t('toast_rating_decimal_limit'), 2600);
+    setDisplay(onlyDigits);
+  });
+  syncPreview();
+}
 function getRatingInputValue(){
   const input = $('#ratingEditorScore') || $('#detailUserRating');
   const raw = String(input?.value ?? '').trim();
@@ -1931,6 +2343,7 @@ async function openRatingEditor(source, sourceEl=null){
     <div class="rating-editor-panel">
       <label>${t('rating_score')}</label>
       <input id="ratingEditorScore" class="rating-input" type="number" inputmode="decimal" autocomplete="off" enterkeyhint="done" min="0" max="10" step="0.1" value="${saved ? Number(saved.rating).toFixed(1) : ''}" placeholder="${t('rating_placeholder')}" />
+      ${ratingStarPreviewMarkup()}
       <label>${t('rating_note')}</label>
       <textarea id="ratingEditorNote" class="rating-note-input" rows="4" autocomplete="off" enterkeyhint="done" placeholder="${t('note_placeholder')}">${escapeHtml(saved?.note || base.note || '')}</textarea>
       <div class="rating-editor-actions">
@@ -1939,20 +2352,37 @@ async function openRatingEditor(source, sourceEl=null){
       </div>
     </div>
   </div>`;
-  $('#ratingEditorSave')?.addEventListener('click', async () => {
+  attachRatingScoreMask($('#ratingEditorScore'), $('#modalBody .rating-editor-panel .rating-star-preview'));
+  const doSaveRating = async () => {
     const rating = getRatingInputValue();
     if(rating === null){ showToast(t('toast_invalid_rating')); return; }
     const note = $('#ratingEditorNote')?.value || '';
     await upsertRating({...base, rating, note});
+    flashRatingSaved(sourceEl);
     closeModal();
-  });
+  };
+  $('#ratingEditorSave')?.addEventListener('click', doSaveRating);
   $('#ratingEditorClear')?.addEventListener('click', async () => {
     await removeRating(base);
     closeModal();
   });
+  // 평점 입력 칸에서 Enter를 누르면 바로 저장됩니다.
+  $('#ratingEditorScore')?.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && !e.isComposing){
+      e.preventDefault();
+      doSaveRating();
+    }
+  });
   $('#modal').classList.remove('hidden');
   document.body.classList.add('lock-scroll');
-  // iOS Safari에서 입력창 자동 포커스가 화면 확대를 유발할 수 있어 수동 입력만 허용합니다.
+  // 평점 버튼 클릭 시 바로 입력할 수 있도록 평점 입력 칸에 포커스 및 값 전체 선택 상태로 엽니다.
+  requestAnimationFrame(() => {
+    const scoreInput = $('#ratingEditorScore');
+    if(scoreInput){
+      scoreInput.focus({preventScroll: true});
+      scoreInput.select();
+    }
+  });
 }
 const RATING_MATCH_STORE_KEY = 'cinefinder_rating_match_store_v3';
 try { localStorage.removeItem('cinefinder_rating_match_store_v1'); } catch {}
@@ -2174,9 +2604,9 @@ function clearRatingViewCache(){
 let PENDING_RATING_IMPORT_STATS_TOAST = false;
 function ratingStatusFromStats(shown, total, stats){
   const statusParts = [];
-  if(stats?.missing > 0) statusParts.push(`검색 제외 ${stats.missing}개`);
-  if(stats?.duplicate > 0) statusParts.push(`중복 정리 ${stats.duplicate}개`);
-  return statusParts.length ? `표시 ${shown}개 / ${statusParts.join(' / ')}` : '';
+  if(stats?.missing > 0) statusParts.push(tf('status_excluded_count', {count: stats.missing}));
+  if(stats?.duplicate > 0) statusParts.push(tf('status_duplicate_count', {count: stats.duplicate}));
+  return statusParts.length ? `${tf('status_shown_count', {count: shown})} / ${statusParts.join(' / ')}` : '';
 }
 
 let RATING_BACKGROUND_RESOLVE_TOKEN = 0;
@@ -2236,7 +2666,7 @@ function renderRatingsInstant(list, maps=null){
   setStatus('');
   return visible.length;
 }
-function scheduleRatingBackgroundResolve(list){
+function scheduleRatingBackgroundResolve(list, immediate=false){
   const source = normalizeRatingList(list);
   if(!source.length) return;
   const token = ++RATING_BACKGROUND_RESOLVE_TOKEN;
@@ -2259,6 +2689,10 @@ function scheduleRatingBackgroundResolve(list){
       setStatus('');
     }
   };
+  // 캐시된 포스터 정보가 전혀 없는 첫 조회(예: 화면이 최소화/백그라운드 상태였던 직후)에는
+  // requestIdleCallback이 크게 지연될 수 있어 썸네일이 비어 보이는 문제가 있었습니다.
+  // 이런 경우엔 idle 대기 없이 즉시 리졸브를 시작합니다.
+  if(immediate){ start(); return; }
   if('requestIdleCallback' in window) window.requestIdleCallback(start, { timeout: 1200 });
   else setTimeout(start, 80);
 }
@@ -2279,7 +2713,7 @@ function showRatingsInstant(){
     if(!PENDING_RATING_IMPORT_STATS_TOAST) return;
     PENDING_RATING_IMPORT_STATS_TOAST = false;
     const msg = ratingStatusFromStats(shown, list.length, stats);
-    showToast(msg ? `${t('toast_ratings_imported')} · ${msg}` : `${t('toast_ratings_imported')} · 표시 ${shown}개`, 3600);
+    showToast(msg ? `${t('toast_ratings_imported')} · ${msg}` : `${t('toast_ratings_imported')} · ${tf('status_shown_count', {count: shown})}`, 3600);
   };
 
   const maps = ratingCachedMaps(list);
@@ -2301,7 +2735,7 @@ function showRatingsInstant(){
 
   const shown = renderRatingsInstant(list, maps);
   maybeToastImportStats(shown, null);
-  scheduleRatingBackgroundResolve(list);
+  scheduleRatingBackgroundResolve(list, !(maps.cached?.items?.length));
 }
 async function showRatings(){
   showRatingsInstant();
@@ -2320,14 +2754,17 @@ async function exportRatings(){
   document.body.appendChild(a);
   a.click();
   setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
-  showToast(`${t('toast_ratings_exported')} · ${list.length}개`, 2200);
+  showToast(`${t('toast_ratings_exported')} · ${tf('count_items', {count: list.length})}`, 2200);
 }
 async function importRatings(file){
   try{
-    // 새 JSON을 불러올 때는 이전 매칭 실패 캐시를 초기화해 누락된 항목을 다시 검색합니다.
-    RATING_MATCH_STORE = {};
-    clearRatingViewCache();
-    try { localStorage.removeItem(RATING_MATCH_STORE_KEY); } catch {}
+    // 새 JSON을 불러올 때, 이전에 "실패"했던 매칭만 다시 시도합니다.
+    // 이미 성공적으로 매칭된 항목(포스터 등)까지 지우면 가져올 때마다 전체를 처음부터
+    // 다시 검색해야 해서 포스터가 한동안 안 보이는 지연이 생겼습니다.
+    Object.keys(RATING_MATCH_STORE).forEach(k => {
+      if(RATING_MATCH_STORE[k]?.miss) delete RATING_MATCH_STORE[k];
+    });
+    persistRatingMatchStore();
     const text = await file.text();
     const data = JSON.parse(text);
     const incomingRaw = Array.isArray(data) ? data : (Array.isArray(data?.ratings) ? data.ratings : []);
@@ -2344,7 +2781,7 @@ async function importRatings(file){
     PENDING_RATING_IMPORT_STATS_TOAST = true;
     await refreshRatingBadges();
     if(PAGE_STATE.lastMode === 'ratings') await showRatings();
-    else showToast(`${t('toast_ratings_imported')} · ${incoming.length}개`, 2600);
+    else showToast(`${t('toast_ratings_imported')} · ${tf('count_items', {count: incoming.length})}`, 2600);
   }catch(e){
     showToast(t('toast_invalid_ratings_file'), 2600);
   }
@@ -2352,7 +2789,7 @@ async function importRatings(file){
 async function clearRatingsList(){
   const list = await getRatings();
   if(!list.length){ showToast(t('no_my_ratings')); return; }
-  if(!confirm(`${t('my_ratings')} ${list.length}개를 모두 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
+  if(!confirm(tf('confirm_delete_list', {name: t('my_ratings'), count: list.length}))) return;
   clearRatingViewCache();
   if(!await setRatings([])){ showToast(t('toast_save_failed'), 2800); return; }
   showToast(t('toast_rating_removed'), 2200);
@@ -2380,12 +2817,24 @@ function setActionButtonVisual(btn,kind,active){
     : actionClockSvg(active);
   btn.innerHTML = `<span class="btn-glyph">${glyph}</span>`;
 }
+// 무한 스크롤로 페이지를 이어붙일 때, TMDB 정렬 순서가 페이지 사이에서 미세하게
+// 바뀌어 이전 페이지와 같은 항목이 다시 오는 경우가 있어 중복 카드가 생길 수 있습니다.
+// 현재 그리드에 이미 렌더링된 항목의 키를 추적해 중복을 걸러냅니다.
+let RENDERED_CARD_KEYS = new Set();
 function renderCards(items,append,options={}){
-  if(!items.length&&!append){
+  if(!append) RENDERED_CARD_KEYS = new Set();
+  const items_ = (items||[]).filter(it=>{
+    const type=it.media_type||(it.first_air_date?'tv':'movie');
+    const key=`${type}-${it.id}`;
+    if(RENDERED_CARD_KEYS.has(key)) return false;
+    RENDERED_CARD_KEYS.add(key);
+    return true;
+  });
+  if(!items_.length&&!append){
     renderEmptyState();
     return;
   }
-  const html=items.map(it=>{
+  const html=items_.map(it=>{
     const type=it.media_type||(it.first_air_date?'tv':'movie');
     // API 응답 title이 현재 언어와 맞지 않으면 original_title로 초기 표시 (refreshCardTitles가 곧 덮어씀)
     const rawTitle=itemTitle(it,type);
@@ -2426,10 +2875,25 @@ function renderCards(items,append,options={}){
     card.dataset.bound='true';
     const type=card.getAttribute('data-type'),id=card.getAttribute('data-id');
     const fb=card.querySelector('.fav-btn'),wb=card.querySelector('.watch-btn'),rb=card.querySelector('.rate-btn');
-    card.addEventListener('click',e=>{if(e.target.closest('.action-btn'))return;openDetail(type,id,card);});
-    fb.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();const s=pickStub(card);const l=await toggleSaved('fav',s);updateSavedButtons('fav',l);});
+    const noteEl=card.querySelector('.user-rating-inline');
+    card.addEventListener('click',e=>{if(e.target.closest('.action-btn')||e.target.closest('.user-rating-inline'))return;openDetail(type,id,card);});
+    fb.addEventListener('click',async e=>{
+      e.preventDefault();e.stopPropagation();
+      const wasActive=fb.classList.contains('active');
+      const s=pickStub(card);
+      const l=await toggleSaved('fav',s);
+      updateSavedButtons('fav',l);
+      if(!wasActive && l.some(x=>x.k===card.getAttribute('data-key'))){
+        fb.classList.remove('heart-burst');
+        void fb.offsetWidth;
+        fb.classList.add('heart-burst');
+        setTimeout(()=>fb.classList.remove('heart-burst'), 550);
+      }
+    });
     wb.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();const s=pickStub(card);const l=await toggleSaved('watch',s);updateSavedButtons('watch',l);});
     rb?.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();await openRatingEditor(ratingSourceFromCard(card),card);});
+    // 썸네일 메모(잘려 보이는 미리보기)를 클릭하면 메모 전체 내용을 평점 편집창에서 확인할 수 있습니다.
+    noteEl?.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();await openRatingEditor(ratingSourceFromCard(card),card);});
   });
   Promise.all([getSaved('fav'),getSaved('watch')]).then(([fl,wl])=>{
     const fs=new Set(fl.map(x=>x.k)),ws=new Set(wl.map(x=>x.k));
@@ -2454,16 +2918,16 @@ function reflectUI(card,list,kind){
 
 /* ═══════════════════════════════ EXPORT / IMPORT ═══════════════════════════════ */
 async function clearSavedList(kind) {
-  const kindName = kind === 'fav' ? '즐겨찾기' : '나중에 보기';
+  const kindName = kind === 'fav' ? t('favorite') : t('watch_later');
   const list = await getSaved(kind);
   if (!list.length) {
-    showToast(`${kindName} 목록이 이미 비어 있습니다`);
+    showToast(tf('toast_list_empty', {name: kindName}));
     return;
   }
   // 확인 다이얼로그
-  if (!confirm(`${kindName} ${list.length}개를 모두 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
+  if (!confirm(tf('confirm_delete_list', {name: kindName, count: list.length}))) return;
   if(!await setSaved(kind, [])){ showToast(t('toast_save_failed'), 2800); return; }
-  showToast(`${kindName} 목록을 초기화했습니다`, 2200);
+  showToast(tf('toast_list_cleared', {name: kindName}), 2200);
   // 현재 화면 갱신
   if (PAGE_STATE.lastMode === `saved-${kind}`) {
     await showSaved(kind);
@@ -2473,11 +2937,11 @@ async function clearSavedList(kind) {
 async function exportSaved(kind) {
   const list = await getSaved(kind);
   if (!list.length) {
-    showToast('저장된 항목이 없습니다');
+    showToast(t('toast_no_saved_items'));
     return;
   }
   const kindKey  = kind === 'fav' ? 'favorites' : 'watchlist';
-  const kindName = kind === 'fav' ? '즐겨찾기' : '나중에보기';
+  const kindName = kind === 'fav' ? t('favorite') : t('watch_later');
   const payload  = {
     version: 1,
     kind,
@@ -2490,11 +2954,11 @@ async function exportSaved(kind) {
   const a    = document.createElement('a');
   const date = new Date().toISOString().slice(0, 10);
   a.href     = url;
-  a.download = `cinefinder_${kindName}_${date}.json`;
+  a.download = `cinefinder_${kindKey}_${date}.json`;
   document.body.appendChild(a);
   a.click();
   setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
-  showToast(`내보내기 완료 · ${kindName} ${list.length}개`, 2000);
+  showToast(tf('toast_export_done', {name: kindName, count: list.length}), 2000);
 }
 
 async function importSaved(file, kind) {
@@ -2503,17 +2967,17 @@ async function importSaved(file, kind) {
     const data = JSON.parse(text);
 
     const kindKey  = kind === 'fav' ? 'favorites' : 'watchlist';
-    const kindName = kind === 'fav' ? '즐겨찾기' : '나중에 보기';
+    const kindName = kind === 'fav' ? t('favorite') : t('watch_later');
 
     // 유효성 검사: kind에 맞는 키가 있어야 함
     if (typeof data !== 'object' || !Array.isArray(data[kindKey])) {
       // 반대 kind 파일인지 확인해서 안내
       const otherKey  = kind === 'fav' ? 'watchlist' : 'favorites';
-      const otherName = kind === 'fav' ? '나중에 보기' : '즐겨찾기';
+      const otherName = kind === 'fav' ? t('watch_later') : t('favorite');
       if (Array.isArray(data[otherKey])) {
-        showToast(`이 파일은 ${otherName} 목록입니다`, 2600);
+        showToast(tf('toast_wrong_list_file', {name: otherName}), 2600);
       } else {
-        showToast('올바른 cinefinder 파일이 아닙니다', 2400);
+        showToast(t('toast_invalid_file'), 2400);
       }
       return;
     }
@@ -2528,14 +2992,14 @@ async function importSaved(file, kind) {
     const added  = merged.length - cur.length;
 
     if(!await setSaved(kind, merged)){ showToast(t('toast_save_failed'), 2800); return; }
-    showToast(`가져오기 완료 · ${kindName} +${added}개`, 2400);
+    showToast(tf('toast_import_done', {name: kindName, count: added}), 2400);
 
     // 현재 화면 갱신
     if (PAGE_STATE.lastMode === `saved-${kind}`) {
       await showSaved(kind);
     }
   } catch (e) {
-    showToast('파일을 읽을 수 없습니다', 2400);
+    showToast(t('toast_file_read_fail'), 2400);
   }
 }
 
@@ -2582,6 +3046,30 @@ async function personKeySet(){
 }
 
 /* ═══════════════════════════════ MODAL ═══════════════════════════════ */
+const isValidYoutubeId = key => /^[A-Za-z0-9_-]{11}$/.test(key || '');
+function trailerCandidates(videos){
+  const list = (videos || []).filter(v => v?.site === 'YouTube' && isValidYoutubeId(v.key));
+  const score = v => {
+    if(v.type === 'Trailer') return v.official ? 0 : 1;
+    if(v.type === 'Teaser')  return v.official ? 2 : 3;
+    return 4;
+  };
+  return list.slice().sort((a,b)=>score(a)-score(b));
+}
+// TMDB에 등록된 예고편이라도 실제 유튜브에서 삭제/비공개 처리된 경우가 있어,
+// oEmbed로 실제 재생 가능한 영상인지 확인한 뒤 후보 중 첫 번째로 유효한 것을 사용합니다.
+async function verifyYoutubeVideo(key){
+  try{
+    await fetchJson(`https://www.youtube.com/oembed?url=${encodeURIComponent('https://www.youtube.com/watch?v='+key)}&format=json`);
+    return true;
+  }catch{ return false; }
+}
+async function findWorkingTrailer(videos){
+  for(const v of trailerCandidates(videos)){
+    if(await verifyYoutubeVideo(v.key)) return v;
+  }
+  return null;
+}
 function stopModalMedia(){
   const mb=$('#modalBody'); if(!mb)return;
   mb.querySelectorAll('iframe,video,audio').forEach(el=>{try{if(el.tagName==='IFRAME')el.setAttribute('src','');else{el.pause?.();el.currentTime=0;}}catch{}el.remove();});
@@ -2597,7 +3085,15 @@ async function openDetail(type,id,sourceEl=null){
     const resolvedPosterPath = IS_MOBILE ? (data.poster_path || '') : await resolveTmdbPosterPath(type,id,data.poster_path||'');
     const poster=detailPosterUrl(resolvedPosterPath);
     const year=getYear(data.release_date||data.first_air_date);
-    const trailer=(data.videos?.results||[]).find(v=>v.site==='YouTube'&&(v.type==='Trailer'||v.type==='Teaser'));
+    let trailer=await findWorkingTrailer(data.videos?.results);
+    if(!trailer){
+      // 현재 언어(ko-KR 등)로 등록된 예고편이 없거나 전부 재생 불가할 수 있어,
+      // 언어 제한 없이 한 번 더 확인합니다.
+      try{
+        const fallbackVideos=await fetchJson(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
+        trailer=await findWorkingTrailer(fallbackVideos?.results);
+      }catch{}
+    }
     const cast=(data.credits?.cast||[]).slice(0,12);
     const crew=(data.credits?.crew||[]);
     const prov=(data['watch/providers']?.results||{})[SELECTED_COUNTRY||'KR']||null;
@@ -2620,15 +3116,24 @@ async function openDetail(type,id,sourceEl=null){
     const ratingLookupId = sourceEl?.getAttribute?.('data-rating-id') || String(id);
     const existingUserRating = findRating(userRatings, {id:ratingLookupId, type:ratingLookupType, title:ratingLookupTitle, rating:0, note:''});
     const sectionBlock=(label, body, extra='') => body ? `<div class="section detail-section ${extra}"><strong>${label}</strong><div>${body}</div></div>` : '';
-    const safeYoutubeKey=/^[A-Za-z0-9_-]{6,}$/.test(trailer?.key||'') ? trailer.key : '';
-    const trailerBlock=safeYoutubeKey?sectionBlock(t('modal_trailer'), `<div class="yt-preview"><img src="https://i.ytimg.com/vi/${safeYoutubeKey}/mqdefault.jpg" alt="Trailer" loading="lazy" decoding="async" fetchpriority="low"/><button class="yt-link" data-url="https://www.youtube.com/watch?v=${safeYoutubeKey}">▶ ${t('trailer_youtube')}</button></div>`, 'media-section'):'';
+    const safeYoutubeKey=trailer?.key||'';
+    const trailerBlock=safeYoutubeKey?sectionBlock(t('modal_trailer'), `<div class="yt-preview"><img class="yt-preview-thumb" src="https://i.ytimg.com/vi/${safeYoutubeKey}/mqdefault.jpg" alt="Trailer" loading="lazy" decoding="async" fetchpriority="low"/><button class="yt-link" data-url="https://www.youtube.com/watch?v=${safeYoutubeKey}">▶ ${t('trailer_youtube')}</button></div>`, 'media-section'):'';
     const overviewBlock=sectionBlock(t('modal_overview'), `<div class="detail-chip-row">${detailChips.map(x=>`<span class="detail-chip">${escapeHtml(String(x))}</span>`).join('')}</div>`, 'summary-section');
     const descriptionBlock=data.overview?sectionBlock(t('modal_description'), `<p class="detail-text">${escapeHtml(data.overview)}</p>`, 'description-section'):'';
     const userRatingBlock = sectionBlock(t('my_rating'), `<div class="detail-rating-form">
-      <input id="detailUserRating" class="rating-input" type="number" inputmode="decimal" autocomplete="off" enterkeyhint="done" min="0" max="10" step="0.1" value="${existingUserRating ? Number(existingUserRating.rating).toFixed(1) : ''}" placeholder="${t('rating_placeholder')}" />
-      <input id="detailUserNote" class="rating-note-line" type="text" autocomplete="off" enterkeyhint="done" value="${escapeHtml(existingUserRating?.note || '')}" placeholder="${t('note_placeholder')}" />
-      <button id="detailSaveRating" class="modal-save-btn modal-rating-save" type="button">★ ${t('save_rating')}</button>
-      <button id="detailClearRating" class="modal-save-btn modal-rating-clear" type="button">× ${t('clear_rating')}</button>
+      <div class="detail-rating-field">
+        <label>${t('rating_score')}</label>
+        <input id="detailUserRating" class="rating-input" type="number" inputmode="decimal" autocomplete="off" enterkeyhint="done" min="0" max="10" step="0.1" value="${existingUserRating ? Number(existingUserRating.rating).toFixed(1) : ''}" placeholder="${t('rating_placeholder')}" />
+        ${ratingStarPreviewMarkup()}
+      </div>
+      <div class="detail-rating-field detail-rating-note-field">
+        <label>${t('rating_note')}</label>
+        <textarea id="detailUserNote" class="rating-note-input" rows="3" autocomplete="off" enterkeyhint="done" placeholder="${t('note_placeholder')}">${escapeHtml(existingUserRating?.note || '')}</textarea>
+      </div>
+      <div class="detail-rating-actions">
+        <button id="detailSaveRating" class="modal-save-btn modal-rating-save" type="button">★ ${t('save_rating')}</button>
+        <button id="detailClearRating" class="modal-save-btn modal-rating-clear" type="button">× ${t('clear_rating')}</button>
+      </div>
     </div>`, 'user-rating-section');
     const renderCastMembers = members => members.map(c => {
       const name = c.name || c.original_name || '';
@@ -2662,6 +3167,8 @@ async function openDetail(type,id,sourceEl=null){
       </div>
     </div>`;
     $$('#modalBody [data-url]').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();window.open(btn.getAttribute('data-url'),'_blank','noopener,noreferrer');}));
+    // 예고편 썸네일이 깨져서 보일 경우(잘못된/삭제된 영상 등) 회색 깨짐 이미지 대신 버튼만 남기고 감춥니다.
+    $('#modalBody .yt-preview-thumb')?.addEventListener('error', function(){ this.closest('.yt-preview')?.classList.add('no-thumb'); this.remove(); }, { once:true });
     $$('#modalBody .modal-save-btn[data-kind]').forEach(btn=>btn.addEventListener('click',async e=>{
       e.preventDefault(); e.stopPropagation();
       const kind=btn.dataset.kind;
@@ -2672,16 +3179,29 @@ async function openDetail(type,id,sourceEl=null){
       btn.textContent=`${kind==='fav'?(active?'♥':'♡'):(active?'✓':'⏱')} ${kind==='fav'?t('modal_add_fav'):t('modal_add_watch')}`;
       updateSavedButtons(kind, list);
     }));
-    $('#detailSaveRating')?.addEventListener('click', async e=>{
-      e.preventDefault(); e.stopPropagation();
+    attachRatingScoreMask($('#detailUserRating'), $('#modalBody .detail-rating-field .rating-star-preview'));
+    const doSaveDetailRating = async () => {
       const rating = getRatingInputValue();
       if(rating === null){ showToast(t('toast_invalid_rating')); return; }
       await upsertRating({id:ratingLookupId, type:ratingLookupType, title:ratingLookupTitle, rating, note:$('#detailUserNote')?.value || ''});
+      flashRatingSaved(sourceEl);
+    };
+    $('#detailSaveRating')?.addEventListener('click', async e=>{
+      e.preventDefault(); e.stopPropagation();
+      await doSaveDetailRating();
+    });
+    // 평점 입력 칸에서 Enter를 누르면 바로 저장됩니다.
+    $('#detailUserRating')?.addEventListener('keydown', e=>{
+      if(e.key === 'Enter' && !e.isComposing){
+        e.preventDefault();
+        doSaveDetailRating();
+      }
     });
     $('#detailClearRating')?.addEventListener('click', async e=>{
       e.preventDefault(); e.stopPropagation();
       await removeRating({id:ratingLookupId, type:ratingLookupType, title:ratingLookupTitle, rating:0, note:''});
       const ri=$('#detailUserRating'), rn=$('#detailUserNote'); if(ri)ri.value=''; if(rn)rn.value='';
+      updateRatingStarPreview($('#modalBody .detail-rating-field .rating-star-preview'), 0);
     });
     const modalContent=document.querySelector('.modal-content');
     if(modalContent) modalContent.scrollTop=0;
