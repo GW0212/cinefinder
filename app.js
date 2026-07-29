@@ -651,19 +651,41 @@ function backupPersistedKeyToIdb(key, value){
   if(!PERSIST_STORAGE_KEYS.includes(key)) return;
   try { idbBackupSet(key, value); } catch {}
 }
-async function restorePersistedListsIfMissing(){
-  try {
-    if(!('indexedDB' in window)) return;
-    for(const key of PERSIST_STORAGE_KEYS){
-      let localList = [];
-      try { localList = JSON.parse(localStorage.getItem(key) || '[]'); } catch { localList = []; }
-      if(Array.isArray(localList) && localList.length) continue; // 로컬에 이미 데이터가 있으면 건드리지 않습니다.
-      const backup = await idbBackupGet(key);
-      if(Array.isArray(backup) && backup.length){
-        try { localStorage.setItem(key, JSON.stringify(backup)); } catch {}
-      }
+// 즐겨찾기/나중에 보기/내 평점은 앱이 켜져 있는 동안 이 메모리 변수를 기준으로
+// 읽고 씁니다. 저장할 때는 localStorage(빠르지만 5~10MB로 작음)에 먼저 시도하고,
+// 항상 IndexedDB(용량이 훨씬 큼, 보통 수십~수백MB 이상)에도 함께 저장해서, 큰
+// JSON을 가져오기(import)할 때도 브라우저의 작은 localStorage 한도 때문에 저장이
+// 실패하지 않도록 합니다.
+let FAV_MEM = null, WATCH_MEM = null, RATINGS_MEM = null;
+async function loadPersistedListsIntoMemory(){
+  const readList = async (key) => {
+    let list = [];
+    try {
+      const raw = localStorage.getItem(key);
+      if(raw) list = JSON.parse(raw) || [];
+    } catch {}
+    if(!Array.isArray(list) || !list.length){
+      try {
+        const idbList = await idbBackupGet(key);
+        if(Array.isArray(idbList) && idbList.length) list = idbList;
+      } catch {}
     }
-  } catch {}
+    return Array.isArray(list) ? list : [];
+  };
+  FAV_MEM = normalizeSavedList(await readList(SK.favs));
+  WATCH_MEM = normalizeSavedList(await readList(SK.watch));
+  RATINGS_MEM = normalizeRatingList(await readList(SK.ratings));
+}
+// localStorage(빠른 캐시)와 IndexedDB(진짜 저장 용량) 양쪽에 저장을 시도합니다.
+// localStorage가 용량 부족으로 실패해도 IndexedDB가 성공하면 정상 저장으로 처리합니다.
+async function persistListDual(key, list){
+  let localOk = false;
+  try { localOk = safeSetJsonItem(key, list); } catch {}
+  let idbOk = false;
+  try { idbOk = await idbBackupSet(key, list); } catch {}
+  const success = localOk || idbOk;
+  if(success) LAST_SAVE_ERROR = null; // localStorage만 실패했어도 IndexedDB에 잘 저장됐다면 실패로 취급하지 않습니다.
+  return success;
 }
 function requestPersistentStorage(){
   try {
@@ -1162,7 +1184,7 @@ initTheme(); // 렌더 전 즉시 테마 적용 (깜빡임 방지)
 
 document.addEventListener('DOMContentLoaded', async () => {
   requestPersistentStorage();
-  await restorePersistedListsIfMissing();
+  await loadPersistedListsIntoMemory();
   const bag = await storage.get([SK.filters, SK.lang]);
   API_KEY = DEFAULT_TMDB_KEY;
 
@@ -2159,18 +2181,14 @@ function normalizeSavedList(list){
   return Array.from(map.values());
 }
 async function getSaved(kind){
-  const key = savedKey(kind);
-  const obj = await storage.get([key]);
-  return normalizeSavedList(obj[key]);
+  if(FAV_MEM === null || WATCH_MEM === null) await loadPersistedListsIntoMemory();
+  return kind==='fav' ? (FAV_MEM||[]) : (WATCH_MEM||[]);
 }
 async function setSaved(kind,list){
   const key = savedKey(kind);
   const normalized = normalizeSavedList(list);
-  const ok = await storage.set({[key]: normalized});
-  if(!ok) return false;
-  const check = await storage.get([key]);
-  const saved = normalizeSavedList(check[key]);
-  return saved.length === normalized.length && normalized.every((x,i)=>saved[i]?.k === x.k);
+  if(kind==='fav') FAV_MEM = normalized; else WATCH_MEM = normalized;
+  return await persistListDual(key, normalized);
 }
 function updateSavedButtons(kind, list){
   const set = new Set(normalizeSavedList(list).map(x=>x.k));
@@ -2249,15 +2267,11 @@ function normalizeRatingList(list){
   return Array.from(map.values());
 }
 function getRatingsSync(){
-  try{
-    const raw = localStorage.getItem(SK.ratings);
-    return normalizeRatingList(raw ? JSON.parse(raw) : []);
-  }catch{
-    return [];
-  }
+  return RATINGS_MEM || [];
 }
 async function getRatings(){
-  return getRatingsSync();
+  if(RATINGS_MEM === null) await loadPersistedListsIntoMemory();
+  return RATINGS_MEM || [];
 }
 // setRatings가 호출될 때마다 캐시된 뷰(포스터 등 리졸브 결과)를 통째로 지우면,
 // 평점 하나만 수정해도 전체 목록을 다시 TMDB에서 검색해야 해서 포스터가 한동안
@@ -2293,10 +2307,8 @@ function patchRatingViewCacheForList(newList){
 async function setRatings(list){
   const normalized = normalizeRatingList(list);
   patchRatingViewCacheForList(normalized);
-  const ok = await storage.set({[SK.ratings]: normalized});
-  if(!ok) return false;
-  const check = await storage.get([SK.ratings]);
-  return normalizeRatingList(check[SK.ratings]).length === normalized.length;
+  RATINGS_MEM = normalized;
+  return await persistListDual(SK.ratings, normalized);
 }
 function findRatingIndex(list, source){
   const src = normalizeRatingItem(source);
