@@ -57,7 +57,8 @@ const I18N = {
     cached_badge:"캐시 결과",
     min_rating:"최소 평점",
     sort_popularity:"인기순",
-    sort_vote:"평점순",
+    sort_vote:"평점 높은순",
+    sort_vote_asc:"평점 낮은순",
     sort_date:"최신순",
     crew_director:"감독",
     crew_writing:"각본",
@@ -125,7 +126,8 @@ const I18N = {
     cached_badge:"Cached result",
     min_rating:"Min rating",
     sort_popularity:"Popular",
-    sort_vote:"Top rated",
+    sort_vote:"Highest rated",
+    sort_vote_asc:"Lowest rated",
     sort_date:"Latest",
     crew_director:"Director",
     crew_writing:"Writing",
@@ -193,7 +195,8 @@ const I18N = {
     cached_badge:"キャッシュ結果",
     min_rating:"最低評価",
     sort_popularity:"人気順",
-    sort_vote:"評価順",
+    sort_vote:"評価が高い順",
+    sort_vote_asc:"評価が低い順",
     sort_date:"最新順",
     crew_director:"監督",
     crew_writing:"脚本",
@@ -261,7 +264,8 @@ const I18N = {
     cached_badge:"缓存结果",
     min_rating:"最低评分",
     sort_popularity:"人气",
-    sort_vote:"评分",
+    sort_vote:"评分从高到低",
+    sort_vote_asc:"评分从低到高",
     sort_date:"最新",
     crew_director:"导演",
     crew_writing:"编剧",
@@ -330,6 +334,7 @@ const I18N = {
     min_rating:"Note minimum",
     sort_popularity:"Popularité",
     sort_vote:"Mieux notés",
+    sort_vote_asc:"Moins bien notés",
     sort_date:"Récent",
     crew_director:"Réalisation",
     crew_writing:"Écriture",
@@ -363,7 +368,7 @@ const COUNTRY_NAMES = {
 };
 Object.assign(I18N.ko, {
   tab_anime:'애니', my_ratings:'내 평점', my_rating:'내 평점', anime:'애니', drama:'드라마', rating_score:'평점', rating_note:'메모',
-  save_rating:'평점 저장', clear_rating:'평점 삭제', edit_rating:'평점 수정', rate_this:'평점 매기기',
+  save_rating:'평점 저장', clear_rating:'평점 삭제', clear_note:'메모 삭제', edit_rating:'평점 수정', rate_this:'평점 매기기',
   rating_placeholder:'0.0 ~ 10.0 (소수점 첫째 자리까지)', note_placeholder:'메모 선택 입력', no_my_ratings:'저장된 내 평점이 없습니다',
   toast_rating_saved:'평점 저장됨', toast_rating_removed:'평점 삭제됨', toast_ratings_exported:'평점 내보내기 완료',
   toast_ratings_imported:'평점 가져오기 완료', toast_invalid_rating:'0~10 사이 숫자를 입력해주세요', toast_invalid_ratings_file:'올바른 평점 JSON 파일이 아닙니다',
@@ -385,7 +390,7 @@ Object.assign(I18N.ko, {
 });
 Object.assign(I18N.en, {
   tab_anime:'Anime', my_ratings:'My ratings', my_rating:'My rating', anime:'Anime', drama:'Drama', rating_score:'Rating', rating_note:'Note',
-  save_rating:'Save rating', clear_rating:'Remove rating', edit_rating:'Edit rating', rate_this:'Rate this',
+  save_rating:'Save rating', clear_rating:'Remove rating', clear_note:'Clear note', edit_rating:'Edit rating', rate_this:'Rate this',
   rating_placeholder:'0.0 ~ 10.0 (one decimal place)', note_placeholder:'Optional note', no_my_ratings:'No ratings yet',
   toast_rating_saved:'Rating saved', toast_rating_removed:'Rating removed', toast_ratings_exported:'Ratings exported',
   toast_ratings_imported:'Ratings imported', toast_invalid_rating:'Enter a number from 0 to 10', toast_invalid_ratings_file:'Invalid ratings JSON file',
@@ -407,7 +412,7 @@ Object.assign(I18N.en, {
 });
 Object.assign(I18N.ja, {
   tab_anime:'アニメ', my_ratings:'マイ評価', my_rating:'マイ評価', anime:'アニメ', drama:'ドラマ', rating_score:'評価', rating_note:'メモ',
-  save_rating:'評価を保存', clear_rating:'評価を削除', edit_rating:'評価を編集', rate_this:'評価する',
+  save_rating:'評価を保存', clear_rating:'評価を削除', clear_note:'メモを削除', edit_rating:'評価を編集', rate_this:'評価する',
   rating_placeholder:'0.0 ~ 10.0（小数点第一位まで）', note_placeholder:'メモ任意', no_my_ratings:'保存した評価はありません',
   toast_rating_saved:'評価を保存しました', toast_rating_removed:'評価を削除しました', toast_ratings_exported:'評価を書き出しました',
   toast_ratings_imported:'評価を読み込みました', toast_invalid_rating:'0〜10の数値を入力してください', toast_invalid_ratings_file:'正しい評価JSONではありません',
@@ -429,7 +434,7 @@ Object.assign(I18N.ja, {
 });
 Object.assign(I18N.zh, {
   tab_anime:'动画', my_ratings:'我的评分', my_rating:'我的评分', anime:'动画', drama:'剧集', rating_score:'评分', rating_note:'备注',
-  save_rating:'保存评分', clear_rating:'删除评分', edit_rating:'编辑评分', rate_this:'评分',
+  save_rating:'保存评分', clear_rating:'删除评分', clear_note:'删除备注', edit_rating:'编辑评分', rate_this:'评分',
   rating_placeholder:'0.0 ~ 10.0（仅限小数点后一位）', note_placeholder:'备注可选', no_my_ratings:'暂无保存的评分',
   toast_rating_saved:'评分已保存', toast_rating_removed:'评分已删除', toast_ratings_exported:'评分已导出',
   toast_ratings_imported:'评分已导入', toast_invalid_rating:'请输入 0 到 10 的数字', toast_invalid_ratings_file:'不是有效的评分 JSON 文件',
@@ -451,7 +456,7 @@ Object.assign(I18N.zh, {
 });
 Object.assign(I18N.fr, {
   tab_anime:'Anime', my_ratings:'Mes notes', my_rating:'Ma note', anime:'Anime', drama:'Série', rating_score:'Note', rating_note:'Mémo',
-  save_rating:'Enregistrer', clear_rating:'Supprimer', edit_rating:'Modifier la note', rate_this:'Noter',
+  save_rating:'Enregistrer', clear_rating:'Supprimer', clear_note:'Effacer le mémo', edit_rating:'Modifier la note', rate_this:'Noter',
   rating_placeholder:'0.0 ~ 10.0 (une décimale)', note_placeholder:'Mémo facultatif', no_my_ratings:'Aucune note enregistrée',
   toast_rating_saved:'Note enregistrée', toast_rating_removed:'Note supprimée', toast_ratings_exported:'Notes exportées',
   toast_ratings_imported:'Notes importées', toast_invalid_rating:'Saisissez un nombre de 0 à 10', toast_invalid_ratings_file:'Fichier JSON de notes invalide',
@@ -669,6 +674,14 @@ const COMMON_TITLE_CHARS_RE = /^[\u0000-\u007F\uAC00-\uD7A3\u1100-\u11FF\u3130-\
 const JA_TITLE_CHARS_RE = /^[\u0000-\u007F\u3040-\u30FF\u3400-\u9FFF\s.,:;!?"'()\[\]{}\-–—_&+/·•★☆#@%°]+$/;
 const ZH_TITLE_CHARS_RE = /^[\u0000-\u007F\u3400-\u9FFF\s.,:;!?"'()\[\]{}\-–—_&+/·•★☆#@%°]+$/;
 function cleanTitle(v){ return String(v||'').replace(/\s+/g,' ').trim(); }
+// 내 평점 배지 색상: 1~3 빨강 / 3.1~6 주황 / 6.1~7.9 노랑 / 8~10 초록
+function ratingTierClass(v){
+  const n = Number(v) || 0;
+  if(n <= 3) return 'rating-tier-red';
+  if(n <= 6) return 'rating-tier-orange';
+  if(n <= 7.9) return 'rating-tier-yellow';
+  return 'rating-tier-green';
+}
 function itemTitle(it,type){ return cleanTitle(type==='movie'?(it.title||it.name||it.original_title||it.original_name||''):(it.name||it.title||it.original_name||it.original_title||'')); }
 function translationTitle(entry,type){
   const data=entry?.data||{};
@@ -807,9 +820,8 @@ function refreshCardTitles(cards){
       if(nameEl&&nameEl.textContent!==cached){ nameEl.textContent=cached; nameEl.setAttribute('title',cached); card.setAttribute('data-title',cached); const img=card.querySelector('.thumb img'); if(img)img.setAttribute('alt',cached); }
     }
   });
-  // 모바일 최적화: 카드별 translations API 호출을 중단합니다. TMDB 기본 language 응답과 캐시만 사용합니다.
-  if(IS_MOBILE) return;
-  // 2) 캐시 미스는 병렬 API 호출 (저전력 환경에서는 동시성 축소)
+  // 모바일에서도 제목 번역을 시도합니다 (이전에는 건너뛰어서 번역 가능한 제목도
+  // 원어 그대로 남는 경우가 있었습니다). 저전력 기기는 동시 요청 수만 줄입니다.
   runLimited(cards, IS_LOW_POWER ? 2 : 4, async card=>{
     if(!document.body.contains(card))return;
     const type=card.getAttribute('data-type');
@@ -1087,6 +1099,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   CUR_LANG = bag[SK.lang] || 'ko';
   $('#langSelect').value = CUR_LANG;
 
+  initSortDropdown();
   applyI18n();
   renderCountryOptions();
   populateYearSelects();
@@ -1101,7 +1114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     MOVIE_EXC = new Set(f.movieExc || f.genreExcludeIds || []);
     TV_INC = new Set(f.tvInc || []);
     TV_EXC = new Set(f.tvExc || []);
-    if(f.sortBy){ SORT_BY=f.sortBy; const ss=$('#sortSelect'); if(ss) ss.value=SORT_BY; }
+    if(f.sortBy){ SORT_BY=f.sortBy; window.selectSortValue?.(SORT_BY, {trigger:false}); }
     if(f.minRating){ MIN_RATING=f.minRating; const rs=$('#ratingSelect'); if(rs) rs.value=String(MIN_RATING); }
     $('#yearFrom').value = YEAR_FROM;
     $('#yearTo').value   = YEAR_TO;
@@ -1163,6 +1176,76 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ═══════════════════════════════ I18N ═══════════════════════════════ */
+// 실제 <select>를 완전히 커스텀 드롭다운으로 대체합니다. 네이티브 select의 옵션 목록은
+// 브라우저가 그리는 팝업이라 text-align이 잘 안 먹히는 경우가 많아, 직접 만든 목록으로
+// 닫힌 상태 텍스트와 펼쳤을 때 옵션 텍스트 모두 항상 정확히 중앙 정렬되도록 했습니다.
+function initSortDropdown(){
+  const wrap = $('#sortWrap');
+  const display = $('#sortSelectDisplay');
+  const list = $('#sortOptionsList');
+  if(!wrap || !display || !list) return;
+  const options = Array.from(list.querySelectorAll('.sort-option'));
+
+  // .site-header에 backdrop-filter가 걸려 있으면, 그 하위에 있는 position:fixed 요소는
+  // 뷰포트가 아니라 그 헤더 박스를 기준으로 위치가 계산되는 CSS 규칙 때문에 엉뚱한
+  // 곳(우측 등)에 붙어 보이는 문제가 있었습니다. 목록을 body 바로 아래로 옮겨서
+  // (portal 패턴) 이 문제를 원천적으로 피하고, 항상 뷰포트 기준 좌표로만 위치시킵니다.
+  if(list.parentElement !== document.body) document.body.appendChild(list);
+
+  // 부모 요소의 position 상속 관계와 상관없이 항상 버튼 바로 아래에 딱 붙도록,
+  // 버튼의 실제 화면 좌표를 기준으로 목록 위치를 직접 계산합니다.
+  const positionList = () => {
+    const rect = display.getBoundingClientRect();
+    list.style.top = `${rect.bottom + 6}px`;
+    list.style.left = `${rect.left + rect.width / 2}px`;
+    list.style.minWidth = `${rect.width}px`;
+  };
+  const openList = () => {
+    positionList();
+    list.classList.remove('hidden');
+    display.setAttribute('aria-expanded','true');
+  };
+  const closeList = () => { list.classList.add('hidden'); display.setAttribute('aria-expanded','false'); };
+  const isOpen = () => !list.classList.contains('hidden');
+
+  window.selectSortValue = (value, {trigger=true}={}) => {
+    const opt = options.find(o=>o.dataset.value===value) || options[0];
+    if(!opt) return;
+    display.textContent = opt.textContent;
+    options.forEach(o=>{
+      const on = o===opt;
+      o.classList.toggle('active', on);
+      o.setAttribute('aria-selected', on?'true':'false');
+    });
+    if(trigger){
+      SORT_BY = opt.dataset.value;
+      onSortChanged();
+    }
+  };
+
+  display.addEventListener('click', e=>{
+    e.stopPropagation();
+    isOpen() ? closeList() : openList();
+  });
+  options.forEach(opt=>{
+    opt.addEventListener('click', ()=>{
+      window.selectSortValue(opt.dataset.value);
+      closeList();
+    });
+  });
+  document.addEventListener('click', e=>{ if(!wrap.contains(e.target) && !list.contains(e.target)) closeList(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && isOpen()){ closeList(); display.focus(); } });
+  window.addEventListener('scroll', ()=>{ if(isOpen()) closeList(); }, true);
+  window.addEventListener('resize', ()=>{ if(isOpen()) closeList(); });
+}
+async function onSortChanged(){
+  if(PAGE_STATE.lastMode==='ratings'){await showRatings();return;}
+  if(String(PAGE_STATE.lastMode).startsWith('saved-')){await showSaved(String(PAGE_STATE.lastMode).split('-')[1]||'fav');return;}
+  resetPaging(); await runSearchOrDiscover(true);
+}
+function syncSortSelectDisplay(){
+  window.selectSortValue?.(SORT_BY, {trigger:false});
+}
 function applyI18n() {
   const set = (id, prop, val) => { const el=$(id); if(el) el[prop]=val; };
   set('#searchInput',      'placeholder', t('search_placeholder'));
@@ -1188,13 +1271,15 @@ function applyI18n() {
   const favSpan=$('#btnFav span:last-child'); if(favSpan)favSpan.textContent=t('favorite');
   const watchSpan=$('#btnWatch span:last-child'); if(watchSpan)watchSpan.textContent=t('watch_later');
   const ratingsSpan=$('#btnRatings span:last-child'); if(ratingsSpan)ratingsSpan.textContent=t('my_ratings');
-  const sortPop=$('#sortSelect option[value="popularity.desc"]'); if(sortPop)sortPop.textContent=t('sort_popularity');
+  const sortPop=$('.sort-option[data-value="popularity.desc"]'); if(sortPop)sortPop.textContent=t('sort_popularity');
   set('#i18nMinRating', 'textContent', t('min_rating'));
   // ratingSelect 옵션 텍스트 다국어화
   const ratingAll=$('#ratingSelect option[value="0"]');
   if(ratingAll) ratingAll.textContent=CUR_LANG==='ko'?'전체':CUR_LANG==='ja'?'すべて':CUR_LANG==='zh'?'全部':CUR_LANG==='fr'?'Tous':'All';
-  const sortVote=$('#sortSelect option[value="vote_average.desc"]'); if(sortVote)sortVote.textContent=t('sort_vote');
-  const sortDate=$('#sortSelect option[value="date.desc"]'); if(sortDate)sortDate.textContent=t('sort_date');
+  const sortVote=$('.sort-option[data-value="vote_average.desc"]'); if(sortVote)sortVote.textContent=t('sort_vote');
+  const sortVoteAsc=$('.sort-option[data-value="vote_average.asc"]'); if(sortVoteAsc)sortVoteAsc.textContent=t('sort_vote_asc');
+  const sortDate=$('.sort-option[data-value="date.desc"]'); if(sortDate)sortDate.textContent=t('sort_date');
+  syncSortSelectDisplay();
 
   // 접근성 라벨/타이틀 (언어 전환 시에도 갱신)
   const setAttrs = (id, attrs) => { const el=$(id); if(!el) return; Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v)); };
@@ -1500,12 +1585,6 @@ function bindEvents() {
     e.preventDefault();
     await executeSearchFromInput();
     closeSuggest();
-  });
-  $('#sortSelect').addEventListener('change', async e=>{
-    SORT_BY=e.target.value;
-    if(PAGE_STATE.lastMode==='ratings'){await showRatings();return;}
-    if(String(PAGE_STATE.lastMode).startsWith('saved-')){await showSaved(String(PAGE_STATE.lastMode).split('-')[1]||'fav');return;}
-    resetPaging(); await runSearchOrDiscover(true);
   });
   $('#langSelect').addEventListener('change', async()=>{
     CUR_LANG=$('#langSelect').value||'ko';
@@ -1840,18 +1919,48 @@ async function runSearch(clear){
   if(!clear&&PAGE_STATE.personActive){setStatusIfEmpty('');return;}
   if(clear){$('#results').innerHTML='';showSkeletons();setStatus(t('status_searching'));}
   if(PAGE_STATE.personActive){clearSkeletons();await renderPersonFilmography(PAGE_STATE.personMeta||{id:PAGE_STATE.personActive},clear);return;}
-  const p=new URLSearchParams({api_key:API_KEY,language:tmdbLang(),include_adult:'false',query:PAGE_STATE.query,page:String(PAGE_STATE.pageSearch||1)});
+  const query=PAGE_STATE.query;
+  const page=String(PAGE_STATE.pageSearch||1);
+  const baseParams={api_key:API_KEY,language:tmdbLang(),include_adult:'false',query,page};
   try{
-    const multi=await fetchJson(`https://api.themoviedb.org/3/search/multi?${p}&_lang=${CUR_LANG}`);
+    // 영화/드라마 제목은 검색 전용 엔드포인트(search/movie, search/tv)로 직접 조회해
+    // multi 검색만 쓸 때보다 제목 일치 정확도를 높입니다. 인물(감독/배우) 여부 판단에는
+    // multi 검색 결과를 그대로 사용합니다.
+    const [movieRes,tvRes,multiRes]=await Promise.all([
+      fetchJson(`https://api.themoviedb.org/3/search/movie?${new URLSearchParams(baseParams)}&_lang=${CUR_LANG}`).catch(()=>({results:[]})),
+      fetchJson(`https://api.themoviedb.org/3/search/tv?${new URLSearchParams(baseParams)}&_lang=${CUR_LANG}`).catch(()=>({results:[]})),
+      fetchJson(`https://api.themoviedb.org/3/search/multi?${new URLSearchParams(baseParams)}&_lang=${CUR_LANG}`)
+    ]);
     if(isStale(token))return;
-    const person=(multi.results||[]).find(r=>r.media_type==='person');
+
+    // 인물 검색 판단: 예전에는 결과 어딘가에 인물이 하나라도 섞여 있으면 무조건 그 사람의
+    // 필모그래피로 전환해버려서, 영화 제목이 우연히 무관한 인물과 겹칠 때 정작 찾던 영화가
+    // 안 보이는 문제가 있었습니다. 이제는 검색어와 이름이 정확히 일치하거나, 인물이 전체
+    // 결과 중 1위(가장 관련도 높음)일 때만 인물 검색으로 전환합니다.
+    const normalizedQuery=query.trim().toLowerCase();
+    const personResults=(multiRes.results||[]).filter(r=>r.media_type==='person');
+    const exactPerson=personResults.find(p=>(p.name||'').trim().toLowerCase()===normalizedQuery);
+    const topResult=(multiRes.results||[])[0];
+    const topIsPerson=topResult&&topResult.media_type==='person';
+    const person=exactPerson||(topIsPerson?topResult:null);
     if(person){ PAGE_STATE.personActive=person.id; PAGE_STATE.personMeta={id:person.id,known_for_department:person.known_for_department||''}; clearSkeletons(); await renderPersonFilmography(PAGE_STATE.personMeta,clear); return; }
-    let items=(multi.results||[]).filter(r=>r.media_type==='movie'||r.media_type==='tv');
+
+    // 제목 검색 결과 병합: 전용 엔드포인트 결과를 우선하고, multi 검색으로 보강합니다.
+    const movieItems=(movieRes.results||[]).map(r=>({...r,media_type:'movie'}));
+    const tvItems=(tvRes.results||[]).map(r=>({...r,media_type:'tv'}));
+    const multiItems=(multiRes.results||[]).filter(r=>r.media_type==='movie'||r.media_type==='tv');
+    const seen=new Map();
+    [...movieItems,...tvItems,...multiItems].forEach(it=>{
+      const type=it.media_type||(it.first_air_date?'tv':'movie');
+      const key=`${type}-${it.id}`;
+      if(!seen.has(key))seen.set(key,{...it,media_type:type});
+    });
+    let items=Array.from(seen.values());
     if(CONTENT_TYPE!=='all' && CONTENT_TYPE!=='anime')items=items.filter(r=>r.media_type===CONTENT_TYPE);
-    let merged=Array.from(new Map(items.map(it=>{const type=it.media_type||(it.first_air_date?'tv':'movie');return[`${type}-${it.id}`,{...it,media_type:type}];})).values());
-    merged=limitPageItemsForDevice(clientSort(await applyClientFiltersStrict(merged)));
+    let merged=limitPageItemsForDevice(clientSort(await applyClientFiltersStrict(items)));
     clearSkeletons(); renderCards(merged,!clear); setStatusIfEmpty(t('status_empty'));
-    if((multi.page||1)<(multi.total_pages||1))PAGE_STATE.pageSearch++;
+    const maxTotalPages=Math.max(movieRes.total_pages||1,tvRes.total_pages||1,multiRes.total_pages||1);
+    if((multiRes.page||1)<maxTotalPages)PAGE_STATE.pageSearch++;
     await saveCache({mode:'search',items:merged,state:snapshotState()});
   }catch(e){
     if(String(e).includes('AbortError'))return;
@@ -1894,13 +2003,26 @@ function buildDiscoverParams(type,page){
   if(YEAR_FROM||YEAR_TO){if(type==='movie'){if(YEAR_FROM)p.set('primary_release_date.gte',`${YEAR_FROM}-01-01`);if(YEAR_TO)p.set('primary_release_date.lte',`${YEAR_TO}-12-31`);}else{if(YEAR_FROM)p.set('first_air_date.gte',`${YEAR_FROM}-01-01`);if(YEAR_TO)p.set('first_air_date.lte',`${YEAR_TO}-12-31`);}}
   return p.toString();
 }
-function clientSort(list){
+function clientSort(list, ratingField='vote_average'){
+  const usesPersonalRating = ratingField !== 'vote_average';
   if(SORT_BY==='vote_average.desc'){
-    // 평점순: 투표 수 10개 미만은 후순위
+    // 평점 높은순: 개인 평점 정렬이 아닐 때만 투표 수 10개 미만 항목을 후순위로 보정
     return[...list].sort((a,b)=>{
-      const aValid=(a.vote_count||0)>=10, bValid=(b.vote_count||0)>=10;
-      if(aValid!==bValid)return aValid?-1:1;
-      return (b.vote_average||0)-(a.vote_average||0);
+      if(!usesPersonalRating){
+        const aValid=(a.vote_count||0)>=10, bValid=(b.vote_count||0)>=10;
+        if(aValid!==bValid)return aValid?-1:1;
+      }
+      return Number(b[ratingField]||0)-Number(a[ratingField]||0);
+    });
+  }
+  if(SORT_BY==='vote_average.asc'){
+    // 평점 낮은순
+    return[...list].sort((a,b)=>{
+      if(!usesPersonalRating){
+        const aValid=(a.vote_count||0)>=10, bValid=(b.vote_count||0)>=10;
+        if(aValid!==bValid)return aValid?-1:1;
+      }
+      return Number(a[ratingField]||0)-Number(b[ratingField]||0);
     });
   }
   if(SORT_BY==='date.desc')return[...list].sort((a,b)=>{const da=a.release_date||a.first_air_date||'',db=b.release_date||b.first_air_date||'';return db>da?1:db<da?-1:0;});
@@ -2132,20 +2254,35 @@ async function upsertRating(source){
   }
   if(!await setRatings(next)){ showToast(t('toast_save_failed'), 2800); return null; }
   showToast(t('toast_rating_saved'));
+  // 평점/메모를 수정할 때 "내 평점" 화면 전체를 다시 불러오면(순위 재조회 등으로) 몇 초씩
+  // 걸리고, 이 동안 다른 카드를 편집하면 상태가 꼬이는 문제가 있었습니다. 이미 화면에 보이는
+  // 카드는 refreshRatingBadges()로 그 자리에서 바로 갱신하고, 전체 재로딩은 하지 않습니다.
   await refreshRatingBadges();
-  if(PAGE_STATE.lastMode === 'ratings') await showRatings();
   return item;
 }
 async function removeRating(source){
   const list = await getRatings();
   const idx = findRatingIndex(list, source);
   if(idx < 0){ showToast(t('toast_rating_removed')); return; }
+  const removed = list[idx];
   const next = list.slice();
   next.splice(idx, 1);
   if(!await setRatings(next)){ showToast(t('toast_save_failed'), 2800); return; }
   showToast(t('toast_rating_removed'));
   await refreshRatingBadges();
-  if(PAGE_STATE.lastMode === 'ratings') await showRatings();
+  // 평점을 완전히 삭제하면 "내 평점" 화면에서는 더 이상 보일 이유가 없는 카드이므로,
+  // 전체를 다시 불러오는 대신 해당 카드만 화면에서 제거합니다.
+  if(PAGE_STATE.lastMode === 'ratings'){
+    const removedType = normalizeRatingType(removed.type);
+    $$('#results .card').forEach(card => {
+      const cardRatingId = card.getAttribute('data-rating-id') || '';
+      const cardRatingType = normalizeRatingType(card.getAttribute('data-rating-type') || '');
+      if(cardRatingId === String(removed.id) && cardRatingType === removedType){
+        card.remove();
+      }
+    });
+    if(!$('#results .card')) renderRatingFallbackEmpty();
+  }
 }
 function ratingSourceFromCard(card){
   const mediaType = card.getAttribute('data-type') || 'movie';
@@ -2227,7 +2364,8 @@ async function refreshRatingBadges(){
         scoreEl.textContent = `★ ${Number(saved.rating).toFixed(1)}`;
         scoreEl.setAttribute('title', `${t('my_rating')} ${Number(saved.rating).toFixed(1)}`);
         scoreEl.setAttribute('aria-label', `${t('my_rating')} ${Number(saved.rating).toFixed(1)}`);
-        scoreEl.classList.remove('hidden');
+        scoreEl.classList.remove('hidden', 'rating-tier-red', 'rating-tier-orange', 'rating-tier-yellow', 'rating-tier-green');
+        scoreEl.classList.add(ratingTierClass(saved.rating));
       }
       if(holder){
         holder.textContent = saved.note || '';
@@ -2246,6 +2384,7 @@ async function refreshRatingBadges(){
         scoreEl.removeAttribute('title');
         scoreEl.removeAttribute('aria-label');
         scoreEl.classList.add('hidden');
+        scoreEl.classList.remove('rating-tier-red', 'rating-tier-orange', 'rating-tier-yellow', 'rating-tier-green');
       }
       if(holder){ holder.textContent = ''; holder.classList.add('hidden'); }
       setRateButtonVisual(card.querySelector('.rate-btn'), null);
@@ -2687,7 +2826,7 @@ async function showRatings(){
   const maps = ratingCachedMaps(list);
   if(maps.cached?.items?.length){
     // 이미 리졸브(포스터 확인)된 캐시가 있으면 바로 보여줍니다 — 대기 없음.
-    const cachedItems = clientSort(filterByCurrentQuery(maps.cached.items || []));
+    const cachedItems = clientSort(filterByCurrentQuery(maps.cached.items || []), 'user_rating_value');
     if(cachedItems.length){
       renderCards(cachedItems, false, { skipEnrich: true, skipRatingRefresh: true });
       setStatus('');
@@ -2709,7 +2848,7 @@ async function showRatings(){
   setStatus(t('status_resolving_ratings'));
   const resolved = await resolveRatingListToTmdb(list);
   if(myToken !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings') return; // 그 사이 화면이 바뀌었으면 중단
-  const sortedResolved = clientSort(resolved || []);
+  const sortedResolved = clientSort(resolved || [], 'user_rating_value');
   setCachedRatingView(list, sortedResolved, resolved._ratingStats || null);
   clearSkeletons();
   const visible = filterByCurrentQuery(sortedResolved);
@@ -2847,7 +2986,7 @@ function renderCards(items,append,options={}){
     const badgeCls=userRatingType==='anime'?'badge badge-anime':type==='tv'?'badge badge-tv':'badge';
     const badgeLabel=userRatingType==='anime'?t('anime'):(type==='movie'?t('badge_movie'):t('badge_tv'));
     return`<div class="card" data-type="${type}" data-id="${it.id}" data-key="${key}" data-title="${escapeHtml(title)}" data-rating-id="${escapeHtml(ratingId)}" data-rating-title="${escapeHtml(ratingTitle)}" data-rating-type="${escapeHtml(userRatingType)}" data-user-rating="${hasUserRating?userRatingValue.toFixed(1):''}" data-user-note="${escapeHtml(userRatingNote)}" data-poster="${escapeHtml(it.poster_path||'')}" data-date="${escapeHtml(it.release_date||it.first_air_date||'')}" data-vote="${it.vote_average||0}">
-      <div class="thumb">${img?`<img src="${img}" alt="${escapeHtml(title)}" loading="lazy" decoding="async" fetchpriority="low">`:`<div class="thumb-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>${t('poster_none')}</span></div>`}<div class="thumb-top-info"><div class="thumb-badge-action"><span class="${badgeCls}">${escapeHtml(badgeLabel)}</span><div class="card-actions"><button class="action-btn fav-btn" type="button" aria-pressed="false" aria-label="${t('favorite')} ${t('not_selected')}" title="${t('favorite')} ${t('not_selected')}"><span class="btn-glyph">${actionHeartSvg(false)}</span></button><button class="action-btn watch-btn" type="button" aria-pressed="false" aria-label="${t('watch_later')} ${t('not_selected')}" title="${t('watch_later')} ${t('not_selected')}"><span class="btn-glyph">${actionClockSvg(false)}</span></button><button class="action-btn rate-btn${hasUserRating?' active':''}" type="button" aria-pressed="${hasUserRating?'true':'false'}" aria-label="${hasUserRating?`${t('my_rating')} ${userRatingValue.toFixed(1)}`:t('rate_this')}" title="${hasUserRating?`${t('my_rating')} ${userRatingValue.toFixed(1)}`:t('rate_this')}"><span class="btn-glyph">${actionStarSvg(hasUserRating)}</span></button></div></div><span class="card-user-rating user-rating-score${hasUserRating?'':' hidden'}"${hasUserRating?` title="${t('my_rating')} ${userRatingValue.toFixed(1)}" aria-label="${t('my_rating')} ${userRatingValue.toFixed(1)}"`:''}>${hasUserRating?`★ ${userRatingValue.toFixed(1)}`:''}</span></div></div>
+      <div class="thumb">${img?`<img src="${img}" alt="${escapeHtml(title)}" loading="lazy" decoding="async" fetchpriority="low">`:`<div class="thumb-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>${t('poster_none')}</span></div>`}<div class="thumb-top-info"><div class="thumb-badge-action"><span class="${badgeCls}">${escapeHtml(badgeLabel)}</span><div class="card-actions"><button class="action-btn fav-btn" type="button" aria-pressed="false" aria-label="${t('favorite')} ${t('not_selected')}" title="${t('favorite')} ${t('not_selected')}"><span class="btn-glyph">${actionHeartSvg(false)}</span></button><button class="action-btn watch-btn" type="button" aria-pressed="false" aria-label="${t('watch_later')} ${t('not_selected')}" title="${t('watch_later')} ${t('not_selected')}"><span class="btn-glyph">${actionClockSvg(false)}</span></button><button class="action-btn rate-btn${hasUserRating?' active':''}" type="button" aria-pressed="${hasUserRating?'true':'false'}" aria-label="${hasUserRating?`${t('my_rating')} ${userRatingValue.toFixed(1)}`:t('rate_this')}" title="${hasUserRating?`${t('my_rating')} ${userRatingValue.toFixed(1)}`:t('rate_this')}"><span class="btn-glyph">${actionStarSvg(hasUserRating)}</span></button></div></div><span class="card-user-rating user-rating-score${hasUserRating?' '+ratingTierClass(userRatingValue):''}${hasUserRating?'':' hidden'}"${hasUserRating?` title="${t('my_rating')} ${userRatingValue.toFixed(1)}" aria-label="${t('my_rating')} ${userRatingValue.toFixed(1)}"`:''}>${hasUserRating?`★ ${userRatingValue.toFixed(1)}`:''}</span></div></div>
       <div class="meta">
         <div class="name" title="${escapeHtml(title)}">${escapeHtml(title)||'&nbsp;'}</div>
         <div class="sub">${year||t('year_unknown')}</div>
@@ -3012,6 +3151,7 @@ async function showSaved(kind){
   // 정렬
   items.sort((a,b)=>{
     if(SORT_BY==='vote_average.desc') return (b.vote_average||0)-(a.vote_average||0);
+    if(SORT_BY==='vote_average.asc') return (a.vote_average||0)-(b.vote_average||0);
     if(SORT_BY==='date.desc'){ const da=a.release_date||'',db=b.release_date||''; return db>da?1:db<da?-1:0; }
     return (b.popularity||0)-(a.popularity||0);
   });
@@ -3038,6 +3178,7 @@ async function personKeySet(){
 
 /* ═══════════════════════════════ MODAL ═══════════════════════════════ */
 const isValidYoutubeId = key => /^[A-Za-z0-9_-]{11}$/.test(key || '');
+let DETAIL_MODAL_TOKEN = 0;
 function trailerCandidates(videos){
   const list = (videos || []).filter(v => v?.site === 'YouTube' && isValidYoutubeId(v.key));
   const score = v => {
@@ -3061,37 +3202,112 @@ async function findWorkingTrailer(videos){
   }
   return null;
 }
+// 예고편이 실제로 재생 가능한지 확인(oEmbed)하는 데는 네트워크 왕복이 필요해서,
+// 이걸 모달을 띄우기 전에 기다리면 포스터 클릭 후 0.5~1초 정도 버퍼링이 생겼습니다.
+// 이제는 모달을 먼저 즉시 보여주고, 확인은 백그라운드에서 진행한 뒤 필요하면
+// 예고편 영역만 갱신(또는 제거)합니다.
+async function verifyTrailerInBackground(type, id, initialVideos, token){
+  try{
+    let working = await findWorkingTrailer(initialVideos);
+    if(!working){
+      try{
+        const fallbackVideos = await fetchJson(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
+        working = await findWorkingTrailer(fallbackVideos?.results);
+      }catch{}
+    }
+    if(token !== DETAIL_MODAL_TOKEN) return; // 그 사이 모달이 닫히거나 다른 항목을 열었으면 무시
+    const section = $('#modalBody .media-section');
+    if(!section) return;
+    if(!working){
+      section.classList.add('hidden'); // 재생 가능한 예고편이 끝내 없으면 섹션을 숨깁니다
+      return;
+    }
+    const thumb = $('#detailTrailerThumb');
+    const link = $('#modalBody .yt-link');
+    if(thumb) thumb.src = `https://i.ytimg.com/vi/${working.key}/mqdefault.jpg`;
+    if(link) link.setAttribute('data-url', `https://www.youtube.com/watch?v=${working.key}`);
+    section.classList.remove('hidden');
+  }catch{}
+}
 function stopModalMedia(){
   const mb=$('#modalBody'); if(!mb)return;
   mb.querySelectorAll('iframe,video,audio').forEach(el=>{try{if(el.tagName==='IFRAME')el.setAttribute('src','');else{el.pause?.();el.currentTime=0;}}catch{}el.remove();});
   mb.innerHTML='';
 }
+// 제목 번역과 포스터 재확인도 네트워크 호출이 필요해서, 모달을 먼저 보여준 뒤
+// 백그라운드에서 더 나은 값을 찾으면 그때 갱신합니다 (클릭 직후 버퍼링 방지).
+async function resolveDetailTitleAndPosterInBackground(type, id, rawTitle, rawPoster, year, token){
+  try{
+    const [betterTitle, betterPosterPath] = await Promise.all([
+      resolveTmdbDisplayTitle(type, id, rawTitle),
+      resolveTmdbPosterPath(type, id, rawPoster)
+    ]);
+    if(token !== DETAIL_MODAL_TOKEN) return; // 그 사이 모달이 닫히거나 다른 항목을 열었으면 무시
+    if(betterTitle && betterTitle !== rawTitle){
+      const titleEl = $('#modalTitle');
+      if(titleEl) titleEl.textContent = `${betterTitle}${year?` (${year})`:''}`;
+    }
+    const finalPosterPath = betterPosterPath || rawPoster;
+    if(finalPosterPath){
+      // 경로가 그대로여도, 초기엔 카드와 같은 저해상도 이미지를 재사용했으므로
+      // 여기서 항상 더 큰 해상도로 업그레이드합니다 (이미 모달은 열려 있어 지연 체감 없음).
+      const posterFullUrl = detailPosterUrl(finalPosterPath);
+      const posterBox = $('#modalBody .modal-poster');
+      const posterImg = posterBox?.querySelector('img');
+      if(posterFullUrl && posterImg && posterImg.getAttribute('src') !== posterFullUrl) posterImg.src = posterFullUrl;
+      else if(posterFullUrl && posterBox && !posterImg) posterBox.innerHTML = `<img src="${posterFullUrl}" alt="${escapeHtml(betterTitle||rawTitle)}" loading="eager" decoding="async">`;
+    }
+  }catch{}
+}
 async function openDetail(type,id,sourceEl=null){
   LAST_FOCUS=sourceEl||document.activeElement;
   stopModalMedia();
+  const myModalToken = ++DETAIL_MODAL_TOKEN;
+
+  // 카드에 이미 있는 정보(포스터·제목)로 데이터를 받아오기 전에 모달을 즉시 엽니다.
+  // 포스터 URL은 방금 그리드에서 보여준 것과 동일해서 브라우저 캐시 덕분에 정말로
+  // 즉시 나타나고, 나머지 상세 정보만 로딩 표시와 함께 아래에서 채워집니다.
+  const stub = sourceEl ? pickStub(sourceEl) : null;
+  const instantPoster = stub?.poster_path ? cardPosterUrl(stub.poster_path) : '';
+  const instantTitle = stub?.title || '';
+  $('#modalBody').innerHTML = `<div class="modal-header">
+    <div class="modal-poster">${instantPoster?`<img src="${instantPoster}" alt="${escapeHtml(instantTitle)}" loading="eager" decoding="async">`:''}</div>
+    <div class="modal-body">
+      <h3 id="modalTitle">${escapeHtml(instantTitle)}</h3>
+      <div class="modal-loading-row"><span class="modal-loading-spinner"></span></div>
+    </div>
+  </div>`;
+  const modalContentEarly=document.querySelector('.modal-content');
+  if(modalContentEarly) modalContentEarly.scrollTop=0;
+  $('#modal').classList.remove('hidden');
+  document.body.classList.add('lock-scroll');
+  requestAnimationFrame(()=>{
+    const mc=document.querySelector('.modal-content');
+    if(mc) mc.scrollTo({top:0,left:0,behavior:'instant'});
+  });
+
   try{
+    if(myModalToken !== DETAIL_MODAL_TOKEN) return; // 그 사이 다른 항목을 열었으면 중단
     const data=await fetchJson(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=${tmdbLang()}&append_to_response=videos,credits,watch/providers`);
+    if(myModalToken !== DETAIL_MODAL_TOKEN) return; // 그 사이 다른 항목을 열었거나 모달을 닫았으면 중단
     const rawTitle=itemTitle(data,type);
-    const title = IS_MOBILE ? rawTitle : await resolveTmdbDisplayTitle(type,id,rawTitle);
-    const resolvedPosterPath = IS_MOBILE ? (data.poster_path || '') : await resolveTmdbPosterPath(type,id,data.poster_path||'');
-    const poster=detailPosterUrl(resolvedPosterPath);
+    // 제목/포스터 번역·재확인(translations, images API 호출)도 대기 시간을 만들던 부분이라,
+    // 일단 즉시 받은 값으로 모달을 먼저 그리고 더 나은 값은 백그라운드에서 찾아 반영합니다.
+    const title = rawTitle;
+    const resolvedPosterPath = data.poster_path || '';
+    // 순간 미리보기와 같은 크기(cardPosterUrl)를 그대로 써서, 이미 캐시된 이미지를 재사용하고
+    // 더 큰 해상도로의 교체는 백그라운드 보정(resolveDetailTitleAndPosterInBackground)에 맡깁니다.
+    // 여기서 detailPosterUrl(더 큰 사이즈)을 쓰면 다른 URL이라 다시 받아오느라 포스터가
+    // 잠깐 사라졌다 나타나는 깜빡임이 생겼습니다.
+    const poster=resolvedPosterPath?cardPosterUrl(resolvedPosterPath):'';
     const year=getYear(data.release_date||data.first_air_date);
-    let trailer=await findWorkingTrailer(data.videos?.results);
-    if(!trailer){
-      // 현재 언어(ko-KR 등)로 등록된 예고편이 없거나 전부 재생 불가할 수 있어,
-      // 언어 제한 없이 한 번 더 확인합니다.
-      try{
-        const fallbackVideos=await fetchJson(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
-        trailer=await findWorkingTrailer(fallbackVideos?.results);
-      }catch{}
-    }
+    let trailer=trailerCandidates(data.videos?.results)[0]||null;
     const cast=(data.credits?.cast||[]).slice(0,12);
     const crew=(data.credits?.crew||[]);
     const prov=(data['watch/providers']?.results||{})[SELECTED_COUNTRY||'KR']||null;
     const genres=(data.genres||[]).map(g=>g.name).filter(Boolean);
     const releaseDate=data.release_date||data.first_air_date||'';
     const detailChips=[
-      `★ ${(data.vote_average||0).toFixed(1)}`,
       (data.original_language||'').toUpperCase(),
       data.runtime?`${data.runtime}${t('runtime_min')}`:'',
       data.number_of_seasons?`${t('season_label')} ${data.number_of_seasons}`:'',
@@ -3108,8 +3324,9 @@ async function openDetail(type,id,sourceEl=null){
     const existingUserRating = findRating(userRatings, {id:ratingLookupId, type:ratingLookupType, title:ratingLookupTitle, rating:0, note:''});
     const sectionBlock=(label, body, extra='') => body ? `<div class="section detail-section ${extra}"><strong>${label}</strong><div>${body}</div></div>` : '';
     const safeYoutubeKey=trailer?.key||'';
-    const trailerBlock=safeYoutubeKey?sectionBlock(t('modal_trailer'), `<div class="yt-preview"><img class="yt-preview-thumb" src="https://i.ytimg.com/vi/${safeYoutubeKey}/mqdefault.jpg" alt="Trailer" loading="lazy" decoding="async" fetchpriority="low"/><button class="yt-link" data-url="https://www.youtube.com/watch?v=${safeYoutubeKey}">▶ ${t('trailer_youtube')}</button></div>`, 'media-section'):'';
-    const overviewBlock=sectionBlock(t('modal_overview'), `<div class="detail-chip-row">${detailChips.map(x=>`<span class="detail-chip">${escapeHtml(String(x))}</span>`).join('')}</div>`, 'summary-section');
+    const trailerBlock=sectionBlock(t('modal_trailer'), `<div class="yt-preview"><img class="yt-preview-thumb" id="detailTrailerThumb"${safeYoutubeKey?` src="https://i.ytimg.com/vi/${safeYoutubeKey}/mqdefault.jpg"`:''} alt="Trailer" loading="lazy" decoding="async" fetchpriority="low"/><button class="yt-link"${safeYoutubeKey?` data-url="https://www.youtube.com/watch?v=${safeYoutubeKey}"`:''}>▶ ${t('trailer_youtube')}</button></div>`, `media-section${safeYoutubeKey?'':' hidden'}`);
+    const ratingChipHtml=`<span class="detail-chip rating-chip ${ratingTierClass(data.vote_average||0)}">★ ${(data.vote_average||0).toFixed(1)}</span>`;
+    const overviewBlock=sectionBlock(t('modal_overview'), `<div class="detail-chip-row">${ratingChipHtml}${detailChips.map(x=>`<span class="detail-chip">${escapeHtml(String(x))}</span>`).join('')}</div>`, 'summary-section');
     const descriptionBlock=data.overview?sectionBlock(t('modal_description'), `<p class="detail-text">${escapeHtml(data.overview)}</p>`, 'description-section'):'';
     const userRatingBlock = sectionBlock(t('my_rating'), `<div class="detail-rating-form">
       <div class="detail-rating-field">
@@ -3124,6 +3341,7 @@ async function openDetail(type,id,sourceEl=null){
       <div class="detail-rating-actions">
         <button id="detailSaveRating" class="modal-save-btn modal-rating-save" type="button">★ ${t('save_rating')}</button>
         <button id="detailClearRating" class="modal-save-btn modal-rating-clear" type="button">× ${t('clear_rating')}</button>
+        <button id="detailClearNote" class="modal-save-btn modal-note-clear" type="button">× ${t('clear_note')}</button>
       </div>
     </div>`, 'user-rating-section');
     const renderCastMembers = members => members.map(c => {
@@ -3157,7 +3375,15 @@ async function openDetail(type,id,sourceEl=null){
         <div class="section detail-section tmdb-row"><button class="yt-link tmdb-link" data-url="https://www.themoviedb.org/${type}/${id}?language=${tmdbLang()}">${t('modal_open_tmdb')}</button></div>
       </div>
     </div>`;
-    $$('#modalBody [data-url]').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();window.open(btn.getAttribute('data-url'),'_blank','noopener,noreferrer');}));
+    $$('#modalBody [data-url], #modalBody .yt-link').forEach(btn=>{
+      if(btn.dataset.linkBound) return;
+      btn.dataset.linkBound='1';
+      btn.addEventListener('click',e=>{
+        e.preventDefault(); e.stopPropagation();
+        const url=btn.getAttribute('data-url');
+        if(url) window.open(url,'_blank','noopener,noreferrer');
+      });
+    });
     // 예고편 썸네일이 깨져서 보일 경우(잘못된/삭제된 영상 등) 회색 깨짐 이미지 대신 버튼만 남기고 감춥니다.
     $('#modalBody .yt-preview-thumb')?.addEventListener('error', function(){ this.closest('.yt-preview')?.classList.add('no-thumb'); this.remove(); }, { once:true });
     $$('#modalBody .modal-save-btn[data-kind]').forEach(btn=>btn.addEventListener('click',async e=>{
@@ -3176,6 +3402,7 @@ async function openDetail(type,id,sourceEl=null){
       if(rating === null){ showToast(t('toast_invalid_rating')); return; }
       await upsertRating({id:ratingLookupId, type:ratingLookupType, title:ratingLookupTitle, rating, note:$('#detailUserNote')?.value || ''});
       flashRatingSaved(sourceEl);
+      closeModal();
     };
     $('#detailSaveRating')?.addEventListener('click', async e=>{
       e.preventDefault(); e.stopPropagation();
@@ -3191,19 +3418,32 @@ async function openDetail(type,id,sourceEl=null){
     $('#detailClearRating')?.addEventListener('click', async e=>{
       e.preventDefault(); e.stopPropagation();
       await removeRating({id:ratingLookupId, type:ratingLookupType, title:ratingLookupTitle, rating:0, note:''});
-      const ri=$('#detailUserRating'), rn=$('#detailUserNote'); if(ri)ri.value=''; if(rn)rn.value='';
-      updateRatingStarPreview($('#modalBody .detail-rating-field .rating-star-preview'), 0);
+      closeModal();
+    });
+    $('#detailClearNote')?.addEventListener('click', async e=>{
+      e.preventDefault(); e.stopPropagation();
+      const noteEl = $('#detailUserNote');
+      if(noteEl) noteEl.value = '';
+      const rating = getRatingInputValue();
+      if(rating === null) return; // 저장된 평점이 아직 없으면 입력칸만 비우고 끝냅니다.
+      await upsertRating({id:ratingLookupId, type:ratingLookupType, title:ratingLookupTitle, rating, note:''});
+      flashRatingSaved(sourceEl);
+      closeModal();
     });
     const modalContent=document.querySelector('.modal-content');
     if(modalContent) modalContent.scrollTop=0;
-    $('#modal').classList.remove('hidden');
-    document.body.classList.add('lock-scroll');
     requestAnimationFrame(()=>{
       const mc=document.querySelector('.modal-content');
       if(mc) mc.scrollTo({top:0,left:0,behavior:'instant'});
     });
     $('#modalClose').focus();
-  }catch(e){showToast(t('status_fetch_fail'));}
+    verifyTrailerInBackground(type, id, data.videos?.results, myModalToken);
+    resolveDetailTitleAndPosterInBackground(type, id, rawTitle, data.poster_path||'', year, myModalToken);
+  }catch(e){
+    if(String(e).includes('AbortError')) return;
+    showToast(t('status_fetch_fail'));
+    if(myModalToken === DETAIL_MODAL_TOKEN) closeModal();
+  }
 }
 function groupCrew(crew){
   const buckets=[
