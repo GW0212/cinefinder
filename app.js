@@ -26,6 +26,7 @@ const I18N = {
     toast_reset:'초기화 완료', toast_saved:'저장됨', toast_removed:'삭제됨',
     toast_save_failed:'저장 실패: 브라우저 저장 공간을 정리한 뒤 다시 시도해주세요.',
     toast_save_blocked:'저장 실패: 이 브라우저(시크릿/프라이빗 모드이거나 사이트 데이터 차단 설정)에서 로컬 저장이 막혀 있습니다.',
+    toast_current_usage:'현재 사용량',
     badge_movie:'영화', badge_tv:'드라마', poster_none:'포스터 없음', year_unknown:'연도 미상',
     modal_overview:'개요', modal_description:'설명', modal_trailer:'예고편', modal_cast:'출연', modal_crew:'제작',
     modal_providers:'시청 가능', modal_buy:'구매', modal_rent:'대여', modal_open_tmdb:'TMDB에서 보기',
@@ -96,6 +97,7 @@ const I18N = {
     toast_reset:'Reset complete', toast_saved:'Saved', toast_removed:'Removed',
     toast_save_failed:'Save failed: clear browser storage and try again.',
     toast_save_blocked:'Save failed: local storage is blocked in this browser (private/incognito mode or site data settings).',
+    toast_current_usage:'current usage',
     badge_movie:'Movie', badge_tv:'TV', poster_none:'No poster', year_unknown:'Unknown year',
     modal_overview:'Overview', modal_description:'Description', modal_trailer:'Trailer', modal_cast:'Cast', modal_crew:'Crew',
     modal_providers:'Available On', modal_buy:'Buy', modal_rent:'Rent', modal_open_tmdb:'Open on TMDB',
@@ -166,6 +168,7 @@ const I18N = {
     toast_reset:'リセット完了', toast_saved:'保存済み', toast_removed:'削除済み',
     toast_save_failed:'保存に失敗しました。ブラウザの保存容量を整理して再試行してください。',
     toast_save_blocked:'保存に失敗しました。このブラウザ（プライベートモードまたはサイトデータのブロック設定）ではローカル保存が無効になっています。',
+    toast_current_usage:'現在の使用量',
     badge_movie:'映画', badge_tv:'ドラマ', poster_none:'ポスターなし', year_unknown:'年不明',
     modal_overview:'概要', modal_description:'説明', modal_trailer:'予告編', modal_cast:'キャスト', modal_crew:'スタッフ',
     modal_providers:'視聴可能', modal_buy:'購入', modal_rent:'レンタル', modal_open_tmdb:'TMDBで開く',
@@ -236,6 +239,7 @@ const I18N = {
     toast_reset:'重置完成', toast_saved:'已保存', toast_removed:'已删除',
     toast_save_failed:'保存失败：请清理浏览器存储后重试。',
     toast_save_blocked:'保存失败：此浏览器（隐身/隐私模式或已阻止网站数据）已禁用本地存储。',
+    toast_current_usage:'当前使用量',
     badge_movie:'电影', badge_tv:'剧集', poster_none:'无海报', year_unknown:'年份未知',
     modal_overview:'概述', modal_description:'说明', modal_trailer:'预告片', modal_cast:'演员', modal_crew:'主创',
     modal_providers:'可观看', modal_buy:'购买', modal_rent:'租借', modal_open_tmdb:'在TMDB打开',
@@ -306,6 +310,7 @@ const I18N = {
     toast_reset:'Réinitialisé', toast_saved:'Sauvegardé', toast_removed:'Supprimé',
     toast_save_failed:'Échec de sauvegarde : libérez le stockage du navigateur puis réessayez.',
     toast_save_blocked:'Échec de sauvegarde : le stockage local est bloqué dans ce navigateur (mode privé ou données de site bloquées).',
+    toast_current_usage:'utilisation actuelle',
     badge_movie:'Film', badge_tv:'Série', poster_none:'Pas d\'affiche', year_unknown:'Année inconnue',
     modal_overview:'Aperçu', modal_description:'Description', modal_trailer:'Bande-annonce', modal_cast:'Acteurs', modal_crew:'Équipe',
     modal_providers:'Disponible sur', modal_buy:'Acheter', modal_rent:'Louer', modal_open_tmdb:'Ouvrir sur TMDB',
@@ -508,9 +513,24 @@ function detectStorageBlocked(){
     return true;
   }
 }
+// 실제로 localStorage를 얼마나 쓰고 있는지 KB 단위로 계산합니다.
+// "용량 부족" 안내가 실제로 타당한지 눈으로 바로 확인할 수 있도록 토스트에 함께 표시합니다.
+function localStorageUsageKB(){
+  try{
+    let total = 0;
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      const v = localStorage.getItem(k) || '';
+      total += (k ? k.length : 0) + v.length;
+    }
+    return Math.round(total/1024);
+  }catch{ return -1; }
+}
 function saveFailedToastMessage(){
   if(LAST_SAVE_ERROR?.reason === 'blocked') return t('toast_save_blocked');
-  return t('toast_save_failed');
+  const kb = localStorageUsageKB();
+  const usageNote = kb >= 0 ? ` (${t('toast_current_usage')}: ${kb.toLocaleString()}KB)` : '';
+  return t('toast_save_failed') + usageNote;
 }
 function clearVolatileStorageForSave() {
   // 즐겨찾기/나중에 보기/평점 저장 실패의 주 원인은 결과/제목/포스터/매칭 캐시가
