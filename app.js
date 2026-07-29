@@ -487,16 +487,28 @@ function isQuotaError(err) {
   );
 }
 function clearVolatileStorageForSave() {
-  // 즐겨찾기/나중에 보기 저장 실패의 주 원인은 결과/제목/포스터 캐시가 localStorage 용량을 차지하는 케이스입니다.
-  // 사용자 저장 목록은 보존하고, 다시 받아올 수 있는 캐시만 정리합니다.
-  ['cinefinder_cache', 'cinefinder_title_store_v3', 'cinefinder_poster_store_v2', 'cinefinder_detail_filter_store_v1', 'cinefinder_rating_match_store_v1'].forEach(k => {
-    try { localStorage.removeItem(k); } catch {}
+  // 즐겨찾기/나중에 보기/평점 저장 실패의 주 원인은 결과/제목/포스터/매칭 캐시가
+  // localStorage 용량을 차지하는 케이스입니다. 사용자 저장 목록(즐겨찾기·나중에 보기·평점)은
+  // 보존하고, 다시 받아올 수 있는 캐시만 정리합니다.
+  // 주의: 여기 나열하는 키는 실제로 지금 쓰이는 최신 버전 키와 반드시 일치해야 합니다
+  // (예전에 'v1' 같은 지난 버전 키를 지우고 있어서, 실제로는 존재하지도 않는 키를 지우느라
+  // 정작 용량을 차지하는 최신 캐시가 안 지워져 저장이 계속 실패하는 문제가 있었습니다).
+  [
+    'cinefinder_cache',
+    TITLE_STORE_KEY,
+    POSTER_STORE_KEY,
+    DETAIL_STORE_KEY,
+    RATING_MATCH_STORE_KEY,
+    SK.ratingViewCache,
+  ].forEach(k => {
+    try { if(k) localStorage.removeItem(k); } catch {}
   });
   try { TITLE_CACHE.clear(); } catch {}
   try { POSTER_CACHE.clear(); } catch {}
   try { TITLE_STORE = {}; } catch {}
   try { POSTER_STORE = {}; } catch {}
   try { DETAIL_STORE = {}; } catch {}
+  try { RATING_MATCH_STORE = {}; } catch {}
 }
 function safeSetJsonItem(key, value) {
   const json = JSON.stringify(value);
