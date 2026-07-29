@@ -26,7 +26,7 @@ const I18N = {
     toast_reset:'초기화 완료', toast_saved:'저장됨', toast_removed:'삭제됨',
     toast_save_failed:'저장 실패: 브라우저 저장 공간을 정리한 뒤 다시 시도해주세요.',
     toast_save_blocked:'저장 실패: 이 브라우저(시크릿/프라이빗 모드이거나 사이트 데이터 차단 설정)에서 로컬 저장이 막혀 있습니다.',
-    toast_current_usage:'현재 사용량',
+    toast_current_usage:'현재 사용량', ratings_by_score:'점수 구간별', ratings_by_type:'콘텐츠 종류별',
     badge_movie:'영화', badge_tv:'드라마', poster_none:'포스터 없음', year_unknown:'연도 미상',
     modal_overview:'개요', modal_description:'설명', modal_trailer:'예고편', modal_cast:'출연', modal_crew:'제작',
     modal_providers:'시청 가능', modal_buy:'구매', modal_rent:'대여', modal_open_tmdb:'TMDB에서 보기',
@@ -97,7 +97,7 @@ const I18N = {
     toast_reset:'Reset complete', toast_saved:'Saved', toast_removed:'Removed',
     toast_save_failed:'Save failed: clear browser storage and try again.',
     toast_save_blocked:'Save failed: local storage is blocked in this browser (private/incognito mode or site data settings).',
-    toast_current_usage:'current usage',
+    toast_current_usage:'current usage', ratings_by_score:'By score range', ratings_by_type:'By content type',
     badge_movie:'Movie', badge_tv:'TV', poster_none:'No poster', year_unknown:'Unknown year',
     modal_overview:'Overview', modal_description:'Description', modal_trailer:'Trailer', modal_cast:'Cast', modal_crew:'Crew',
     modal_providers:'Available On', modal_buy:'Buy', modal_rent:'Rent', modal_open_tmdb:'Open on TMDB',
@@ -168,7 +168,7 @@ const I18N = {
     toast_reset:'リセット完了', toast_saved:'保存済み', toast_removed:'削除済み',
     toast_save_failed:'保存に失敗しました。ブラウザの保存容量を整理して再試行してください。',
     toast_save_blocked:'保存に失敗しました。このブラウザ（プライベートモードまたはサイトデータのブロック設定）ではローカル保存が無効になっています。',
-    toast_current_usage:'現在の使用量',
+    toast_current_usage:'現在の使用量', ratings_by_score:'点数帯別', ratings_by_type:'コンテンツ種類別',
     badge_movie:'映画', badge_tv:'ドラマ', poster_none:'ポスターなし', year_unknown:'年不明',
     modal_overview:'概要', modal_description:'説明', modal_trailer:'予告編', modal_cast:'キャスト', modal_crew:'スタッフ',
     modal_providers:'視聴可能', modal_buy:'購入', modal_rent:'レンタル', modal_open_tmdb:'TMDBで開く',
@@ -239,7 +239,7 @@ const I18N = {
     toast_reset:'重置完成', toast_saved:'已保存', toast_removed:'已删除',
     toast_save_failed:'保存失败：请清理浏览器存储后重试。',
     toast_save_blocked:'保存失败：此浏览器（隐身/隐私模式或已阻止网站数据）已禁用本地存储。',
-    toast_current_usage:'当前使用量',
+    toast_current_usage:'当前使用量', ratings_by_score:'按分数区间', ratings_by_type:'按内容类型',
     badge_movie:'电影', badge_tv:'剧集', poster_none:'无海报', year_unknown:'年份未知',
     modal_overview:'概述', modal_description:'说明', modal_trailer:'预告片', modal_cast:'演员', modal_crew:'主创',
     modal_providers:'可观看', modal_buy:'购买', modal_rent:'租借', modal_open_tmdb:'在TMDB打开',
@@ -310,7 +310,7 @@ const I18N = {
     toast_reset:'Réinitialisé', toast_saved:'Sauvegardé', toast_removed:'Supprimé',
     toast_save_failed:'Échec de sauvegarde : libérez le stockage du navigateur puis réessayez.',
     toast_save_blocked:'Échec de sauvegarde : le stockage local est bloqué dans ce navigateur (mode privé ou données de site bloquées).',
-    toast_current_usage:'utilisation actuelle',
+    toast_current_usage:'utilisation actuelle', ratings_by_score:'Par tranche de note', ratings_by_type:'Par type de contenu',
     badge_movie:'Film', badge_tv:'Série', poster_none:'Pas d\'affiche', year_unknown:'Année inconnue',
     modal_overview:'Aperçu', modal_description:'Description', modal_trailer:'Bande-annonce', modal_cast:'Acteurs', modal_crew:'Équipe',
     modal_providers:'Disponible sur', modal_buy:'Acheter', modal_rent:'Louer', modal_open_tmdb:'Ouvrir sur TMDB',
@@ -369,6 +369,27 @@ const I18N = {
     rating_min_9:"9.0+",
   },
 };
+// ISO 639-1 언어 코드를 사람이 읽을 수 있는 이름으로 바꿉니다 (예: 'en' → '영어').
+// 브라우저 내장 Intl.DisplayNames를 우선 사용해 사실상 모든 언어 코드를 지원하고,
+// 지원하지 않는 구형 브라우저를 위한 주요 언어 수동 매핑을 예비로 둡니다.
+const LANGUAGE_NAME_FALLBACK = {
+  ko:{en:'영어',ko:'한국어',ja:'일본어',zh:'중국어',fr:'프랑스어',es:'스페인어',de:'독일어',it:'이탈리아어',ru:'러시아어',pt:'포르투갈어',hi:'힌디어',th:'태국어',vi:'베트남어',id:'인도네시아어',ar:'아랍어',tr:'터키어',nl:'네덜란드어',sv:'스웨덴어',pl:'폴란드어',da:'덴마크어',no:'노르웨이어',fi:'핀란드어',cs:'체코어',el:'그리스어',he:'히브리어',hu:'헝가리어',ro:'루마니아어',uk:'우크라이나어',fa:'페르시아어',ms:'말레이어',ta:'타밀어',cn:'중국어',yue:'광둥어'},
+  en:{en:'English',ko:'Korean',ja:'Japanese',zh:'Chinese',fr:'French',es:'Spanish',de:'German',it:'Italian',ru:'Russian',pt:'Portuguese',hi:'Hindi',th:'Thai',vi:'Vietnamese',id:'Indonesian',ar:'Arabic',tr:'Turkish',nl:'Dutch',sv:'Swedish',pl:'Polish',da:'Danish',no:'Norwegian',fi:'Finnish',cs:'Czech',el:'Greek',he:'Hebrew',hu:'Hungarian',ro:'Romanian',uk:'Ukrainian',fa:'Persian',ms:'Malay',ta:'Tamil',cn:'Chinese',yue:'Cantonese'},
+  ja:{en:'英語',ko:'韓国語',ja:'日本語',zh:'中国語',fr:'フランス語',es:'スペイン語',de:'ドイツ語',it:'イタリア語',ru:'ロシア語',pt:'ポルトガル語',hi:'ヒンディー語',th:'タイ語',vi:'ベトナム語',id:'インドネシア語',ar:'アラビア語',tr:'トルコ語',nl:'オランダ語',sv:'スウェーデン語',pl:'ポーランド語',da:'デンマーク語',no:'ノルウェー語',fi:'フィンランド語',cs:'チェコ語',el:'ギリシャ語',he:'ヘブライ語',hu:'ハンガリー語',ro:'ルーマニア語',uk:'ウクライナ語',fa:'ペルシャ語',ms:'マレー語',ta:'タミル語',cn:'中国語',yue:'広東語'},
+  zh:{en:'英语',ko:'韩语',ja:'日语',zh:'中文',fr:'法语',es:'西班牙语',de:'德语',it:'意大利语',ru:'俄语',pt:'葡萄牙语',hi:'印地语',th:'泰语',vi:'越南语',id:'印尼语',ar:'阿拉伯语',tr:'土耳其语',nl:'荷兰语',sv:'瑞典语',pl:'波兰语',da:'丹麦语',no:'挪威语',fi:'芬兰语',cs:'捷克语',el:'希腊语',he:'希伯来语',hu:'匈牙利语',ro:'罗马尼亚语',uk:'乌克兰语',fa:'波斯语',ms:'马来语',ta:'泰米尔语',cn:'中文',yue:'粤语'},
+  fr:{en:'Anglais',ko:'Coréen',ja:'Japonais',zh:'Chinois',fr:'Français',es:'Espagnol',de:'Allemand',it:'Italien',ru:'Russe',pt:'Portugais',hi:'Hindi',th:'Thaï',vi:'Vietnamien',id:'Indonésien',ar:'Arabe',tr:'Turc',nl:'Néerlandais',sv:'Suédois',pl:'Polonais',da:'Danois',no:'Norvégien',fi:'Finnois',cs:'Tchèque',el:'Grec',he:'Hébreu',hu:'Hongrois',ro:'Roumain',uk:'Ukrainien',fa:'Persan',ms:'Malais',ta:'Tamoul',cn:'Chinois',yue:'Cantonais'}
+};
+function languageDisplayName(code){
+  const c = String(code||'').trim().toLowerCase();
+  if(!c) return '';
+  try{
+    const locale = CUR_LANG === 'zh' ? 'zh-Hans' : CUR_LANG;
+    const dn = new Intl.DisplayNames([locale, 'en'], {type:'language'});
+    const name = dn.of(c);
+    if(name && name.toLowerCase() !== c) return name;
+  }catch{}
+  return (LANGUAGE_NAME_FALLBACK[CUR_LANG]?.[c]) || (LANGUAGE_NAME_FALLBACK.en[c]) || c.toUpperCase();
+}
 const COUNTRY_NAMES = {
   ko: { '':'전체','KR':'대한민국','US':'미국','JP':'일본','CN':'중국','TW':'대만','HK':'홍콩','TH':'태국','GB':'영국','FR':'프랑스','DE':'독일','IN':'인도','ES':'스페인','IT':'이탈리아','BR':'브라질','MX':'멕시코','AU':'호주','CA':'캐나다','RU':'러시아','TR':'터키' },
   en: { '':'All','KR':'Korea','US':'United States','JP':'Japan','CN':'China','TW':'Taiwan','HK':'Hong Kong','TH':'Thailand','GB':'United Kingdom','FR':'France','DE':'Germany','IN':'India','ES':'Spain','IT':'Italy','BR':'Brazil','MX':'Mexico','AU':'Australia','CA':'Canada','RU':'Russia','TR':'Turkey' },
@@ -1137,7 +1158,7 @@ let MOVIE_INC=new Set(), MOVIE_EXC=new Set(), TV_INC=new Set(), TV_EXC=new Set()
 // 장르 그룹(포함/제외 × 영화/드라마) 펼침·접힘 상태. 기본값은 접힘(true)입니다.
 let GENRE_GROUP_COLLAPSED = {};
 let SELECTED_COUNTRY='', YEAR_FROM='', YEAR_TO='', SORT_BY='popularity.desc', MIN_RATING=0;
-let BUSY=false, IO=null, acTimer=null, acCtrl=null, acIndex=-1;
+let BUSY=false, IO=null, acTimer=null, acCtrl=null, acIndex=-1, liveSearchTimer=null, LIBRARY_TYPE_FILTER='all';
 let ABORTS=new Set(), lastScrollLoad=0, RENDER_TOKEN=0, LAST_FOCUS=null;
 
 const SK = { filters:'cineScopeFilters', favs:'cinefinder_favs', watch:'cinefinder_watch', ratings:'cinefinder_ratings', ratingViewCache:'cinefinder_rating_view_cache_v1', cache:'cinefinder_cache', lang:'cinefinderLang', theme:'cinefinderTheme' };
@@ -1192,6 +1213,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#langSelect').value = CUR_LANG;
 
   initSortDropdown();
+  initRatingsCountPopup();
+  initLibraryTypeTabs();
   applyI18n();
   renderCountryOptions();
   populateYearSelects();
@@ -1346,6 +1369,10 @@ function applyI18n() {
   set('#tabMovie',         'textContent', t('tab_movie'));
   set('#tabTV',            'textContent', t('tab_tv'));
   set('#tabAnime',        'textContent', t('tab_anime'));
+  set('#libraryTypeTabs [data-libtype="all"]',    'textContent', t('tab_all'));
+  set('#libraryTypeTabs [data-libtype="movie"]',  'textContent', t('tab_movie'));
+  set('#libraryTypeTabs [data-libtype="tv"]',     'textContent', t('tab_tv'));
+  set('#libraryTypeTabs [data-libtype="anime"]',  'textContent', t('tab_anime'));
   set('#i18nFilters',      'textContent', t('filters'));
   set('#i18nCountry',      'textContent', t('country'));
   set('#i18nYearRange',    'textContent', t('year_range'));
@@ -1451,6 +1478,120 @@ function setSavedModeUI(mode) {
       toolbar.dataset.mode = '';
     }
   }
+  if(mode === 'ratings') updateRatingsCountBadge();
+  else{
+    $('#ratingsCountBtn')?.classList.add('hidden');
+    closeRatingsBreakdownPopup();
+  }
+  $('#libraryTypeTabs')?.classList.toggle('hidden', !mode);
+}
+function setLibraryTypeTabsActive(type){
+  $$('#libraryTypeTabs .lib-type-tab').forEach(b=>{
+    const on = b.dataset.libtype === type;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true':'false');
+  });
+}
+function initLibraryTypeTabs(){
+  $$('#libraryTypeTabs .lib-type-tab').forEach(btn=>{
+    btn.addEventListener('click', async()=>{
+      const type = btn.dataset.libtype;
+      // 이미 선택된 버튼을 다시 클릭하면 선택을 해제(=모두)합니다.
+      const nextType = (LIBRARY_TYPE_FILTER === type) ? 'all' : type;
+      if(LIBRARY_TYPE_FILTER === nextType) return;
+      LIBRARY_TYPE_FILTER = nextType;
+      setLibraryTypeTabsActive(nextType);
+      const mode = PAGE_STATE.lastMode;
+      if(mode === 'ratings') await showRatings();
+      else if(String(mode).startsWith('saved-')) await showSaved(String(mode).split('-')[1] || 'fav');
+    });
+  });
+}
+// 즐겨찾기/나중에 보기 항목이 애니인지 판단합니다 (genre_ids가 있으면 정확히,
+// 없으면 제목 텍스트로 대략 추정합니다 — 예전에 저장된 항목은 genre 정보가 없을 수 있습니다).
+function savedItemIsAnime(item){
+  return itemIsAnimeLike({genre_ids:item.genre_ids||[], title:item.title, name:item.title});
+}
+function applyLibraryTypeFilter(items, isRatingsList){
+  if(LIBRARY_TYPE_FILTER === 'all') return items;
+  if(isRatingsList){
+    const wanted = LIBRARY_TYPE_FILTER === 'tv' ? 'drama' : LIBRARY_TYPE_FILTER;
+    return items.filter(x => normalizeRatingType(x.user_rating_type || x.type) === wanted);
+  }
+  if(LIBRARY_TYPE_FILTER === 'anime') return items.filter(x => savedItemIsAnime(x));
+  return items.filter(x => x.media_type === LIBRARY_TYPE_FILTER && !savedItemIsAnime(x));
+}
+// 별점 구간(1~3/3.1~6/6.1~7.9/8~10)별, 콘텐츠 종류(영화/드라마/애니)별 개수를 계산합니다.
+function computeRatingsBreakdown(list){
+  const tiers = { red:0, orange:0, yellow:0, green:0 };
+  const types = { movie:0, drama:0, anime:0 };
+  (list||[]).forEach(r=>{
+    const tierName = ratingTierClass(r.rating).replace('rating-tier-','');
+    if(tierName in tiers) tiers[tierName]++;
+    if(r.type in types) types[r.type]++;
+  });
+  return { total:(list||[]).length, tiers, types };
+}
+function updateRatingsCountBadge(){
+  const btn = $('#ratingsCountBtn');
+  if(!btn) return;
+  const list = getRatingsSync();
+  const breakdown = computeRatingsBreakdown(list);
+  btn.textContent = tf('count_items', {count: breakdown.total});
+  btn.classList.remove('hidden');
+  btn.dataset.total = String(breakdown.total);
+  // 팝업이 이미 열려 있으면 내용도 함께 갱신합니다.
+  if(!$('#ratingsBreakdownPopup')?.classList.contains('hidden')) renderRatingsBreakdownPopup(breakdown);
+}
+function renderRatingsBreakdownPopup(breakdown){
+  const popup = $('#ratingsBreakdownPopup');
+  if(!popup) return;
+  const scoreRow = (cls,label,count) => `<div class="ratings-breakdown-row"><span class="tier-dot ${cls}"></span><span class="ratings-breakdown-name">${label}</span><span class="ratings-breakdown-count">${count}</span></div>`;
+  popup.innerHTML = `
+    <div class="ratings-breakdown-title">${t('ratings_by_score')}</div>
+    ${scoreRow('rating-tier-red','1 ~ 3',breakdown.tiers.red)}
+    ${scoreRow('rating-tier-orange','3.1 ~ 6',breakdown.tiers.orange)}
+    ${scoreRow('rating-tier-yellow','6.1 ~ 7.9',breakdown.tiers.yellow)}
+    ${scoreRow('rating-tier-green','8 ~ 10',breakdown.tiers.green)}
+    <div class="ratings-breakdown-divider"></div>
+    <div class="ratings-breakdown-title">${t('ratings_by_type')}</div>
+    ${scoreRow('type-dot-movie',t('badge_movie'),breakdown.types.movie)}
+    ${scoreRow('type-dot-drama',t('drama'),breakdown.types.drama)}
+    ${scoreRow('type-dot-anime',t('anime'),breakdown.types.anime)}
+  `;
+}
+function closeRatingsBreakdownPopup(){
+  const popup = $('#ratingsBreakdownPopup');
+  const btn = $('#ratingsCountBtn');
+  popup?.classList.add('hidden');
+  btn?.setAttribute('aria-expanded','false');
+}
+function initRatingsCountPopup(){
+  const btn = $('#ratingsCountBtn');
+  const popup = $('#ratingsBreakdownPopup');
+  if(!btn || !popup) return;
+  // 헤더의 backdrop-filter로 인해 position:fixed 자식 요소의 좌표 기준이 어긋나는 문제를
+  // 피하기 위해 body로 옮겨서(portal) 항상 뷰포트 기준 좌표로만 위치시킵니다.
+  if(popup.parentElement !== document.body) document.body.appendChild(popup);
+  const isOpen = () => !popup.classList.contains('hidden');
+  const openPopup = () => {
+    renderRatingsBreakdownPopup(computeRatingsBreakdown(getRatingsSync()));
+    const rect = btn.getBoundingClientRect();
+    popup.style.top = `${rect.bottom + 6}px`;
+    popup.style.left = `${rect.left}px`;
+    popup.classList.remove('hidden');
+    btn.setAttribute('aria-expanded','true');
+  };
+  btn.addEventListener('click', e=>{
+    e.preventDefault(); e.stopPropagation();
+    isOpen() ? closeRatingsBreakdownPopup() : openPopup();
+  });
+  document.addEventListener('click', e=>{
+    if(!btn.contains(e.target) && !popup.contains(e.target)) closeRatingsBreakdownPopup();
+  });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && isOpen()) closeRatingsBreakdownPopup(); });
+  window.addEventListener('scroll', ()=>{ if(isOpen()) closeRatingsBreakdownPopup(); }, true);
+  window.addEventListener('resize', ()=>{ if(isOpen()) closeRatingsBreakdownPopup(); });
 }
 
 /* Filter badge indicator */
@@ -1659,14 +1800,17 @@ function bindEvents() {
 
   $('#btnFav').addEventListener('click', async()=>{
     if(PAGE_STATE.lastMode==='saved-fav'){setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
+    LIBRARY_TYPE_FILTER='all'; setLibraryTypeTabsActive('all');
     setSavedModeUI('fav'); await showSaved('fav');
   });
   $('#btnWatch').addEventListener('click', async()=>{
     if(PAGE_STATE.lastMode==='saved-watch'){setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
+    LIBRARY_TYPE_FILTER='all'; setLibraryTypeTabsActive('all');
     setSavedModeUI('watch'); await showSaved('watch');
   });
   $('#btnRatings').addEventListener('click', async()=>{
     if(PAGE_STATE.lastMode==='ratings'){setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
+    LIBRARY_TYPE_FILTER='all'; setLibraryTypeTabsActive('all');
     CONTENT_TYPE = 'all';
     $$('.type-tabs .tab').forEach(b=>{ const on=b.dataset.type==='all'; b.classList.toggle('active',on); b.setAttribute('aria-selected',on?'true':'false'); });
     await showRatings();
@@ -1675,6 +1819,7 @@ function bindEvents() {
 
   $('#searchForm').addEventListener('submit', async e=>{
     e.preventDefault();
+    clearTimeout(liveSearchTimer);
     await executeSearchFromInput();
     closeSuggest();
   });
@@ -1744,20 +1889,26 @@ function bindEvents() {
 function initAutocomplete() {
   const input=$('#searchInput'), box=$('#suggestBox');
   input.addEventListener('input', ()=>{
-    clearTimeout(acTimer); const q=input.value.trim(); if(!q || (IS_MOBILE && q.length < 2)){closeSuggest();return;}
-    acTimer=setTimeout(async()=>{
-      acCtrl?.abort(); acCtrl=new AbortController();
-      try{
-        const j=await fetchJson(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=${tmdbLang()}&query=${encodeURIComponent(q)}&page=1`,{signal:acCtrl.signal});
-        renderSuggest((j.results||[]).filter(r=>['movie','tv','person'].includes(r.media_type)).slice(0, IS_MOBILE ? 5 : 8));
-      }catch{}
-    }, IS_MOBILE ? 420 : 220);
+    clearTimeout(acTimer); const q=input.value.trim(); if(!q || (IS_MOBILE && q.length < 2)){closeSuggest();}
+    else{
+      acTimer=setTimeout(async()=>{
+        acCtrl?.abort(); acCtrl=new AbortController();
+        try{
+          const j=await fetchJson(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=${tmdbLang()}&query=${encodeURIComponent(q)}&page=1`,{signal:acCtrl.signal});
+          renderSuggest((j.results||[]).filter(r=>['movie','tv','person'].includes(r.media_type)).slice(0, IS_MOBILE ? 5 : 8));
+        }catch{}
+      }, IS_MOBILE ? 420 : 220);
+    }
+    // 실시간 검색: 입력을 멈추면 검색 버튼을 누르지 않아도 자동으로 검색이 실행됩니다.
+    // 검색어를 지우면 검색 상태에서 빠져나와 원래 탐색 화면으로 자동 복귀합니다.
+    clearTimeout(liveSearchTimer);
+    liveSearchTimer=setTimeout(()=>{ executeSearchFromInput(); }, IS_MOBILE ? 550 : 450);
   });
   input.addEventListener('keydown', e=>{
     const items=$$('#suggestBox .sitem'); if(!items.length)return;
     if(e.key==='ArrowDown'){acIndex=(acIndex+1)%items.length;updateActive(items);e.preventDefault();}
     else if(e.key==='ArrowUp'){acIndex=(acIndex-1+items.length)%items.length;updateActive(items);e.preventDefault();}
-    else if(e.key==='Enter'){if(acIndex>=0){input.value=items[acIndex].dataset.label;executeSearchFromInput();closeSuggest();e.preventDefault();}}
+    else if(e.key==='Enter'){if(acIndex>=0){clearTimeout(liveSearchTimer);input.value=items[acIndex].dataset.label;executeSearchFromInput();closeSuggest();e.preventDefault();}}
     else if(e.key==='Escape'){closeSuggest();}
   });
   document.addEventListener('click', e=>{if(!box.contains(e.target)&&e.target!==input)closeSuggest();});
@@ -1765,7 +1916,7 @@ function initAutocomplete() {
     if(!list || !list.length){ closeSuggest(); return; }
     box.innerHTML=list.map(r=>{const label=r.media_type==='person'?(r.name||''):(r.title||r.name||'');return`<div class="sitem" role="option" data-label="${escapeHtml(label)}">${escapeHtml(label)}</div>`;}).join('');
     box.classList.remove('hidden'); acIndex=-1;
-    $$('#suggestBox .sitem').forEach(el=>el.addEventListener('click',async()=>{input.value=el.dataset.label;await executeSearchFromInput();closeSuggest();}));
+    $$('#suggestBox .sitem').forEach(el=>el.addEventListener('click',async()=>{clearTimeout(liveSearchTimer);input.value=el.dataset.label;await executeSearchFromInput();closeSuggest();}));
   }
   function updateActive(items){items.forEach((el,i)=>el.setAttribute('aria-selected',i===acIndex?'true':'false'));}
   function closeSuggest(){box.classList.add('hidden');box.innerHTML='';acIndex=-1;}
@@ -2169,7 +2320,8 @@ function normalizeSavedItem(item){
     poster_path: item.poster_path || '',
     vote_average: Number(item.vote_average || 0),
     release_date: item.release_date || item.first_air_date || '',
-    popularity: Number(item.popularity || 0)
+    popularity: Number(item.popularity || 0),
+    genre_ids: Array.isArray(item.genre_ids) ? item.genre_ids.filter(n=>Number.isFinite(n)) : []
   };
 }
 function normalizeSavedList(list){
@@ -2472,6 +2624,7 @@ async function refreshRatingBadges(){
       setRateButtonVisual(card.querySelector('.rate-btn'), null);
     }
   });
+  if(PAGE_STATE.lastMode === 'ratings') updateRatingsCountBadge();
 }
 /* 평점 점수 옆에 실시간으로 채워지는 별점 미리보기(별 1개 = 2점) */
 function ratingStarPreviewMarkup(){
@@ -2908,14 +3061,14 @@ async function showRatings(){
   const maps = ratingCachedMaps(list);
   if(maps.cached?.items?.length){
     // 이미 리졸브(포스터 확인)된 캐시가 있으면 바로 보여줍니다 — 대기 없음.
-    const cachedItems = clientSort(filterByCurrentQuery(maps.cached.items || []), 'user_rating_value');
+    const cachedItems = clientSort(filterByCurrentQuery(applyLibraryTypeFilter(maps.cached.items || [], true)), 'user_rating_value');
     if(cachedItems.length){
       renderCards(cachedItems, false, { skipEnrich: true, skipRatingRefresh: true });
       setStatus('');
       maybeToastImportStats((maps.cached.items || []).length, maps.cached.stats);
       return;
     }
-    if(PAGE_STATE.query){
+    if(PAGE_STATE.query || LIBRARY_TYPE_FILTER !== 'all'){
       renderEmptyState();
       setStatus('');
       maybeToastImportStats((maps.cached.items || []).length, maps.cached.stats);
@@ -2933,9 +3086,9 @@ async function showRatings(){
   const sortedResolved = clientSort(resolved || [], 'user_rating_value');
   setCachedRatingView(list, sortedResolved, resolved._ratingStats || null);
   clearSkeletons();
-  const visible = filterByCurrentQuery(sortedResolved);
+  const visible = filterByCurrentQuery(applyLibraryTypeFilter(sortedResolved, true));
   if(!visible.length){
-    PAGE_STATE.query ? renderEmptyState() : renderRatingFallbackEmpty();
+    (PAGE_STATE.query || LIBRARY_TYPE_FILTER !== 'all') ? renderEmptyState() : renderRatingFallbackEmpty();
     setStatus('');
     return;
   }
@@ -3067,7 +3220,7 @@ function renderCards(items,append,options={}){
     const userRatingNote=String(it.user_rating_note || '').trim();
     const badgeCls=userRatingType==='anime'?'badge badge-anime':type==='tv'?'badge badge-tv':'badge';
     const badgeLabel=userRatingType==='anime'?t('anime'):(type==='movie'?t('badge_movie'):t('badge_tv'));
-    return`<div class="card" data-type="${type}" data-id="${it.id}" data-key="${key}" data-title="${escapeHtml(title)}" data-rating-id="${escapeHtml(ratingId)}" data-rating-title="${escapeHtml(ratingTitle)}" data-rating-type="${escapeHtml(userRatingType)}" data-user-rating="${hasUserRating?userRatingValue.toFixed(1):''}" data-user-note="${escapeHtml(userRatingNote)}" data-poster="${escapeHtml(it.poster_path||'')}" data-date="${escapeHtml(it.release_date||it.first_air_date||'')}" data-vote="${it.vote_average||0}">
+    return`<div class="card" data-type="${type}" data-id="${it.id}" data-key="${key}" data-title="${escapeHtml(title)}" data-rating-id="${escapeHtml(ratingId)}" data-rating-title="${escapeHtml(ratingTitle)}" data-rating-type="${escapeHtml(userRatingType)}" data-user-rating="${hasUserRating?userRatingValue.toFixed(1):''}" data-user-note="${escapeHtml(userRatingNote)}" data-poster="${escapeHtml(it.poster_path||'')}" data-date="${escapeHtml(it.release_date||it.first_air_date||'')}" data-vote="${it.vote_average||0}" data-genre-ids="${(Array.isArray(it.genre_ids)?it.genre_ids:[]).join(',')}">
       <div class="thumb">${img?`<img src="${img}" alt="${escapeHtml(title)}" loading="lazy" decoding="async" fetchpriority="low">`:`<div class="thumb-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>${t('poster_none')}</span></div>`}<div class="thumb-top-info"><div class="thumb-badge-action"><span class="${badgeCls}">${escapeHtml(badgeLabel)}</span><div class="card-actions"><button class="action-btn fav-btn" type="button" aria-pressed="false" aria-label="${t('favorite')} ${t('not_selected')}" title="${t('favorite')} ${t('not_selected')}"><span class="btn-glyph">${actionHeartSvg(false)}</span></button><button class="action-btn watch-btn" type="button" aria-pressed="false" aria-label="${t('watch_later')} ${t('not_selected')}" title="${t('watch_later')} ${t('not_selected')}"><span class="btn-glyph">${actionClockSvg(false)}</span></button><button class="action-btn rate-btn${hasUserRating?' active':''}" type="button" aria-pressed="${hasUserRating?'true':'false'}" aria-label="${hasUserRating?`${t('my_rating')} ${userRatingValue.toFixed(1)}`:t('rate_this')}" title="${hasUserRating?`${t('my_rating')} ${userRatingValue.toFixed(1)}`:t('rate_this')}"><span class="btn-glyph">${actionStarSvg(hasUserRating)}</span></button></div></div><span class="card-user-rating user-rating-score${hasUserRating?' '+ratingTierClass(userRatingValue):''}${hasUserRating?'':' hidden'}"${hasUserRating?` title="${t('my_rating')} ${userRatingValue.toFixed(1)}" aria-label="${t('my_rating')} ${userRatingValue.toFixed(1)}"`:''}>${hasUserRating?`★ ${userRatingValue.toFixed(1)}`:''}</span></div></div>
       <div class="meta">
         <div class="name" title="${escapeHtml(title)}">${escapeHtml(title)||'&nbsp;'}</div>
@@ -3122,7 +3275,7 @@ function renderCards(items,append,options={}){
   }
   if(!options.skipRatingRefresh) refreshRatingBadges();
 }
-function pickStub(card){ return{id:Number(card.getAttribute('data-id')),media_type:card.getAttribute('data-type'),title:card.querySelector('.name').textContent.trim(),poster_path:card.getAttribute('data-poster')||'',vote_average:parseFloat(card.getAttribute('data-vote')||'0'),release_date:card.getAttribute('data-date')||''}; }
+function pickStub(card){ return{id:Number(card.getAttribute('data-id')),media_type:card.getAttribute('data-type'),title:card.querySelector('.name').textContent.trim(),poster_path:card.getAttribute('data-poster')||'',vote_average:parseFloat(card.getAttribute('data-vote')||'0'),release_date:card.getAttribute('data-date')||'',genre_ids:(card.getAttribute('data-genre-ids')||'').split(',').filter(Boolean).map(Number)}; }
 function reflectUI(card,list,kind){
   const set=new Set(list.map(x=>x.k));
   setActionButtonVisual(card.querySelector(kind==='fav'?'.fav-btn':'.watch-btn'), kind, set.has(card.getAttribute('data-key')));
@@ -3224,9 +3377,8 @@ async function showSaved(kind){
   const list = await getSaved(kind);
   if(!list.length){ renderEmptyState(); return; }
 
-  // 탭 필터만 적용 (장르/국가 필터 미적용)
-  let items = list.slice();
-  if(CONTENT_TYPE!=='all' && CONTENT_TYPE!=='anime') items = items.filter(x=>x.media_type===CONTENT_TYPE);
+  // 탭 필터 대신 내 평점/즐겨찾기 화면 전용 종류 필터(모두/영화/드라마/애니)를 적용합니다.
+  let items = applyLibraryTypeFilter(list.slice(), false);
   items = filterByCurrentQuery(items);
   if(!items.length){ renderEmptyState(); return; }
 
@@ -3245,7 +3397,8 @@ async function showSaved(kind){
     poster_path: x.poster_path,
     vote_average: x.vote_average||0,
     release_date: x.release_date||'',
-    popularity: x.popularity||0
+    popularity: x.popularity||0,
+    genre_ids: x.genre_ids||[]
   })), false);
   setStatus('');
 }
@@ -3390,7 +3543,7 @@ async function openDetail(type,id,sourceEl=null){
     const genres=(data.genres||[]).map(g=>g.name).filter(Boolean);
     const releaseDate=data.release_date||data.first_air_date||'';
     const detailChips=[
-      (data.original_language||'').toUpperCase(),
+      languageDisplayName(data.original_language),
       data.runtime?`${data.runtime}${t('runtime_min')}`:'',
       data.number_of_seasons?`${t('season_label')} ${data.number_of_seasons}`:'',
       releaseDate,
