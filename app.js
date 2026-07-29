@@ -25,6 +25,7 @@ const I18N = {
     offline_using_cache:'오프라인: 마지막 결과를 표시합니다.',
     toast_reset:'초기화 완료', toast_saved:'저장됨', toast_removed:'삭제됨',
     toast_save_failed:'저장 실패: 브라우저 저장 공간을 정리한 뒤 다시 시도해주세요.',
+    toast_save_blocked:'저장 실패: 이 브라우저(시크릿/프라이빗 모드이거나 사이트 데이터 차단 설정)에서 로컬 저장이 막혀 있습니다.',
     badge_movie:'영화', badge_tv:'드라마', poster_none:'포스터 없음', year_unknown:'연도 미상',
     modal_overview:'개요', modal_description:'설명', modal_trailer:'예고편', modal_cast:'출연', modal_crew:'제작',
     modal_providers:'시청 가능', modal_buy:'구매', modal_rent:'대여', modal_open_tmdb:'TMDB에서 보기',
@@ -94,6 +95,7 @@ const I18N = {
     offline_using_cache:'Offline: showing cached results.',
     toast_reset:'Reset complete', toast_saved:'Saved', toast_removed:'Removed',
     toast_save_failed:'Save failed: clear browser storage and try again.',
+    toast_save_blocked:'Save failed: local storage is blocked in this browser (private/incognito mode or site data settings).',
     badge_movie:'Movie', badge_tv:'TV', poster_none:'No poster', year_unknown:'Unknown year',
     modal_overview:'Overview', modal_description:'Description', modal_trailer:'Trailer', modal_cast:'Cast', modal_crew:'Crew',
     modal_providers:'Available On', modal_buy:'Buy', modal_rent:'Rent', modal_open_tmdb:'Open on TMDB',
@@ -163,6 +165,7 @@ const I18N = {
     offline_using_cache:'オフライン: キャッシュを表示します。',
     toast_reset:'リセット完了', toast_saved:'保存済み', toast_removed:'削除済み',
     toast_save_failed:'保存に失敗しました。ブラウザの保存容量を整理して再試行してください。',
+    toast_save_blocked:'保存に失敗しました。このブラウザ（プライベートモードまたはサイトデータのブロック設定）ではローカル保存が無効になっています。',
     badge_movie:'映画', badge_tv:'ドラマ', poster_none:'ポスターなし', year_unknown:'年不明',
     modal_overview:'概要', modal_description:'説明', modal_trailer:'予告編', modal_cast:'キャスト', modal_crew:'スタッフ',
     modal_providers:'視聴可能', modal_buy:'購入', modal_rent:'レンタル', modal_open_tmdb:'TMDBで開く',
@@ -232,6 +235,7 @@ const I18N = {
     offline_using_cache:'离线: 显示上次结果。',
     toast_reset:'重置完成', toast_saved:'已保存', toast_removed:'已删除',
     toast_save_failed:'保存失败：请清理浏览器存储后重试。',
+    toast_save_blocked:'保存失败：此浏览器（隐身/隐私模式或已阻止网站数据）已禁用本地存储。',
     badge_movie:'电影', badge_tv:'剧集', poster_none:'无海报', year_unknown:'年份未知',
     modal_overview:'概述', modal_description:'说明', modal_trailer:'预告片', modal_cast:'演员', modal_crew:'主创',
     modal_providers:'可观看', modal_buy:'购买', modal_rent:'租借', modal_open_tmdb:'在TMDB打开',
@@ -301,6 +305,7 @@ const I18N = {
     offline_using_cache:'Hors ligne : affichage du cache.',
     toast_reset:'Réinitialisé', toast_saved:'Sauvegardé', toast_removed:'Supprimé',
     toast_save_failed:'Échec de sauvegarde : libérez le stockage du navigateur puis réessayez.',
+    toast_save_blocked:'Échec de sauvegarde : le stockage local est bloqué dans ce navigateur (mode privé ou données de site bloquées).',
     badge_movie:'Film', badge_tv:'Série', poster_none:'Pas d\'affiche', year_unknown:'Année inconnue',
     modal_overview:'Aperçu', modal_description:'Description', modal_trailer:'Bande-annonce', modal_cast:'Acteurs', modal_crew:'Équipe',
     modal_providers:'Disponible sur', modal_buy:'Acheter', modal_rent:'Louer', modal_open_tmdb:'Ouvrir sur TMDB',
@@ -486,6 +491,27 @@ function isQuotaError(err) {
     err.code === 1014
   );
 }
+// 저장 실패의 실제 원인을 기록해둡니다. localStorage 저장 실패는 "용량 부족"만이
+// 원인이 아니라, 시크릿/프라이빗 모드(브라우저가 저장 자체를 막아버림)나 브라우저
+// 설정에서 사이트 데이터를 차단해둔 경우도 있는데, 두 경우 모두 겉으로는 같은
+// QuotaExceededError로 보일 수 있어 원인을 구분해서 정확한 안내를 보여줍니다.
+let LAST_SAVE_ERROR = null;
+function detectStorageBlocked(){
+  // 프라이빗/시크릿 모드 등에서는 아주 작은 데이터조차 저장이 안 되는 경우가 많아,
+  // 이걸로 "용량 부족"과 "저장 자체가 차단됨"을 구분합니다.
+  try {
+    const probeKey = '__cinefinder_probe__';
+    localStorage.setItem(probeKey, '1');
+    localStorage.removeItem(probeKey);
+    return false;
+  } catch {
+    return true;
+  }
+}
+function saveFailedToastMessage(){
+  if(LAST_SAVE_ERROR?.reason === 'blocked') return t('toast_save_blocked');
+  return t('toast_save_failed');
+}
 function clearVolatileStorageForSave() {
   // 즐겨찾기/나중에 보기/평점 저장 실패의 주 원인은 결과/제목/포스터/매칭 캐시가
   // localStorage 용량을 차지하는 케이스입니다. 사용자 저장 목록(즐겨찾기·나중에 보기·평점)은
@@ -514,15 +540,27 @@ function safeSetJsonItem(key, value) {
   const json = JSON.stringify(value);
   try {
     localStorage.setItem(key, json);
+    LAST_SAVE_ERROR = null;
     return true;
   } catch (err) {
     if (isQuotaError(err)) {
       clearVolatileStorageForSave();
       try {
         localStorage.setItem(key, json);
+        LAST_SAVE_ERROR = null;
         return true;
-      } catch {}
+      } catch (err2) {
+        // 캐시를 다 지운 뒤에도 실패하면, 정말 큰 데이터라 용량이 부족한 건지
+        // 아니면 저장 자체가 브라우저에서 막혀있는 건지 작은 값으로 다시 확인합니다.
+        const blocked = detectStorageBlocked();
+        LAST_SAVE_ERROR = { reason: blocked ? 'blocked' : 'quota' };
+        console.error('[cinefinder] localStorage save failed after cache cleanup', { key, blocked, error: err2 });
+        return false;
+      }
     }
+    const blocked = detectStorageBlocked();
+    LAST_SAVE_ERROR = { reason: blocked ? 'blocked' : 'other', message: String(err?.message || err) };
+    console.error('[cinefinder] localStorage save failed (non-quota error)', { key, blocked, error: err });
     return false;
   }
 }
@@ -2124,7 +2162,7 @@ function updateSavedButtons(kind, list){
 async function toggleSaved(kind,item){
   const current = await getSaved(kind);
   const savedItem = normalizeSavedItem(item);
-  if(!savedItem){ showToast(t('toast_save_failed'), 2600); return current; }
+  if(!savedItem){ showToast(saveFailedToastMessage(), 2600); return current; }
   const idx = current.findIndex(x=>x.k===savedItem.k);
   const next = current.slice();
   const willRemove = idx >= 0;
@@ -2132,7 +2170,7 @@ async function toggleSaved(kind,item){
   else next.push(savedItem);
 
   const ok = await setSaved(kind,next);
-  if(!ok){ showToast(t('toast_save_failed'), 2800); return current; }
+  if(!ok){ showToast(saveFailedToastMessage(), 2800); return current; }
 
   showToast(willRemove ? t('toast_removed') : t('toast_saved'));
   if(PAGE_STATE.lastMode===`saved-${kind}`) await showSaved(kind);
@@ -2264,7 +2302,7 @@ async function upsertRating(source){
   } else {
     next.push(item);
   }
-  if(!await setRatings(next)){ showToast(t('toast_save_failed'), 2800); return null; }
+  if(!await setRatings(next)){ showToast(saveFailedToastMessage(), 2800); return null; }
   showToast(t('toast_rating_saved'));
   // 평점/메모를 수정할 때 "내 평점" 화면 전체를 다시 불러오면(순위 재조회 등으로) 몇 초씩
   // 걸리고, 이 동안 다른 카드를 편집하면 상태가 꼬이는 문제가 있었습니다. 이미 화면에 보이는
@@ -2279,7 +2317,7 @@ async function removeRating(source){
   const removed = list[idx];
   const next = list.slice();
   next.splice(idx, 1);
-  if(!await setRatings(next)){ showToast(t('toast_save_failed'), 2800); return; }
+  if(!await setRatings(next)){ showToast(saveFailedToastMessage(), 2800); return; }
   showToast(t('toast_rating_removed'));
   await refreshRatingBadges();
   // 평점을 완전히 삭제하면 "내 평점" 화면에서는 더 이상 보일 이유가 없는 카드이므로,
@@ -2919,7 +2957,7 @@ async function importRatings(file){
         next.push(item);
       }
     });
-    if(!await setRatings(next)){ showToast(t('toast_save_failed'), 2800); return; }
+    if(!await setRatings(next)){ showToast(saveFailedToastMessage(), 2800); return; }
     PENDING_RATING_IMPORT_STATS_TOAST = true;
     await refreshRatingBadges();
     if(PAGE_STATE.lastMode === 'ratings') await showRatings();
@@ -2933,7 +2971,7 @@ async function clearRatingsList(){
   if(!list.length){ showToast(t('no_my_ratings')); return; }
   if(!confirm(tf('confirm_delete_list', {name: t('my_ratings'), count: list.length}))) return;
   clearRatingViewCache();
-  if(!await setRatings([])){ showToast(t('toast_save_failed'), 2800); return; }
+  if(!await setRatings([])){ showToast(saveFailedToastMessage(), 2800); return; }
   showToast(t('toast_rating_removed'), 2200);
   await refreshRatingBadges();
   if(PAGE_STATE.lastMode === 'ratings') await showRatings();
@@ -3068,7 +3106,7 @@ async function clearSavedList(kind) {
   }
   // 확인 다이얼로그
   if (!confirm(tf('confirm_delete_list', {name: kindName, count: list.length}))) return;
-  if(!await setSaved(kind, [])){ showToast(t('toast_save_failed'), 2800); return; }
+  if(!await setSaved(kind, [])){ showToast(saveFailedToastMessage(), 2800); return; }
   showToast(tf('toast_list_cleared', {name: kindName}), 2200);
   // 현재 화면 갱신
   if (PAGE_STATE.lastMode === `saved-${kind}`) {
@@ -3133,7 +3171,7 @@ async function importSaved(file, kind) {
     const merged = Array.from(map.values());
     const added  = merged.length - cur.length;
 
-    if(!await setSaved(kind, merged)){ showToast(t('toast_save_failed'), 2800); return; }
+    if(!await setSaved(kind, merged)){ showToast(saveFailedToastMessage(), 2800); return; }
     showToast(tf('toast_import_done', {name: kindName, count: added}), 2400);
 
     // 현재 화면 갱신
