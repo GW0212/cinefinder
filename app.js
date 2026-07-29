@@ -3187,20 +3187,32 @@ function setActionButtonVisual(btn,kind,active){
 // 현재 그리드에 이미 렌더링된 항목의 키를 추적해 중복을 걸러냅니다.
 let RENDERED_CARD_KEYS = new Set();
 // TMDB에 같은 작품이 서로 다른 id로 중복 등록된 경우(특히 발표 전 신작)도 있어,
-// id가 달라도 제목+연도+종류가 완전히 같으면 한 번만 보여주도록 추가로 걸러냅니다.
-let RENDERED_CARD_TITLE_KEYS = new Set();
+// id가 달라도 원제(언어에 상관없이 항상 같은 값)가 같으면 한 번만 보여주도록 추가로
+// 걸러냅니다. 번역된 제목(title/name)은 항목마다 번역 등록 여부가 달라 언어가 서로
+// 다르게 나올 수 있어서, 원제(original_title/original_name) 기준으로 비교합니다.
+// 연도는 둘 중 하나라도 비어있거나 서로 같을 때만 "중복"으로 판단해서, 같은 제목의
+// 리메이크처럼 실제로 다른 작품까지 하나로 합쳐버리지 않도록 합니다.
+let RENDERED_CARD_TITLE_YEARS = new Map();
 function renderCards(items,append,options={}){
-  if(!append){ RENDERED_CARD_KEYS = new Set(); RENDERED_CARD_TITLE_KEYS = new Set(); }
+  if(!append){ RENDERED_CARD_KEYS = new Set(); RENDERED_CARD_TITLE_YEARS = new Map(); }
   const items_ = (items||[]).filter(it=>{
     const type=it.media_type||(it.first_air_date?'tv':'movie');
     const key=`${type}-${it.id}`;
     if(RENDERED_CARD_KEYS.has(key)) return false;
-    const rawTitle=cleanTitle(it.title||it.name||it.original_title||it.original_name||'');
+    const originalTitle=cleanTitle(it.original_title||it.original_name||it.title||it.name||'');
     const year=(it.release_date||it.first_air_date||'').slice(0,4);
-    const titleKey=rawTitle?`${type}::${ratingTitleKey(rawTitle)}::${year}`:'';
-    if(titleKey && RENDERED_CARD_TITLE_KEYS.has(titleKey)) return false;
+    const titleKey=originalTitle?`${type}::${ratingTitleKey(originalTitle)}`:'';
+    if(titleKey){
+      const seenYears=RENDERED_CARD_TITLE_YEARS.get(titleKey);
+      if(seenYears){
+        const isDuplicate = !year || seenYears.has('') || seenYears.has(year);
+        if(isDuplicate) return false;
+        seenYears.add(year);
+      } else {
+        RENDERED_CARD_TITLE_YEARS.set(titleKey, new Set([year]));
+      }
+    }
     RENDERED_CARD_KEYS.add(key);
-    if(titleKey) RENDERED_CARD_TITLE_KEYS.add(titleKey);
     return true;
   });
   if(!items_.length&&!append){
