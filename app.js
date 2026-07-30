@@ -62,6 +62,7 @@ const I18N = {
     sort_vote:"평점 높은순",
     sort_vote_asc:"평점 낮은순",
     sort_date:"최신순",
+    sort_random:"랜덤",
     crew_director:"감독",
     crew_writing:"각본",
     crew_production:"제작",
@@ -133,6 +134,7 @@ const I18N = {
     sort_vote:"Highest rated",
     sort_vote_asc:"Lowest rated",
     sort_date:"Latest",
+    sort_random:"Random",
     crew_director:"Director",
     crew_writing:"Writing",
     crew_production:"Production",
@@ -204,6 +206,7 @@ const I18N = {
     sort_vote:"評価が高い順",
     sort_vote_asc:"評価が低い順",
     sort_date:"最新順",
+    sort_random:"ランダム",
     crew_director:"監督",
     crew_writing:"脚本",
     crew_production:"制作",
@@ -275,6 +278,7 @@ const I18N = {
     sort_vote:"评分从高到低",
     sort_vote_asc:"评分从低到高",
     sort_date:"最新",
+    sort_random:"随机",
     crew_director:"导演",
     crew_writing:"编剧",
     crew_production:"制作",
@@ -346,6 +350,7 @@ const I18N = {
     sort_vote:"Mieux notés",
     sort_vote_asc:"Moins bien notés",
     sort_date:"Récent",
+    sort_random:"Aléatoire",
     crew_director:"Réalisation",
     crew_writing:"Écriture",
     crew_production:"Production",
@@ -1408,6 +1413,7 @@ function applyI18n() {
   const sortVote=$('.sort-option[data-value="vote_average.desc"]'); if(sortVote)sortVote.textContent=t('sort_vote');
   const sortVoteAsc=$('.sort-option[data-value="vote_average.asc"]'); if(sortVoteAsc)sortVoteAsc.textContent=t('sort_vote_asc');
   const sortDate=$('.sort-option[data-value="date.desc"]'); if(sortDate)sortDate.textContent=t('sort_date');
+  const sortRandom=$('.sort-option[data-value="random"]'); if(sortRandom)sortRandom.textContent=t('sort_random');
   syncSortSelectDisplay();
 
   // 접근성 라벨/타이틀 (언어 전환 시에도 갱신)
@@ -2148,15 +2154,32 @@ async function runDiscover(clear){
   // "모두" 탭: 반대 타입에만 포함 장르가 있으면 해당 API 요청 스킵
   const skipMovie = CONTENT_TYPE==='all' && TV_INC.size>0 && MOVIE_INC.size===0;
   const skipTV    = CONTENT_TYPE==='all' && MOVIE_INC.size>0 && TV_INC.size===0;
-  if((CONTENT_TYPE==='all'&&!skipMovie)||CONTENT_TYPE==='movie'||CONTENT_TYPE==='anime') tasks.push(fetchJson(`https://api.themoviedb.org/3/discover/movie?${buildDiscoverParams('movie',PAGE_STATE.pageMovie)}`));
-  if((CONTENT_TYPE==='all'&&!skipTV)||CONTENT_TYPE==='tv'||CONTENT_TYPE==='anime')       tasks.push(fetchJson(`https://api.themoviedb.org/3/discover/tv?${buildDiscoverParams('tv',PAGE_STATE.pageTV)}`));
+  // 랜덤 정렬일 때는 페이지 자체를 무작위로 뽑아서, 새로고침하거나 탭에 다시 들어올 때마다
+  // (스크롤로 더 불러올 때도) 매번 다른 작품들이 나오도록 합니다.
+  const isRandom = SORT_BY==='random';
+  const moviePage = isRandom ? randomDiscoverPage() : PAGE_STATE.pageMovie;
+  const tvPage    = isRandom ? randomDiscoverPage() : PAGE_STATE.pageTV;
+  if((CONTENT_TYPE==='all'&&!skipMovie)||CONTENT_TYPE==='movie'||CONTENT_TYPE==='anime'){
+    const params=buildDiscoverParams('movie',moviePage).replace(/&page=\d+/,'');
+    tasks.push(isRandom
+      ? fetchDiscoverRandomPage(`https://api.themoviedb.org/3/discover/movie?${params}`,moviePage)
+      : fetchJson(`https://api.themoviedb.org/3/discover/movie?${buildDiscoverParams('movie',moviePage)}`));
+  }
+  if((CONTENT_TYPE==='all'&&!skipTV)||CONTENT_TYPE==='tv'||CONTENT_TYPE==='anime'){
+    const params=buildDiscoverParams('tv',tvPage).replace(/&page=\d+/,'');
+    tasks.push(isRandom
+      ? fetchDiscoverRandomPage(`https://api.themoviedb.org/3/discover/tv?${params}`,tvPage)
+      : fetchJson(`https://api.themoviedb.org/3/discover/tv?${buildDiscoverParams('tv',tvPage)}`));
+  }
   try{
     let merged=mergeResults(await Promise.all(tasks));
     if(isStale(token))return;
     if(CONTENT_TYPE!=='all' && CONTENT_TYPE!=='anime')merged=merged.filter(x=>x.media_type===CONTENT_TYPE);
     merged=limitPageItemsForDevice(clientSort(await applyClientFiltersStrict(merged)));
     clearSkeletons(); renderCards(merged,!clear); setStatusIfEmpty(t('status_empty'));
-    if(CONTENT_TYPE==='all'||CONTENT_TYPE==='anime'){PAGE_STATE.pageMovie++;PAGE_STATE.pageTV++;}
+    if(SORT_BY==='random'){
+      // 다음 페이지도 계속 새로운 무작위 페이지를 쓰도록 별도 카운터는 그대로 둡니다.
+    } else if(CONTENT_TYPE==='all'||CONTENT_TYPE==='anime'){PAGE_STATE.pageMovie++;PAGE_STATE.pageTV++;}
     else if(CONTENT_TYPE==='movie')PAGE_STATE.pageMovie++;
     else PAGE_STATE.pageTV++;
     await saveCache({mode:'discover',items:merged,state:snapshotState()});
@@ -2238,10 +2261,30 @@ async function renderPersonFilmography(meta, clear){
   await saveCache({mode:'search',items:merged,state:snapshotState()});
 }
 
+// 랜덤 정렬용: TMDB discover가 지원하는 실제 최대 페이지(500페이지, 약 1만 개)까지 사용합니다.
+function randomDiscoverPage(){
+  return 1 + Math.floor(Math.random() * 500);
+}
+// 필터가 좁을 때는 실제 존재하는 페이지 수가 500보다 훨씬 적어서, 무작위로 고른 페이지에
+// 결과가 하나도 없을 수 있습니다. 이 경우 해당 쿼리의 실제 total_pages 범위 안에서
+// 다시 무작위로 골라 재시도합니다.
+async function fetchDiscoverRandomPage(baseUrl, page){
+  let res = await fetchJson(`${baseUrl}&page=${page}`);
+  const totalPages = Math.min(res.total_pages || 1, 500);
+  if((res.results||[]).length === 0 && page > totalPages && totalPages >= 1){
+    const retryPage = 1 + Math.floor(Math.random() * totalPages);
+    res = await fetchJson(`${baseUrl}&page=${retryPage}`);
+  }
+  return res;
+}
 function buildDiscoverParams(type,page){
   const p=new URLSearchParams();
   p.set('api_key',API_KEY); p.set('language',tmdbLang()); p.set('_lang',CUR_LANG); // 언어변경 캐시 bust
-  p.set('sort_by',SORT_BY==='date.desc'?(type==='movie'?'primary_release_date.desc':'first_air_date.desc'):SORT_BY);
+  // TMDB에는 "랜덤" 정렬이 없어서, 임의의 페이지를 요청하는 방식으로 랜덤을 구현합니다.
+  // 페이지 자체를 무작위로 고르기 때문에 정렬 기준 자체는 인기순으로 둡니다.
+  const sortByValue = SORT_BY==='date.desc' ? (type==='movie'?'primary_release_date.desc':'first_air_date.desc')
+    : SORT_BY==='random' ? 'popularity.desc' : SORT_BY;
+  p.set('sort_by',sortByValue);
   p.set('include_adult','false'); p.set('page',String(page||1));
   const inc = type==='movie' ? MOVIE_INC : TV_INC;
   const exc = type==='movie' ? MOVIE_EXC : TV_EXC;
@@ -2256,8 +2299,18 @@ function buildDiscoverParams(type,page){
   if(YEAR_FROM||YEAR_TO){if(type==='movie'){if(YEAR_FROM)p.set('primary_release_date.gte',`${YEAR_FROM}-01-01`);if(YEAR_TO)p.set('primary_release_date.lte',`${YEAR_TO}-12-31`);}else{if(YEAR_FROM)p.set('first_air_date.gte',`${YEAR_FROM}-01-01`);if(YEAR_TO)p.set('first_air_date.lte',`${YEAR_TO}-12-31`);}}
   return p.toString();
 }
+// Fisher-Yates 셔플 (매번 새로운 순서를 만듭니다)
+function shuffleArray(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
 function clientSort(list, ratingField='vote_average'){
   const usesPersonalRating = ratingField !== 'vote_average';
+  if(SORT_BY==='random') return shuffleArray(list);
   if(SORT_BY==='vote_average.desc'){
     // 평점 높은순: 개인 평점 정렬이 아닐 때만 투표 수 10개 미만 항목을 후순위로 보정
     return[...list].sort((a,b)=>{
@@ -3413,12 +3466,16 @@ async function showSaved(kind){
   if(!items.length){ renderEmptyState(); return; }
 
   // 정렬
-  items.sort((a,b)=>{
-    if(SORT_BY==='vote_average.desc') return (b.vote_average||0)-(a.vote_average||0);
-    if(SORT_BY==='vote_average.asc') return (a.vote_average||0)-(b.vote_average||0);
-    if(SORT_BY==='date.desc'){ const da=a.release_date||'',db=b.release_date||''; return db>da?1:db<da?-1:0; }
-    return (b.popularity||0)-(a.popularity||0);
-  });
+  if(SORT_BY==='random'){
+    items = shuffleArray(items);
+  } else {
+    items.sort((a,b)=>{
+      if(SORT_BY==='vote_average.desc') return (b.vote_average||0)-(a.vote_average||0);
+      if(SORT_BY==='vote_average.asc') return (a.vote_average||0)-(b.vote_average||0);
+      if(SORT_BY==='date.desc'){ const da=a.release_date||'',db=b.release_date||''; return db>da?1:db<da?-1:0; }
+      return (b.popularity||0)-(a.popularity||0);
+    });
+  }
 
   // 즉시 렌더링 (제목/포스터는 refreshCardTitles/Posters가 비동기 보완)
   renderCards(items.map(x=>({
