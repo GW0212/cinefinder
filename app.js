@@ -2434,6 +2434,15 @@ async function toggleSaved(kind,item){
 /* ═══════════════════════════════ USER RATINGS ═══════════════════════════════ */
 const RATING_TYPES = new Set(['movie','drama','anime']);
 const ratingTitleKey = title => cleanTitle(title || '').toLowerCase().replace(/\s+/g, ' ').trim();
+// TMDB의 진짜 숫자 id인지, 아니면 id가 없어서 제목으로 대신 만든 임시 id인지 구분합니다.
+// 제목만으로 병합하는 로직은 "진짜 id가 없을 때만" 적용해야, 이름이 같은 서로 다른
+// 작품(예: 애니메이션판과 실사 리메이크)이 하나로 합쳐지는 걸 막을 수 있습니다.
+function isRealRatingId(id){
+  const s = String(id ?? '').trim();
+  if(!s) return false;
+  const n = Number(s);
+  return Number.isFinite(n) && n > 0 && String(Math.trunc(n)) === s;
+}
 const contentTypeToRatingType = mediaType => mediaType === 'tv' ? 'drama' : (mediaType === 'anime' ? 'anime' : 'movie');
 const ratingTypeToMediaType = type => type === 'drama' ? 'tv' : (type === 'movie' ? 'movie' : 'anime');
 function normalizeRatingType(type){
@@ -2475,8 +2484,13 @@ function normalizeRatingList(list){
   (Array.isArray(list) ? list : []).forEach(x => {
     const item = normalizeRatingItem(x);
     if(!item) return;
-    const titleKey = `${item.type}::${ratingTitleKey(item.title)}`;
-    const duplicateKey = Array.from(map.entries()).find(([, v]) => `${v.type}::${ratingTitleKey(v.title)}` === titleKey)?.[0];
+    // 진짜 TMDB id가 있는 항목은 항상 그 id로만 구분합니다(이름이 같아도 다른 작품으로 유지).
+    // id가 없어서 제목으로 대체한 항목끼리만 제목 기준으로 병합합니다.
+    let duplicateKey;
+    if(!isRealRatingId(item.id)){
+      const titleKey = `${item.type}::${ratingTitleKey(item.title)}`;
+      duplicateKey = Array.from(map.entries()).find(([k, v]) => !isRealRatingId(v.id) && `${v.type}::${ratingTitleKey(v.title)}` === titleKey)?.[0];
+    }
     map.set(duplicateKey || item.k, item);
   });
   return Array.from(map.values());
@@ -2530,8 +2544,11 @@ function findRatingIndex(list, source){
   if(!src) return -1;
   let idx = list.findIndex(x => x.k === src.k || (x.id && src.id && String(x.id) === String(src.id) && x.type === src.type));
   if(idx >= 0) return idx;
+  // 제목만으로 매칭하는 건 진짜 TMDB id가 없을 때(예: id 없이 가져온 예전 데이터)만 허용합니다.
+  // 둘 다 실제 id가 있는데 이름만 같은 경우(애니메이션판/실사 리메이크 등)는 별개 작품으로 둡니다.
+  if(isRealRatingId(src.id)) return -1;
   const titleKey = ratingTitleKey(src.title);
-  return list.findIndex(x => x.type === src.type && ratingTitleKey(x.title) === titleKey);
+  return list.findIndex(x => x.type === src.type && !isRealRatingId(x.id) && ratingTitleKey(x.title) === titleKey);
 }
 function findRating(list, source){
   const idx = findRatingIndex(list, source);
@@ -2846,6 +2863,10 @@ function persistRatingMatchStore(){
   }catch{}
 }
 function ratingMatchCacheKey(item){
+  // 진짜 TMDB id가 있으면 그 id로 캐시 키를 만들어서, 이름이 같은 다른 작품과 캐시가
+  // 겹쳐 엉뚱한 포스터/정보가 나오는 일이 없도록 합니다. id가 없을 때만 제목으로 대체합니다.
+  const numericId = /^\d+$/.test(String(item.id || '').trim()) ? String(item.id).trim() : '';
+  if(numericId) return `${normalizeRatingType(item.type)}::id:${numericId}`;
   return `${normalizeRatingType(item.type)}::${ratingTitleKey(item.title)}`;
 }
 function simplifyRatingSearchTitle(title){
