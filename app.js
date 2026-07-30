@@ -681,16 +681,18 @@ let FAV_MEM = null, WATCH_MEM = null, RATINGS_MEM = null;
 async function loadPersistedListsIntoMemory(){
   const readList = async (key) => {
     let list = [];
+    let source = 'none';
     try {
       const raw = localStorage.getItem(key);
-      if(raw) list = JSON.parse(raw) || [];
+      if(raw){ list = JSON.parse(raw) || []; if(Array.isArray(list) && list.length) source = 'localStorage'; }
     } catch {}
     if(!Array.isArray(list) || !list.length){
       try {
         const idbList = await idbBackupGet(key);
-        if(Array.isArray(idbList) && idbList.length) list = idbList;
+        if(Array.isArray(idbList) && idbList.length){ list = idbList; source = 'IndexedDB'; }
       } catch {}
     }
+    console.log(`[cinefinder] load "${key}": ${Array.isArray(list)?list.length:0} item(s) from ${source}`);
     return Array.isArray(list) ? list : [];
   };
   FAV_MEM = normalizeSavedList(await readList(SK.favs));
@@ -706,12 +708,20 @@ async function persistListDual(key, list){
   try { idbOk = await idbBackupSet(key, list); } catch {}
   const success = localOk || idbOk;
   if(success) LAST_SAVE_ERROR = null; // localStorage만 실패했어도 IndexedDB에 잘 저장됐다면 실패로 취급하지 않습니다.
+  console.log(`[cinefinder] save "${key}": ${list?.length ?? 0} item(s) — localStorage=${localOk} IndexedDB=${idbOk}`);
   return success;
 }
-function requestPersistentStorage(){
+async function requestPersistentStorage(){
   try {
-    if(navigator?.storage?.persist) navigator.storage.persist().catch(()=>{});
-  } catch {}
+    if(!navigator?.storage?.persist){ console.warn('[cinefinder] Storage API not available in this browser (navigator.storage.persist missing).'); return; }
+    const already = await navigator.storage.persisted?.().catch(()=>false);
+    if(already){ console.log('[cinefinder] Storage is already persistent — safe from browser eviction.'); return; }
+    const granted = await navigator.storage.persist();
+    console.log(`[cinefinder] Persistent storage request ${granted ? 'GRANTED' : 'DENIED'}.`
+      + (granted ? '' : ' The browser may evict saved data (favorites/watchlist/ratings) under storage pressure or after inactivity — this is a browser policy, not an app bug. This is common when opening the file directly (file://) instead of via a real http(s) address; some browsers restrict persistent storage grants for file:// pages.'));
+  } catch(e) {
+    console.warn('[cinefinder] requestPersistentStorage failed:', e);
+  }
 }
 
 /* ═══════════════════════════════ UTILS ═══════════════════════════════ */
