@@ -1540,7 +1540,9 @@ function setSavedModeUI(mode) {
     }
   }
   if(mode === 'ratings') updateRatingsCountBadge();
-  else{
+  else if(mode === 'fav' || mode === 'watch'){
+    updateSavedCountBadge(mode);
+  } else{
     $('#ratingsCountBtn')?.classList.add('hidden');
     closeRatingsBreakdownPopup();
   }
@@ -1593,6 +1595,15 @@ function computeRatingsBreakdown(list){
   });
   return { total:(list||[]).length, tiers, types };
 }
+function computeSavedBreakdown(list){
+  const types = { movie:0, drama:0, anime:0 };
+  (list||[]).forEach(item=>{
+    if(savedItemIsAnime(item)) types.anime++;
+    else if(item?.media_type === 'tv') types.drama++;
+    else types.movie++;
+  });
+  return { total:(list||[]).length, types };
+}
 function updateRatingsCountBadge(){
   const btn = $('#ratingsCountBtn');
   if(!btn) return;
@@ -1601,20 +1612,44 @@ function updateRatingsCountBadge(){
   btn.textContent = tf('count_items', {count: breakdown.total});
   btn.classList.remove('hidden');
   btn.dataset.total = String(breakdown.total);
+  btn.dataset.mode = 'ratings';
+  btn.setAttribute('aria-label', `${t('my_ratings')} ${tf('count_items', {count: breakdown.total})}`);
   // 팝업이 이미 열려 있으면 내용도 함께 갱신합니다.
-  if(!$('#ratingsBreakdownPopup')?.classList.contains('hidden')) renderRatingsBreakdownPopup(breakdown);
+  if(!$('#ratingsBreakdownPopup')?.classList.contains('hidden')) renderRatingsBreakdownPopup(breakdown, 'ratings');
 }
-function renderRatingsBreakdownPopup(breakdown){
+function updateSavedCountBadge(kind, list=null){
+  const btn = $('#ratingsCountBtn');
+  if(!btn || !['fav','watch'].includes(kind)) return;
+  const source = Array.isArray(list) ? list : (kind==='fav' ? (FAV_MEM||[]) : (WATCH_MEM||[]));
+  const breakdown = computeSavedBreakdown(source);
+  const label = kind==='fav' ? t('favorite') : t('watch_later');
+  btn.textContent = tf('count_items', {count: breakdown.total});
+  btn.classList.remove('hidden');
+  btn.dataset.total = String(breakdown.total);
+  btn.dataset.mode = kind;
+  btn.setAttribute('aria-label', `${label} ${tf('count_items', {count: breakdown.total})}`);
+  if(!$('#ratingsBreakdownPopup')?.classList.contains('hidden')) renderRatingsBreakdownPopup(breakdown, kind);
+}
+function renderRatingsBreakdownPopup(breakdown, mode='ratings'){
   const popup = $('#ratingsBreakdownPopup');
   if(!popup) return;
   const scoreRow = (cls,label,count) => `<div class="ratings-breakdown-row"><span class="tier-dot ${cls}"></span><span class="ratings-breakdown-name">${label}</span><span class="ratings-breakdown-count">${count}</span></div>`;
+  if(mode === 'ratings'){
+    popup.innerHTML = `
+      <div class="ratings-breakdown-title">${t('ratings_by_score')}</div>
+      ${scoreRow('rating-tier-red','1 ~ 3',breakdown.tiers.red)}
+      ${scoreRow('rating-tier-orange','3.1 ~ 6',breakdown.tiers.orange)}
+      ${scoreRow('rating-tier-yellow','6.1 ~ 7.9',breakdown.tiers.yellow)}
+      ${scoreRow('rating-tier-green','8 ~ 10',breakdown.tiers.green)}
+      <div class="ratings-breakdown-divider"></div>
+      <div class="ratings-breakdown-title">${t('ratings_by_type')}</div>
+      ${scoreRow('type-dot-movie',t('badge_movie'),breakdown.types.movie)}
+      ${scoreRow('type-dot-drama',t('drama'),breakdown.types.drama)}
+      ${scoreRow('type-dot-anime',t('anime'),breakdown.types.anime)}
+    `;
+    return;
+  }
   popup.innerHTML = `
-    <div class="ratings-breakdown-title">${t('ratings_by_score')}</div>
-    ${scoreRow('rating-tier-red','1 ~ 3',breakdown.tiers.red)}
-    ${scoreRow('rating-tier-orange','3.1 ~ 6',breakdown.tiers.orange)}
-    ${scoreRow('rating-tier-yellow','6.1 ~ 7.9',breakdown.tiers.yellow)}
-    ${scoreRow('rating-tier-green','8 ~ 10',breakdown.tiers.green)}
-    <div class="ratings-breakdown-divider"></div>
     <div class="ratings-breakdown-title">${t('ratings_by_type')}</div>
     ${scoreRow('type-dot-movie',t('badge_movie'),breakdown.types.movie)}
     ${scoreRow('type-dot-drama',t('drama'),breakdown.types.drama)}
@@ -1636,7 +1671,13 @@ function initRatingsCountPopup(){
   if(popup.parentElement !== document.body) document.body.appendChild(popup);
   const isOpen = () => !popup.classList.contains('hidden');
   const openPopup = () => {
-    renderRatingsBreakdownPopup(computeRatingsBreakdown(getRatingsSync()));
+    const mode = btn.dataset.mode || 'ratings';
+    if(mode === 'fav' || mode === 'watch'){
+      const list = mode === 'fav' ? (FAV_MEM||[]) : (WATCH_MEM||[]);
+      renderRatingsBreakdownPopup(computeSavedBreakdown(list), mode);
+    } else {
+      renderRatingsBreakdownPopup(computeRatingsBreakdown(getRatingsSync()), 'ratings');
+    }
     const rect = btn.getBoundingClientRect();
     popup.style.top = `${rect.bottom + 6}px`;
     popup.style.left = `${rect.left}px`;
@@ -3524,6 +3565,10 @@ async function showSaved(kind){
   setSavedModeUI(kind);
 
   const list = await getSaved(kind);
+  // 저장 목록을 실제로 읽은 뒤 총 개수/콘텐츠 종류별 집계를 갱신합니다.
+  // setSavedModeUI() 호출 시점에는 IndexedDB 로딩이 아직 끝나지 않았을 수 있으므로
+  // 여기서 최종 저장 목록을 기준으로 한 번 더 갱신해야 개수가 정확합니다.
+  updateSavedCountBadge(kind, list);
   if(!list.length){ renderEmptyState(); return; }
 
   // 탭 필터 대신 내 평점/즐겨찾기 화면 전용 종류 필터(모두/영화/드라마/애니)를 적용합니다.
