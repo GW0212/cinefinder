@@ -684,26 +684,69 @@ function backupPersistedKeyToIdb(key, value){
 // 실패하지 않도록 합니다.
 let FAV_MEM = null, WATCH_MEM = null, RATINGS_MEM = null;
 async function loadPersistedListsIntoMemory(){
+  // 중요: localStorage는 "빠른 미러", IndexedDB는 "원본 저장소"로 취급합니다.
+  // 이전 버전에서는 localStorage에 오래된 100개가 남아 있고 IndexedDB에는 최신
+  // 300개가 저장된 경우에도 localStorage를 먼저 선택했습니다. localStorage만
+  // 브라우저 정리/용량 문제 등으로 부분적으로 오래된 상태가 될 수 있기 때문에,
+  // 이후부터는 IndexedDB에 레코드가 존재하면 그 값을 항상 우선합니다.
   const readList = async (key) => {
-    let list = [];
+    let localList;
+    let idbList;
     let source = 'none';
+
     try {
       const raw = localStorage.getItem(key);
-      if(raw){ list = JSON.parse(raw) || []; if(Array.isArray(list) && list.length) source = 'localStorage'; }
+      if(raw !== null){
+        const parsed = JSON.parse(raw);
+        if(Array.isArray(parsed)) localList = parsed;
+      }
     } catch {}
-    if(!Array.isArray(list) || !list.length){
-      try {
-        const idbList = await idbBackupGet(key);
-        if(Array.isArray(idbList) && idbList.length){ list = idbList; source = 'IndexedDB'; }
-      } catch {}
+
+    // idbBackupGet은 "키가 없음"이면 undefined, 저장된 값이 []이면 []을
+    // 반환합니다. 따라서 사용자가 의도적으로 목록을 비운 경우에도
+    // 오래된 localStorage 값이 다시 살아나지 않습니다.
+    try {
+      idbList = await idbBackupGet(key);
+    } catch {}
+
+    if(Array.isArray(idbList)){
+      source = 'IndexedDB';
+      return idbList;
     }
-    console.log(`[cinefinder] load "${key}": ${Array.isArray(list)?list.length:0} item(s) from ${source}`);
-    return Array.isArray(list) ? list : [];
+
+    if(Array.isArray(localList)){
+      source = 'localStorage (legacy/recovery)';
+      // IDB 백업이 아직 없는 기존 사용자 데이터는 최초 1회 IDB로 승격합니다.
+      // 이후부터는 IDB가 authoritative source가 됩니다.
+      try { await idbBackupSet(key, localList); } catch {}
+      return localList;
+    }
+
+    console.log(`[cinefinder] load "${key}": 0 item(s) from ${source}`);
+    return [];
   };
-  FAV_MEM = normalizeSavedList(await readList(SK.favs));
-  WATCH_MEM = normalizeSavedList(await readList(SK.watch));
-  RATINGS_MEM = normalizeRatingList(await readList(SK.ratings));
+
+  const [favs, watch, ratings] = await Promise.all([
+    readList(SK.favs),
+    readList(SK.watch),
+    readList(SK.ratings)
+  ]);
+
+  FAV_MEM = normalizeSavedList(favs);
+  WATCH_MEM = normalizeSavedList(watch);
+  RATINGS_MEM = normalizeRatingList(ratings);
+
+  console.log(`[cinefinder] authoritative persisted state loaded: favs=${FAV_MEM.length}, watch=${WATCH_MEM.length}, ratings=${RATINGS_MEM.length}`);
+
+  // 정규화 과정에서 레거시/중복 데이터가 정리된 경우에도 authoritative IDB에
+  // 정규화된 값을 반영해 다음 로딩에서 같은 문제가 반복되지 않도록 합니다.
+  try { await Promise.all([
+    idbBackupSet(SK.favs, FAV_MEM),
+    idbBackupSet(SK.watch, WATCH_MEM),
+    idbBackupSet(SK.ratings, RATINGS_MEM)
+  ]); } catch {}
 }
+
 // localStorage(빠른 캐시)와 IndexedDB(진짜 저장 용량) 양쪽에 저장을 시도합니다.
 // localStorage가 용량 부족으로 실패해도 IndexedDB가 성공하면 정상 저장으로 처리합니다.
 async function persistListDual(key, list){
@@ -711,8 +754,10 @@ async function persistListDual(key, list){
   try { localOk = safeSetJsonItem(key, list); } catch {}
   let idbOk = false;
   try { idbOk = await idbBackupSet(key, list); } catch {}
+  // IndexedDB가 정상 저장되면 이후 로딩은 IndexedDB를 authoritative source로
+  // 사용합니다. localStorage가 오래된 미러로 남아 있어도 최신 데이터가 복원됩니다.
   const success = localOk || idbOk;
-  if(success) LAST_SAVE_ERROR = null; // localStorage만 실패했어도 IndexedDB에 잘 저장됐다면 실패로 취급하지 않습니다.
+  if(success) LAST_SAVE_ERROR = null; // localStorage만 실패했어도 IndexedDB에 잘 저장됐다면 정상 처리합니다.
   console.log(`[cinefinder] save "${key}": ${list?.length ?? 0} item(s) — localStorage=${localOk} IndexedDB=${idbOk}`);
   return success;
 }
