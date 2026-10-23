@@ -108,7 +108,14 @@
       // custom authDomain because modern mobile browsers partition storage.
       try{await auth.signInWithPopup(provider);}
       catch(e){if(['auth/popup-blocked','auth/operation-not-supported-in-this-environment'].includes(e.code))await auth.signInWithRedirect(provider);else throw e;}
-    }catch(e){status('Google 로그인 오류: '+e.message);}
+    }catch(e){
+      const msg=String(e?.message||e||'');
+      if(msg.includes('auth/api-key-not-valid')){
+        status('Google 로그인 오류: API 키가 유효하지 않습니다. 최신 파일이 배포되지 않았거나 브라우저 캐시가 남아있을 수 있습니다. GitHub Pages 파일 업로드 후 강력 새로고침(Ctrl+F5) 또는 모바일 브라우저 새로고침 후 다시 시도하세요. 계속되면 Firebase 웹 앱의 apiKey와 승인된 도메인(gw0212.github.io), Google 로그인 사용 설정을 다시 확인해 주세요.');
+      }else{
+        status('Google 로그인 오류: '+msg);
+      }
+    }
     finally{loginBusy=false;}
   }
   async function init(){
@@ -120,7 +127,9 @@
     $('cloudSyncNow')?.addEventListener('click',async()=>{if(!user)return;status('클라우드 데이터를 확인 중…');await start(user);});
     ui();if(!configured)return;
     try{
-      await loadSDK();firebase.initializeApp(cfg);auth=firebase.auth();db=firebase.firestore();
+      await loadSDK();
+      if(!cfg.apiKey || !/^AIza[0-9A-Za-z_-]{20,}$/.test(cfg.apiKey)) throw Error('Firebase API key 형식이 올바르지 않습니다. firebase-config.js를 확인해 주세요.');
+      firebase.initializeApp(cfg);auth=firebase.auth();db=firebase.firestore();
       auth.getRedirectResult().catch(e=>status('Google 로그인 리디렉션 오류: '+e.message));
       auth.onAuthStateChanged(async next=>{
         // Existing local app initialization must finish before applying remote data.

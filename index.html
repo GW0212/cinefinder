@@ -158,6 +158,7 @@
       </div>
 
       <div class="header-top-right">
+        <button id="cloudAccountBtn" type="button" class="cloud-account-btn cloud-account-top" title="Google 계정 동기화" aria-label="Google 계정 동기화"><span id="cloudAccountIcon" aria-hidden="true">G</span><span id="cloudAccountText" class="sr-only">Google 로그인</span></button>
         <select id="langSelect" class="hdr-select lang-select" aria-label="Language">
           <option value="ko">🇰🇷 KO</option>
           <option value="en">🇺🇸 EN</option>
@@ -211,7 +212,6 @@
           <button id="searchBtn" type="submit" class="btn-search">검색</button>
         </form>
         <div class="library-actions" aria-label="저장 목록">
-          <button id="cloudAccountBtn" type="button" class="cloud-account-btn" title="Google 계정 동기화" aria-label="Google 계정 동기화"><span id="cloudAccountIcon">G</span><span id="cloudAccountText">Google 로그인</span></button>
           <button id="btnFav" class="saved-btn fav-saved" title="즐겨찾기">
             <span class="saved-btn-icon" aria-hidden="true">♡</span>
             <span>즐겨찾기</span>
@@ -341,7 +341,17 @@
 <script src="ratings-pdf.js?v=20261024mobile9"></script>
 <script src="data-help.js?v=1"></script>
 <script src="data-safety-ui.js?v=1"></script>
-<script src="firebase-config.js?v=10-connected-20261024"></script>
-<script src="cloud-sync.js?v=10"></script>
+<script>
+window.CINEFINDER_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD_eBTMqwSWJNbvcQyuqVHBAjaQ37jdxVw",
+  authDomain: "cinefinder-4f479.firebaseapp.com",
+  projectId: "cinefinder-4f479",
+  storageBucket: "cinefinder-4f479.firebasestorage.app",
+  messagingSenderId: "483997979705",
+  appId: "1:483997979705:web:62ff1c4bb6332c290fa9e8"
+};
+</script>
+<script src="firebase-config.js?v=10-2-connected-20261024"></script>
+<script src="cloud-sync.js?v=10.2"></script>
 </body>
 </html>

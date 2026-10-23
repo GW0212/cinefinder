@@ -5981,3 +5981,13 @@ body {
 .cloud-control button.cloud-primary{background:#23549b;color:#fff;border-color:#23549b}
 .cloud-profile{display:flex;align-items:center;gap:10px;padding:12px;background:var(--surface,#eef2f6);border-radius:9px;overflow-wrap:anywhere;font-size:13px}
 @media(max-width:650px){.cloud-account-btn{padding:7px 9px;min-height:44px;font-size:11px}.cloud-panel{padding:22px 18px}.cloud-dialog{align-items:flex-end;padding:0}.cloud-panel{border-radius:18px 18px 0 0;width:100%;max-height:85dvh;padding-bottom:max(22px,env(safe-area-inset-bottom))}.library-actions{flex-wrap:wrap}}
+
+
+/* v10.2 Google sync header button */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.cloud-account-top{min-width:40px;width:40px;height:40px;padding:0;border-radius:12px;gap:0;flex:0 0 auto}
+.cloud-account-top #cloudAccountIcon{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;font-size:18px;font-weight:800;line-height:1;background:transparent;color:#4285f4;font-family:Arial,Helvetica,sans-serif}
+.cloud-account-top.signed-in #cloudAccountIcon{background:#e9f7ee;color:#18834a;font-size:15px}
+.cloud-account-top:hover{transform:translateY(-1px)}
+.cloud-account-top #cloudAccountText{display:none}
+@media(max-width:650px){.cloud-account-top{min-width:38px;width:38px;height:38px;border-radius:11px}.cloud-account-top #cloudAccountIcon{font-size:17px}}
