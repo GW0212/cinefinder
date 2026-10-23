@@ -65,15 +65,29 @@
     if(before===JSON.stringify(next))return;
     ignoreLocal=true;api.isApplyingRemote=true;
     try{
+      const oldList=local(name).slice();
+      const keyOf=x=>String(x?.k||(x?.type||x?.media_type||'')+'|'+(x?.id||x?.title||''));
+      const existing=new Set(oldList.map(keyOf));
+      const additions=next.filter(x=>!existing.has(keyOf(x)));
+      const appendOnly=next.length===oldList.length+additions.length && oldList.every(x=>next.some(y=>keyOf(x)===keyOf(y)&&JSON.stringify(x)===JSON.stringify(y)));
       const ok=await persistListDual(KEYS[name],next);
       if(!ok)throw Error('로컬 저장소 기록 실패');
       if(name==='favs'){FAV_MEM=next;favDataRevision++;}
       if(name==='watch'){WATCH_MEM=next;watchDataRevision++;}
-      if(name==='ratings'){RATINGS_MEM=next;ratingDataRevision++;clearRatingViewCache();}
+      if(name==='ratings'){RATINGS_MEM=next;ratingDataRevision++;if(!appendOnly)clearRatingViewCache();else if(typeof patchRatingViewCacheForList==='function')patchRatingViewCacheForList(next);}
       if(name==='ratings')updateRatingsCountBadge?.();
-      if(PAGE_STATE?.lastMode==='ratings'&&name==='ratings')await showRatings();
-      else if(PAGE_STATE?.lastMode==='saved-fav'&&name==='favs')await showSaved('fav');
-      else if(PAGE_STATE?.lastMode==='saved-watch'&&name==='watch')await showSaved('watch');
+      const visibleName=PAGE_STATE?.lastMode==='ratings'?'ratings':PAGE_STATE?.lastMode==='saved-fav'?'favs':PAGE_STATE?.lastMode==='saved-watch'?'watch':null;
+      if(visibleName===name){
+        if(appendOnly && additions.length && !PAGE_STATE.query && LIBRARY_TYPE_FILTER==='all'){
+          const cards=additions.map(x=>name==='ratings'?(typeof ratingItemToFastCard==='function'?ratingItemToFastCard(x,ratingCachedMaps(next)):null):({
+            id:x.id,media_type:x.media_type,title:x.title,name:x.title,poster_path:x.poster_path,vote_average:x.vote_average||0,
+            release_date:x.release_date||'',popularity:x.popularity||0,genre_ids:x.genre_ids||[]
+          })).filter(Boolean);
+          if(cards.length)renderCards(cards,true,{skipEnrich:true,skipRatingRefresh:true});
+          if(name==='ratings')updateRatingsCountBadge?.(); else updateSavedCountBadge?.(name==='favs'?'fav':'watch',next);
+        } else if(name==='ratings')await showRatings();
+        else await showSaved(name==='favs'?'fav':'watch');
+      }
     }finally{ignoreLocal=false;api.isApplyingRemote=false;}
   }
   function ref(name){return db.collection('cinefinder_users').doc(user.uid).collection('lists').doc(name);}

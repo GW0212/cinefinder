@@ -843,7 +843,16 @@ const tf = (k, vars={}) => Object.entries(vars).reduce((s,[key,val]) => s.replac
 const tmdbLang   = () => LANGS[CUR_LANG]?.tmdb || 'ko-KR';
 const posterUrl  = (p, s='w342') => p ? `https://image.tmdb.org/t/p/${s}${p}` : '';
 const getYear    = d => (d||'').slice(0,4) || '';
-const setStatus  = m => { $('#status').textContent = m||''; };
+const setStatus = m => {
+  const v=String(m||''); const target=$('#status'); if(target) target.textContent=v;
+  const overlay=document.getElementById('cineLoadingOverlay');
+  if(overlay){
+    const busy=Boolean(v && /TMDB|확인 중|불러오는 중|loading|Loading|Resolving|確認中|正在确认|Recherche/.test(v));
+    overlay.classList.toggle('hidden',!busy);
+    overlay.setAttribute('aria-hidden',busy?'false':'true');
+    if(busy) document.getElementById('cineLoadingText').textContent=v;
+  }
+};
 const setStatusIfEmpty = msg => { if (!$('#results').children.length) $('#status').textContent = msg||''; else $('#status').textContent = ''; };
 const showToast  = (m, ms=1800) => { const el=$('#toast'); el.textContent=m; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'), ms); };
 const escapeHtml = s => (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -2627,7 +2636,12 @@ async function toggleSaved(kind,item){
   if(!ok){ showToast(saveFailedToastMessage(), 2800); return current; }
 
   showToast(willRemove ? t('toast_removed') : t('toast_saved'));
-  if(PAGE_STATE.lastMode===`saved-${kind}`) await showSaved(kind);
+  if(PAGE_STATE.lastMode===`saved-${kind}`){
+    if(!willRemove && LIBRARY_TYPE_FILTER==='all' && !PAGE_STATE.query){
+      renderCards([{...savedItem,name:savedItem.title}],true,{skipEnrich:true});
+      updateSavedCountBadge(kind,next);
+    } else await showSaved(kind);
+  }
   return await getSaved(kind);
 }
 
@@ -3378,7 +3392,7 @@ function stopRatingPaging(){
 }
 function renderPagedRatings(items){
   stopRatingPaging();
-  const batch = IS_MOBILE ? 40 : 64;
+  const batch = IS_MOBILE ? 16 : 64;
   const state = { items, next: 0, batch, busy: false };
   RATING_PAGE_STATE = state;
   function addBatch(){
@@ -3407,7 +3421,7 @@ function renderPagedRatings(items){
   if('IntersectionObserver' in window){
     RATING_PAGE_OBSERVER = new IntersectionObserver(entries => {
       if(entries.some(entry => entry.isIntersecting)) addBatch();
-    }, {rootMargin:'500px 0px'});
+    }, {rootMargin:'120px 0px'});
     RATING_PAGE_OBSERVER.observe(sentinel);
   }
 }
@@ -3803,8 +3817,8 @@ async function showSaved(kind){
     });
   }
 
-  // 즉시 렌더링 (제목/포스터는 refreshCardTitles/Posters가 비동기 보완)
-  renderCards(items.map(x=>({
+  // 모바일에서는 보이는 카드만 우선 렌더링해 초기 DOM 비용을 줄입니다.
+  const prepared = items.map(x=>({
     id: x.id, media_type: x.media_type,
     title: x.title, name: x.title,
     poster_path: x.poster_path,
@@ -3812,7 +3826,26 @@ async function showSaved(kind){
     release_date: x.release_date||'',
     popularity: x.popularity||0,
     genre_ids: x.genre_ids||[]
-  })), false);
+  }));
+  const batchSize = IS_MOBILE ? 20 : prepared.length;
+  let cursor=Math.min(batchSize,prepared.length);
+  renderCards(prepared.slice(0,cursor), false, {skipEnrich:true});
+  const previous=document.getElementById('savedMoreSentinel');previous?.remove();
+  if(cursor<prepared.length){
+    const btn=document.createElement('button');btn.id='savedMoreSentinel';btn.type='button';btn.className='rating-more-sentinel';
+    btn.textContent=`${cursor} / ${prepared.length} · 더 보기`;
+    $('#results').insertAdjacentElement('afterend',btn);
+    let busy=false; let observer=null;
+    const more=()=>{
+      if(busy||PAGE_STATE.lastMode!==`saved-${kind}`||!btn.isConnected)return;
+      busy=true;const next=Math.min(cursor+batchSize,prepared.length);
+      renderCards(prepared.slice(cursor,next),true,{skipEnrich:true});cursor=next;
+      btn.textContent=`${cursor} / ${prepared.length} · 더 보기`;busy=false;
+      if(cursor>=prepared.length){observer?.disconnect();btn.remove();}
+    };
+    btn.addEventListener('click',more);
+    if('IntersectionObserver' in window){observer=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting))more();},{rootMargin:'120px 0px'});observer.observe(btn);}
+  }
   setStatus('');
 }
 async function personKeySet(){

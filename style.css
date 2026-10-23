@@ -6001,3 +6001,20 @@ body {
 .cloud-login-notice-body strong{display:block;color:#a32c2c;font-size:15px;margin:1px 0 5px}
 .cloud-login-notice-body p{margin:0;font-size:13px;line-height:1.5}
 @media(prefers-reduced-motion:reduce){.cloud-login-notice{transition:none}}
+
+/* v10.6: mobile toolbar, centered loading and header control proportions */
+.cloud-account-top{box-sizing:border-box!important;width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;padding:0!important;flex:0 0 38px!important;align-self:center!important}
+.cine-loading-overlay{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:16px}
+.cine-loading-overlay.hidden{display:none!important}
+.cine-loading-panel{display:flex;align-items:center;gap:11px;max-width:min(90vw,400px);border-radius:16px;background:var(--card-bg,#fff);border:1px solid var(--border,#d9dce3);box-shadow:0 9px 35px rgba(0,0,0,.2);padding:17px 20px;color:var(--text,#162235);font-size:13px;font-weight:650;text-align:center}
+.cine-loading-spinner{width:17px;height:17px;flex:0 0 17px;border:2px solid #dfdfdf;border-top-color:#e14c3c;border-radius:50%;animation:cine-spin .7s linear infinite}
+@keyframes cine-spin{to{transform:rotate(360deg)}}
+@media(max-width:650px){
+.saved-toolbar-actions{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px!important;align-items:center!important}
+.saved-toolbar-actions .io-btn{width:100%!important;min-width:0!important;height:34px!important;font-size:clamp(9px,2.5vw,11px)!important;padding:0 2px!important;gap:3px!important;white-space:nowrap!important}
+.saved-toolbar-actions .io-btn svg{width:12px!important;height:12px!important;flex-shrink:0!important}
+.saved-toolbar-actions .io-btn span{white-space:nowrap!important}
+.saved-toolbar-actions .io-divider{display:none!important}
+.cloud-account-top{width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;flex-basis:36px!important}
+#status:has(+ #nothing){display:block}
+}
