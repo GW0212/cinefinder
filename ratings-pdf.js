@@ -80,13 +80,39 @@ const posterURL=p=>{
  return '';
 };
 const sourceKey=r=>typeof ratingKey==='function'?ratingKey(r.type,r.id,r.title):`${r.type}-${r.id}`;
+let completionTimer=null;
+function pdfNotice(){
+ let badge=document.getElementById('cinefinderPdfStatus');
+ if(!badge){
+  badge=document.createElement('button');badge.id='cinefinderPdfStatus';badge.type='button';
+  badge.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;padding:17px 25px;max-width:min(90vw,520px);background:#17314b;color:#fff;border-radius:14px;border:0;box-shadow:0 10px 35px #0005;font-weight:700;text-align:center;cursor:pointer';
+  badge.addEventListener('click',()=>{document.getElementById('ratingPptDialog')?.classList.remove('hidden');document.body.classList.add('rating-ppt-open');updatePdfNoticeVisibility()});
+  document.body.appendChild(badge);
+ }
+ return badge;
+}
+function updatePdfNoticeVisibility(){
+ const badge=pdfNotice();const dialog=document.getElementById('ratingPptDialog');
+ const isDialogVisible=!!dialog&&!dialog.classList.contains('hidden');
+ badge.hidden=isDialogVisible||(!running&&!badge.dataset.completed);
+}
 function status(percent,msg){
- let p=Math.max(0,Math.min(100,Math.round(percent)));
+ const p=Math.max(0,Math.min(100,Math.round(percent)));
  const bar=document.getElementById('ratingPptProgressBar'),label=document.getElementById('ratingPptPercent'),note=document.getElementById('ratingPptProgress');
  if(bar)bar.style.width=p+'%';if(label)label.textContent=p+'%';if(note)note.textContent=msg;
- let badge=document.getElementById('cinefinderPdfStatus');if(!badge){badge=document.createElement('button');badge.id='cinefinderPdfStatus';badge.type='button';badge.style.cssText='position:fixed;bottom:22px;left:18px;z-index:99999;padding:10px 16px;background:#17314b;color:white;border-radius:12px;border:0;box-shadow:0 5px 20px #0004;font-weight:700;cursor:pointer';badge.onclick=()=>{document.getElementById('ratingPptDialog')?.classList.remove('hidden');document.body.classList.add('rating-ppt-open')};document.body.appendChild(badge)}
- badge.textContent='PDF '+p+'% · '+msg;badge.hidden=!running;
+ const badge=pdfNotice();
+ if(running){badge.dataset.completed='';badge.textContent='PDF '+p+'% · '+msg;}
+ updatePdfNoticeVisibility();
 }
+function finishPdfNotice(ok,message){
+ const badge=pdfNotice();clearTimeout(completionTimer);
+ badge.dataset.completed='true';badge.textContent=message;
+ updatePdfNoticeVisibility();
+ completionTimer=setTimeout(()=>{badge.dataset.completed='';badge.hidden=true},2000);
+}
+// The export dialog is toggled in ratings-ppt.js; show the centered indicator only when closed.
+new MutationObserver(updatePdfNoticeVisibility).observe(document.getElementById('ratingPptDialog'),{attributes:true,attributeFilter:['class']});
+
 function chosenItems(){
  // Exactly the same filtered, deduplicated collection as the PDF dialog count.
  if(typeof window.cinefinderPdfSelectedRatings==='function')return window.cinefinderPdfSelectedRatings();
@@ -157,7 +183,7 @@ function pageCanvas(items,imgs,start,page,allPages,groupLabel){
  const c=document.createElement('canvas');c.width=1488;c.height=1052;const g=c.getContext('2d');
  g.fillStyle='#f6f7fb';g.fillRect(0,0,c.width,c.height);
  g.textBaseline='middle';g.textAlign='left';g.fillStyle='#15243b';g.font='bold 33px sans-serif';g.fillText('CINEFINDER',40,39);
- g.font='bold 26px sans-serif';g.fillText('내 평점  ·  '+groupLabel,480,39);
+ g.font='bold 26px sans-serif';g.textAlign='center';g.fillText(groupLabel,c.width/2,39);g.textAlign='left';
  g.font='18px sans-serif';g.fillStyle='#69788a';g.fillText((page+1)+' / '+allPages,1350,39);
  g.strokeStyle='#d8deea';g.beginPath();g.moveTo(40,74);g.lineTo(1448,74);g.stroke();
  const cw=342,ch=178,gx=13,gy=9,y0=95;
@@ -170,7 +196,7 @@ function pageCanvas(items,imgs,start,page,allPages,groupLabel){
   lines.forEach((l,j)=>g.fillText(l,x+123,y+34+j*23));g.restore();
   g.font='bold 17px sans-serif';g.fillStyle='#dc4a35';g.fillText('내 평점 '+Number(r.rating).toFixed(1)+' / 10',x+123,y+147);
  }
- g.font='15px sans-serif';g.fillStyle='#708196';g.fillText('작품 '+(start+1)+'–'+(start+items.length)+' / '+window.__cinefinderPdfItemCount,1190,1021);
+ // The lower-right work counter is intentionally omitted.
  return c;
 }
 function dataBytes(dataURI){const s=atob(dataURI.split(',')[1]),b=new Uint8Array(s.length);for(let i=0;i<s.length;i++)b[i]=s.charCodeAt(i);return b}
@@ -230,6 +256,11 @@ async function exportPDF(){
  const items=[...grouped.values()].sort((a,b)=>bucket(b)-bucket(a)||Number(b.rating)-Number(a.rating)||String(a.title).localeCompare(String(b.title),'ko'));if(!items.length)throw new Error('저장할 작품이 없습니다.');
  lastLog={format:'Cinefinder PDF diagnostic v3',createdAt:new Date().toISOString(),appLocation:location.origin+location.pathname,userAgent:navigator.userAgent,selectedCount:items.length,settings:{concurrency:14,perUrlTimeoutMs:2700},summary:{},events:[]};logBtn.disabled=false;
  window.__cinefinderPdfItemCount=items.length;const candidates=sources(items),imgs=new Array(items.length);let missing=[];
+ // Deterministic, dispersed sample rather than always checking the first few pages.
+ // Includes all ten scoring buckets when possible, with a maximum of 30 detail requests.
+ const auditSet=new Set();for(let b=0;b<10;b++){const ix=items.map((r,i)=>bucket(r)===b&&/^\d+$/.test(String(r.id))?i:-1).filter(i=>i>=0);for(let n=0;n<Math.min(3,ix.length);n++){const pos=Math.floor(((n+0.5)/Math.min(3,ix.length))*ix.length);auditSet.add(ix[pos])}}
+ window.__cinefinderPdfAuditIndices=auditSet;
+
  // Limit concurrency so one failing external image cannot delay all 1,000+ titles.
  let cursor=0,processed=0;
  const imgPromiseCache=new Map();
@@ -239,6 +270,20 @@ async function exportPDF(){
   // Lookup an authoritative TMDB poster for missing/broken source URLs.
   // Prefer the verified title match over a guessed URL or a stale synthetic ID.
   let im=null;
+  // A TMDB numeric ID is stronger evidence than a saved title-to-poster cache.
+  // Check a rotating representative sample (bounded to avoid slowing large exports),
+  // plus every known high-risk title. Prefer the authoritative detail poster.
+  const audit=window.__cinefinderPdfAuditIndices?.has(i) || STRICT_POSTER_IDS[norm(item.title)] || STRICT_POSTER_NAMES.has(norm(item.title));
+  if(audit && /^\d+$/.test(String(item.id)) && typeof API_KEY!=='undefined' && API_KEY){
+   try{
+    const mt=media(item),res=await fetchWithDeadline(`https://api.themoviedb.org/3/${mt}/${item.id}?api_key=${encodeURIComponent(API_KEY)}&language=ko-KR`,8500);
+    if(res.ok){const detail=await res.json();const verified=posterURL(detail.poster_path);
+     if(verified){if(src.length&&!src.includes(verified))trace(item,'identityAudit','posterCorrected',{cached:src,verified,tmdbId:item.id});
+      src=[verified];}
+     else trace(item,'identityAudit','noPoster',{tmdbId:item.id});
+    }else trace(item,'identityAudit','httpError',{status:res.status,tmdbId:item.id});
+   }catch(e){trace(item,'identityAudit','networkError',{error:String(e)})}
+  }
   if(src.length){const sk=src.join('|');if(!imgPromiseCache.has(sk))imgPromiseCache.set(sk,grab(src,item));im=await imgPromiseCache.get(sk)}
   if(!im && !STRICT_POSTER_IDS[norm(item.title)] && !STRICT_POSTER_NAMES.has(norm(item.title)) && typeof findTmdbMatchForRating==='function'){
    try{
@@ -279,10 +324,10 @@ async function exportPDF(){
  for(let j=0;j<groups.length;j++){const group=groups[j],sub=group.ids.map(i=>items[i]),images=group.ids.map(i=>imgs[i]);const c=pageCanvas(sub,images,group.ids[0],j,groups.length,group.label);sheets.push(dataBytes(c.toDataURL('image/jpeg',0.85)));status(80+20*(j+1)/groups.length,`PDF ${j+1}/${groups.length}페이지 작성 중`);if(j%3===0)await wait()}
  
  const file=await pdfFile(sheets,groups,items);downloadBlob(file,'Cinefinder_Ratings_'+new Date().toISOString().slice(0,10)+'.pdf');
- status(100,`PDF 다운로드 시작 · ${sheets.length}페이지 · 포스터 확인 실패 ${missing.length}개`);if(missing.length)alert(`포스터 ${missing.length}개를 복구하지 못했습니다. 필요하면 '진단 LOG 다운로드' 버튼으로 오류 정보를 저장할 수 있습니다.`);
+ status(100,`PDF 다운로드 시작 · ${sheets.length}페이지 · 포스터 확인 실패 ${missing.length}개`);finishPdfNotice(true,`PDF 저장 완료 · ${sheets.length}페이지`);if(missing.length)alert(`포스터 ${missing.length}개를 복구하지 못했습니다. 필요하면 '진단 LOG 다운로드' 버튼으로 오류 정보를 저장할 수 있습니다.`);
  lastLog.summary={selected:items.length,pdfPages:sheets.length,success:items.length-missing.length,failed:missing.length,failures:missing,pdfSizeBytes:file.size,sorting:'score bucket descending, then rating descending',result:'pdf_download_started'};
- }catch(err){if(lastLog){lastLog.summary={...(lastLog.summary||{}),result:'exception',error:String(err?.stack||err)}}console.error('[Cinefinder PDF export]',err);alert('PDF 생성 실패: '+(err?.message||err));status(0,'PDF 생성 실패 · 콘솔 확인')}
- finally{running=false;btn.disabled=false;btn.textContent=original;setTimeout(()=>{const s=document.getElementById('cinefinderPdfStatus');if(s)s.hidden=true},8000)}
+ }catch(err){if(lastLog){lastLog.summary={...(lastLog.summary||{}),result:'exception',error:String(err?.stack||err)}}console.error('[Cinefinder PDF export]',err);alert('PDF 생성 실패: '+(err?.message||err));status(0,'PDF 생성 실패 · 콘솔 확인');finishPdfNotice(false,'PDF 저장 실패 · 진단 LOG 확인')}
+ finally{running=false;btn.disabled=false;btn.textContent=original;updatePdfNoticeVisibility()}
 }
 btn.addEventListener('click',exportPDF);
 })();

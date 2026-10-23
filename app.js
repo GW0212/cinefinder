@@ -1959,22 +1959,66 @@ function bindEvents() {
     });
   });
 
+  // Keep already-rendered library cards alive across library tab changes.
+  // Fragment moves preserve <img> decode, event handlers and scroll state without any API calls.
+  const libraryViewCache = new Map();
+  let lastLibraryMode = null;
+  function libraryCacheKey(mode){
+    const len=mode==='ratings'?(RATINGS_MEM||[]).length:mode==='saved-fav'?(FAV_MEM||[]).length:(WATCH_MEM||[]).length;
+    const rev=mode==='ratings'?ratingDataRevision:mode==='saved-fav'?favDataRevision:watchDataRevision;
+    return [mode,len,rev,CUR_LANG,SORT_BY,PAGE_STATE.query||'',LIBRARY_TYPE_FILTER].join('|');
+  }
+  function parkLibraryView(){
+    const mode=PAGE_STATE.lastMode;
+    if(!['saved-fav','saved-watch','ratings'].includes(mode))return;
+    const results=$('#results'); if(!results || !results.children.length)return;
+    const fragment=document.createDocumentFragment();
+    while(results.firstChild)fragment.appendChild(results.firstChild);
+    const sentinel=document.getElementById('ratingMoreSentinel');
+    if(sentinel)sentinel.remove();
+    if(mode==='ratings')RATING_PAGE_OBSERVER?.disconnect();
+    libraryViewCache.set(mode,{key:libraryCacheKey(mode),fragment,sentinel,scrollY:window.scrollY,
+      pageState:mode==='ratings'?RATING_PAGE_STATE:null,
+      observer:mode==='ratings'?RATING_PAGE_OBSERVER:null});
+    // Only retain the three most recent library snapshots.
+    lastLibraryMode=mode;
+  }
+  function restoreLibraryView(mode){
+    const cached=libraryViewCache.get(mode);
+    if(!cached || cached.key!==libraryCacheKey(mode)){libraryViewCache.delete(mode);return false;}
+    abortActiveRequests();
+    if(PAGE_STATE.lastMode==='ratings')RATING_PAGE_OBSERVER?.disconnect();
+    const results=$('#results');results.replaceChildren(cached.fragment);
+    PAGE_STATE.lastMode=mode;
+    setSavedModeUI(mode==='ratings'?'ratings':mode.slice(6));
+    clearSkeletons();setStatus('');
+    if(mode==='ratings'){
+      RATING_PAGE_STATE=cached.pageState;
+      RATING_PAGE_OBSERVER=cached.observer;
+      if(cached.sentinel){results.insertAdjacentElement('afterend',cached.sentinel);RATING_PAGE_OBSERVER?.observe(cached.sentinel);}
+    }
+    // A cached fragment can only be mounted once, until we park it again.
+    libraryViewCache.delete(mode);
+    refreshRatingBadges();
+    window.scrollTo({top:cached.scrollY,behavior:'instant'});
+    return true;
+  }
   $('#btnFav').addEventListener('click', async()=>{
-    if(PAGE_STATE.lastMode==='saved-fav'){setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
-    LIBRARY_TYPE_FILTER='all'; setLibraryTypeTabsActive('all');
-    setSavedModeUI('fav'); await showSaved('fav');
+    if(PAGE_STATE.lastMode==='saved-fav'){parkLibraryView();setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
+    parkLibraryView();LIBRARY_TYPE_FILTER='all'; setLibraryTypeTabsActive('all');
+    if(!restoreLibraryView('saved-fav')){setSavedModeUI('fav'); await showSaved('fav');}
   });
   $('#btnWatch').addEventListener('click', async()=>{
-    if(PAGE_STATE.lastMode==='saved-watch'){setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
-    LIBRARY_TYPE_FILTER='all'; setLibraryTypeTabsActive('all');
-    setSavedModeUI('watch'); await showSaved('watch');
+    if(PAGE_STATE.lastMode==='saved-watch'){parkLibraryView();setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
+    parkLibraryView();LIBRARY_TYPE_FILTER='all'; setLibraryTypeTabsActive('all');
+    if(!restoreLibraryView('saved-watch')){setSavedModeUI('watch'); await showSaved('watch');}
   });
   $('#btnRatings').addEventListener('click', async()=>{
-    if(PAGE_STATE.lastMode==='ratings'){setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
-    LIBRARY_TYPE_FILTER='all'; setLibraryTypeTabsActive('all');
+    if(PAGE_STATE.lastMode==='ratings'){parkLibraryView();setSavedModeUI(null);resetPaging();await runSearchOrDiscover(true);return;}
+    parkLibraryView();LIBRARY_TYPE_FILTER='all'; setLibraryTypeTabsActive('all');
     CONTENT_TYPE = 'all';
     $$('.type-tabs .tab').forEach(b=>{ const on=b.dataset.type==='all'; b.classList.toggle('active',on); b.setAttribute('aria-selected',on?'true':'false'); });
-    await showRatings();
+    if(!restoreLibraryView('ratings'))await showRatings();
     setTimeout(()=>{ try{ renderGenreChips(); }catch{} }, 0);
   });
 
@@ -2553,11 +2597,12 @@ async function getSaved(kind){
   if(FAV_MEM === null || WATCH_MEM === null) await loadPersistedListsIntoMemory();
   return kind==='fav' ? (FAV_MEM||[]) : (WATCH_MEM||[]);
 }
+let favDataRevision=0, watchDataRevision=0, ratingDataRevision=0;
 async function setSaved(kind,list){
   const key = savedKey(kind);
   const normalized = normalizeSavedList(list);
   const ok=await persistListDual(key,normalized);
-  if(ok){ if(kind==='fav') FAV_MEM = normalized; else WATCH_MEM = normalized; }
+  if(ok){ if(kind==='fav'){ FAV_MEM = normalized;favDataRevision++; } else { WATCH_MEM = normalized;watchDataRevision++; } }
   return ok;
 }
 function updateSavedButtons(kind, list){
@@ -2702,6 +2747,7 @@ function patchRatingViewCacheForList(newList){
   }catch{ clearRatingViewCache(); }
 }
 async function setRatings(list){
+  ratingDataRevision++;
   const normalized = normalizeRatingList(list);
   patchRatingViewCacheForList(normalized);
   const ok=await persistListDual(SK.ratings, normalized);
