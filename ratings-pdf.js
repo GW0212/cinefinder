@@ -13,7 +13,7 @@ const ART='cinefinder_rating_original_poster_v1';
 const norm=s=>String(s||'').normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}]/gu,'');
 const kind=r=>r.type==='anime'?'anime':r.type==='drama'?'drama':'movie';
 const aliases={'해리포터4':'해리포터와불의잔','해리포터1':'해리포터와마법사의돌','해리포터2':'해리포터와비밀의방','해리포터3':'해리포터와아즈카반의죄수','해리포터5':'해리포터와불사조기사단','해리포터6':'해리포터와혼혈왕자','해리포터7':'해리포터와죽음의성물1부','해리포터8':'해리포터와죽음의성물2부','브레이킹배드':'브레이킹배드시즌1','나타중생1':'너자','나타중생2':'너자2','모모노케히메':'모노노케히메','베놈1':'베놈','겨울왕국1':'겨울왕국','범죄도시1':'범죄도시','베테랑1':'베테랑','조커1':'조커','인사이드아웃1':'인사이드아웃'};
-const key=r=>kind(r)+'::'+(aliases[norm(r.title)]||norm(r.title));
+const key=r=>kind(r)+'::'+(typeof ratingCanonicalTitle==='function'?ratingCanonicalTitle(r.title):(aliases[norm(r.title)]||norm(r.title)));
 const wait=()=>new Promise(r=>setTimeout(r,0));
 
 // Explicit recovery hints for legacy user-generated IDs (not trusted as poster URLs).
@@ -181,20 +181,28 @@ async function grab(srcs,item){
 }
 function pageCanvas(items,imgs,start,page,allPages,groupLabel){
  const c=document.createElement('canvas');c.width=1488;c.height=1052;const g=c.getContext('2d');
- g.fillStyle='#f6f7fb';g.fillRect(0,0,c.width,c.height);
- g.textBaseline='middle';g.textAlign='left';g.fillStyle='#15243b';g.font='bold 33px sans-serif';g.fillText('CINEFINDER',40,39);
- g.font='bold 26px sans-serif';g.textAlign='center';g.fillText(groupLabel,c.width/2,39);g.textAlign='left';
- g.font='18px sans-serif';g.fillStyle='#69788a';g.fillText((page+1)+' / '+allPages,1350,39);
- g.strokeStyle='#d8deea';g.beginPath();g.moveTo(40,74);g.lineTo(1448,74);g.stroke();
+ g.fillStyle='#f3f5f9';g.fillRect(0,0,c.width,c.height);
+ // Editorial masthead, accent bar and a slim warm-white title strip.
+ g.fillStyle='#fff';g.fillRect(0,0,c.width,84);
+ g.fillStyle='#e55b44';g.fillRect(0,0,c.width,6);
+ g.fillStyle='#fff4f0';g.fillRect(40,54,125,5);
+ g.fillStyle='#eaedf4';g.fillRect(171,54,76,5);
+ g.textBaseline='middle';g.textAlign='left';g.fillStyle='#15243b';g.font='bold 33px sans-serif';g.fillText('CINEFINDER',40,36);g.fillStyle='#d95742';g.font='bold 13px sans-serif';g.fillText('MY COLLECTION',42,70);g.fillStyle='#15243b';
+ g.font='bold 26px sans-serif';g.textAlign='center';g.fillText(groupLabel,c.width/2,36);g.textAlign='left';
+ g.font='18px sans-serif';g.fillStyle='#69788a';g.textAlign='right';g.fillText(String(page+1).padStart(2,'0')+' / '+String(allPages).padStart(2,'0'),1446,39);g.textAlign='left';
+ g.strokeStyle='#dfe4ec';g.beginPath();g.moveTo(40,83);g.lineTo(1448,83);g.stroke();
  const cw=342,ch=178,gx=13,gy=9,y0=95;
  for(let i=0;i<20;i++){
   const n=i;if(n>=items.length)break;const r=items[n],x=40+(i%4)*(cw+gx),y=y0+Math.floor(i/4)*(ch+gy);
-  g.fillStyle='#fff';g.fillRect(x,y,cw,ch);g.strokeStyle='#d5dce8';g.strokeRect(x,y,cw,ch);
+  g.fillStyle='#e1e5ed';g.fillRect(x+2,y+4,cw,ch);
+  g.fillStyle='#fff';g.fillRect(x,y,cw,ch);g.strokeStyle='#d9dfe9';g.strokeRect(x,y,cw,ch);
+  g.fillStyle='#e65b45';g.fillRect(x,y,4,ch);
+  g.fillStyle='#faf1ed';g.fillRect(x+123,y+133,cw-133,30);
   if(imgs[n])g.drawImage(imgs[n],x+9,y+9,106,160);else {g.fillStyle='#e4e9f1';g.fillRect(x+9,y+9,106,160);g.fillStyle='#445b77';g.font='bold 14px sans-serif';g.fillText('포스터 오류',x+16,y+80)}
   g.save();g.beginPath();g.rect(x+123,y+15,cw-132,108);g.clip();g.font='bold 17px sans-serif';g.fillStyle='#243148';
   let title=String(r.title||'');let lines=[];while(title.length&&lines.length<4){let cut=title.length;while(cut>1&&g.measureText(title.slice(0,cut)).width>cw-143)cut--;lines.push(title.slice(0,cut));title=title.slice(cut)}
   lines.forEach((l,j)=>g.fillText(l,x+123,y+34+j*23));g.restore();
-  g.font='bold 17px sans-serif';g.fillStyle='#dc4a35';g.fillText('내 평점 '+Number(r.rating).toFixed(1)+' / 10',x+123,y+147);
+  g.font='bold 17px sans-serif';g.fillStyle='#dc4a35';g.fillText('★ '+Number(r.rating).toFixed(1)+' / 10',x+132,y+148);
  }
  // The lower-right work counter is intentionally omitted.
  return c;
@@ -211,7 +219,7 @@ async function pdfFile(pages,groups,items){
  const cidToGid=add({dict:`<< /Length ${cidMap.length} >>`,data:cidMap});
  const fontDescriptor=add(`<< /Type /FontDescriptor /FontName /NanumGothic /Flags 4 /FontBBox [-1024 -1024 2048 2048] /ItalicAngle 0 /Ascent 1000 /Descent -250 /CapHeight 750 /StemV 90 /FontFile2 ${fontFile} 0 R >>`);
  const descendant=add(`<< /Type /Font /Subtype /CIDFontType2 /BaseFont /NanumGothic /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /FontDescriptor ${fontDescriptor} 0 R /DW 1000 /CIDToGIDMap ${cidToGid} 0 R >>`);
- const allChars=new Set('CINEFINDER 내 평점');items.forEach(r=>[...String(r.title)+'내 평점'+Number(r.rating).toFixed(1)].forEach(c=>allChars.add(c)));
+ const allChars=new Set('CINEFINDER MY COLLECTION ★ 내 평점');items.forEach(r=>[...String(r.title)+'내 평점'+Number(r.rating).toFixed(1)].forEach(c=>allChars.add(c)));
  let cmap=`/CIDInit /ProcSet findresource begin 12 dict begin begincmap /CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def /CMapName /CinefinderUnicode def /CMapType 2 def 1 begincodespacerange <0000> <FFFF> endcodespacerange `;
  const codes=[...allChars].map(c=>c.charCodeAt(0)).filter(x=>x>0&&x<65536);
  for(let i=0;i<codes.length;i+=100){let chunk=codes.slice(i,i+100);cmap+=`${chunk.length} beginbfchar `+chunk.map(x=>`<${x.toString(16).padStart(4,'0')}> <${x.toString(16).padStart(4,'0')}>`).join(' ')+' endbfchar ';}
@@ -232,11 +240,12 @@ async function pdfFile(pages,groups,items){
     let t=String(r.title||''),lines=[];
     while(t.length&&lines.length<4){const cut=Math.min(18,t.length);lines.push(t.slice(0,cut));t=t.slice(cut)}
     for(let k=0;k<lines.length;k++){const xx=x*841.89/1488,yy=(1052-(y+34+k*23))*595.28/1052;overlay+=`BT /F1 9 Tf 3 Tr 1 0 0 1 ${xx.toFixed(2)} ${yy.toFixed(2)} Tm <${hex(lines[k])}> Tj ET\n`}
-    const txt='내 평점 '+Number(r.rating).toFixed(1)+' / 10';overlay+=`BT /F1 9 Tf 3 Tr 1 0 0 1 ${(x*841.89/1488).toFixed(2)} ${((1052-(y+147))*595.28/1052).toFixed(2)} Tm <${hex(txt)}> Tj ET\n`;
+    const txt='★ '+Number(r.rating).toFixed(1)+' / 10';overlay+=`BT /F1 9 Tf 3 Tr 1 0 0 1 ${(x*841.89/1488).toFixed(2)} ${((1052-(y+147))*595.28/1052).toFixed(2)} Tm <${hex(txt)}> Tj ET\n`;
   }
   const stream=encoder.encode(overlay);
   const contents=add({dict:`<< /Length ${stream.length} >>`,data:stream});
-  pageRefs.push(add(`<< /Type /Page /Parent ${pagesRef} 0 R /MediaBox [0 0 841.89 595.28] /Resources << /XObject << /Im0 ${img} 0 R >> /Font << /F1 ${textFont} 0 R >> >> /Contents ${contents} 0 R >>`));
+  const brandLink=add(`<< /Type /Annot /Subtype /Link /Rect [20 568 195 594] /Border [0 0 0] /A << /S /URI /URI (https://gw0212.github.io/cinefinder/) >> >>`);
+  pageRefs.push(add(`<< /Type /Page /Parent ${pagesRef} 0 R /MediaBox [0 0 841.89 595.28] /Resources << /XObject << /Im0 ${img} 0 R >> /Font << /F1 ${textFont} 0 R >> >> /Contents ${contents} 0 R /Annots [${brandLink} 0 R] >>`));
  }
  objects[catalog-1]=`<< /Type /Catalog /Pages ${pagesRef} 0 R >>`;
  objects[pagesRef-1]=`<< /Type /Pages /Kids [${pageRefs.map(x=>x+' 0 R').join(' ')}] /Count ${pageRefs.length} >>`;

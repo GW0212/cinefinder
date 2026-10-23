@@ -2682,31 +2682,49 @@ function normalizeRatingItem(item){
 // Conservative title de-duplication: normalize punctuation/spacing and known spelling variants.
 // Preserve separate seasons, editions, media types and numeric TMDB IDs when names differ.
 function ratingCanonicalTitle(title){
-  let s=ratingTitleKey(title).normalize('NFKC').replace(/[\s\p{P}\p{S}]+/gu,'').toLowerCase();
-  const aliases = new Map([
-    ['쇼생크탈출','쇼생크탈출'], ['그린마일','그린마일'],
-    ['월e','월e'], ['월이','월e'], ['월e2008','월e'],
-    ['헥소고지','핵소고지'], ['탑건메버릭','탑건매버릭'], ['브레이킹배드','브레이킹배드시즌1'], ['나타중생1','너자'], ['나타중생2','너자2'], ['모모노케히메','모노노케히메']
-  ]);
-  return aliases.get(s)||s;
+  const s=ratingTitleKey(title).normalize('NFKC').replace(/[\s\p{P}\p{S}]+/gu,'').toLowerCase();
+  // Explicitly verified title aliases only. Do NOT collapse unrelated seasons/sequels.
+  const aliases={
+    '브레이킹배드':'브레이킹배드시즌1',
+    '나타중생1':'너자','나타중생2':'너자2',
+    '모모노케히메':'모노노케히메',
+    '겨울왕국1':'겨울왕국', '베놈1':'베놈',
+    '해리포터1':'해리포터와마법사의돌',
+    '해리포터2':'해리포터와비밀의방',
+    '해리포터3':'해리포터와아즈카반의죄수',
+    '해리포터4':'해리포터와불의잔',
+    '해리포터5':'해리포터와불사조기사단',
+    '해리포터6':'해리포터와혼혈왕자',
+    '해리포터7':'해리포터와죽음의성물1부',
+    '해리포터8':'해리포터와죽음의성물2부',
+    '범죄도시1':'범죄도시', '베테랑1':'베테랑',
+    '인사이드아웃1':'인사이드아웃',
+    '맨인더다크1':'맨인더다크',
+    '곰돌이푸피와꿀1':'곰돌이푸피와꿀',
+    '쇼생크탈출':'쇼생크탈출','월이':'월e',
+    '헥소고지':'핵소고지','탑건메버릭':'탑건매버릭'
+  };
+  return aliases[s]||s;
 }
 function normalizeRatingList(list){
-  const byId = new Map(), byTitle = new Map();
-  (Array.isArray(list) ? list : []).forEach(x => {
-    const item=normalizeRatingItem(x); if(!item) return;
-    const idKey=item.k;
-    const titleKey=`${item.type}::${ratingCanonicalTitle(item.title)}`;
-    // Keep multiple seasons and films with genuinely different titles separate.
-    const existing=byId.get(idKey) || byTitle.get(titleKey);
-    if(existing){
-      const preferred=Number(item.rating)>Number(existing.rating)?item:existing;
-      // Keep verified TMDB ID and nonempty notes when both variants refer to the same title.
-      const winner={...preferred, id:isRealRatingId(preferred.id)?preferred.id:(isRealRatingId(existing.id)?existing.id:item.id), note:preferred.note||existing.note||''};
-      winner.k=ratingKey(winner.type,winner.id,winner.title);
-      byId.delete(existing.k); byId.set(winner.k,winner); byTitle.set(titleKey,winner);
-    } else {byId.set(idKey,item);byTitle.set(titleKey,item);}
-  });
-  return [...byId.values()];
+  const grouped=new Map();
+  for(const raw of Array.isArray(list)?list:[]){
+    const item=normalizeRatingItem(raw);if(!item)continue;
+    const canonical=ratingCanonicalTitle(item.title);
+    // Preserve media category distinctions while folding curated title aliases.
+    const key=`${item.type}::${canonical}`;
+    const previous=grouped.get(key);
+    if(!previous){grouped.set(key,item);continue;}
+    const currentScore=Number(item.rating),previousScore=Number(previous.rating);
+    const preferred=currentScore>previousScore?item:previous;
+    const alt=preferred===item?previous:item;
+    // Keep a real numeric source ID when available, without replacing a higher score.
+    const selectedId=isRealRatingId(preferred.id)?preferred.id:(isRealRatingId(alt.id)?alt.id:preferred.id);
+    const winner={...preferred,id:selectedId,note:preferred.note||alt.note||''};
+    winner.k=ratingKey(winner.type,winner.id,winner.title);
+    grouped.set(key,winner);
+  }
+  return [...grouped.values()];
 }
 function getRatingsSync(){
   return RATINGS_MEM || [];
@@ -3392,6 +3410,17 @@ function renderPagedRatings(items){
     RATING_PAGE_OBSERVER.observe(sentinel);
   }
 }
+function dedupeRatingDisplayCards(cards){
+  const map=new Map();
+  for(const item of cards||[]){
+    const type=item.user_rating_type||contentTypeToRatingType(item.media_type);
+    const title=item.user_rating_title||item.title||item.name||'';
+    const key=type+'::'+ratingCanonicalTitle(title);
+    const old=map.get(key);
+    if(!old||Number(item.user_rating_value||0)>Number(old.user_rating_value||0))map.set(key,item);
+  }
+  return [...map.values()];
+}
 async function showRatings(){
   abortActiveRequests();
   stopRatingPaging();
@@ -3416,7 +3445,7 @@ async function showRatings(){
   const maps = ratingCachedMaps(list);
   if(maps.cached?.items?.length){
     // 이미 리졸브(포스터 확인)된 캐시가 있으면 바로 보여줍니다 — 대기 없음.
-    const cachedItems = clientSort(filterByCurrentQuery(applyLibraryTypeFilter(maps.cached.items || [], true)), 'user_rating_value');
+    const cachedItems = clientSort(filterByCurrentQuery(applyLibraryTypeFilter(dedupeRatingDisplayCards(maps.cached.items || []), true)), 'user_rating_value');
     if(cachedItems.length){
       renderPagedRatings(cachedItems);
       setStatus('');
@@ -3438,7 +3467,7 @@ async function showRatings(){
   setStatus(t('status_resolving_ratings'));
   const resolved = await resolveRatingListToTmdb(list);
   if(myToken !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings') return; // 그 사이 화면이 바뀌었으면 중단
-  const sortedResolved = clientSort(resolved || [], 'user_rating_value');
+  const sortedResolved = clientSort(dedupeRatingDisplayCards(resolved || []), 'user_rating_value');
   setCachedRatingView(list, sortedResolved, resolved._ratingStats || null);
   clearSkeletons();
   const visible = filterByCurrentQuery(applyLibraryTypeFilter(sortedResolved, true));

@@ -1,0 +1,8 @@
+CINEFINDER v8 — 내 평점 중복 표시 / PDF 디자인 및 링크
+- 내 평점 탭의 이미 저장된 원본 JSON은 삭제하지 않고, 제목 별칭 중복을 통합 표시합니다.
+- 동일 작품에서 최고 평점을 표시합니다. 시즌 2 이상은 별도 유지합니다.
+- 평점 표시와 PDF 내보내기의 별칭 통합 규칙을 맞췄습니다.
+- PDF: 흰색 편집형 헤더, 색상 악센트, 카드 강조, 페이지 카운터, 점수 밴드 추가.
+- PDF: 모든 페이지의 CINEFINDER 글자 영역을 클릭하면 https://gw0212.github.io/cinefinder/ 이동.
+- 기존 v7 탭 캐시/진행률 UI는 유지.
+QA: JS syntax / de-dup regression test / ZIP integrity. 실제 브라우저 PDF 통합 테스트는 미수행.
