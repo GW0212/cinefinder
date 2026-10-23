@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20261024cloud10" />
+  <link rel="stylesheet" href="style.css?v=20261024cloud104" />
 </head>
 <body>
 <div id="app">
@@ -327,6 +327,13 @@
       <small>즐겨찾기 · 나중에 보기 · 내 평점만 동기화됩니다. 로그인 전 데이터는 첫 연결 시 병합하며 원본 로컬 기록도 유지됩니다.</small>
     </section>
   </div>
+  <!-- Google login error: centered, auto-dismiss after 3 seconds -->
+  <div id="cloudLoginNotice" class="cloud-login-notice hidden" role="alert" aria-live="assertive" aria-hidden="true">
+    <div class="cloud-login-notice-card">
+      <span class="cloud-login-notice-symbol" aria-hidden="true">!</span>
+      <div class="cloud-login-notice-body"><strong>Google 로그인 오류</strong><p id="cloudLoginNoticeMessage"></p></div>
+    </div>
+  </div>
   <!-- ══════════ UTILITIES ══════════ -->
   <div id="toast" class="toast" aria-live="polite"></div>
   <button id="scrollTopBtn" class="scroll-top-btn" aria-label="맨위로">
@@ -342,6 +349,6 @@
 <script src="data-help.js?v=1"></script>
 <script src="data-safety-ui.js?v=1"></script>
 <script src="firebase-config.js?v=10-3-keyfix-20261024"></script>
-<script src="cloud-sync.js?v=10.3"></script>
+<script src="cloud-sync.js?v=10.4"></script>
 </body>
 </html>

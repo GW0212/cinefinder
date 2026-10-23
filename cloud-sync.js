@@ -5,7 +5,7 @@
   const LABEL={favs:'즐겨찾기',watch:'나중에 보기',ratings:'내 평점'};
   const cfg=window.CINEFINDER_FIREBASE_CONFIG||{};
   const configured=Boolean(cfg.apiKey&&cfg.authDomain&&cfg.projectId&&cfg.appId);
-  let auth,db,user=null,ready=false,sub=[],loadingRemote=false,ignoreLocal=false,loginBusy=false;
+  let auth,db,user=null,ready=false,sub=[],loadingRemote=false,ignoreLocal=false,loginBusy=false,initPromise=null,noticeTimer=null;
   const timers=new Map(),dirty=new Set(),busy=new Set();
   const api={isApplyingRemote:false,onLocalSaved:(key,list)=>{
     if(!user||!ready||ignoreLocal)return;
@@ -14,6 +14,25 @@
   }};
   window.CineCloud=api;
   function status(message){const e=$('cloudStatus');if(e)e.textContent=message;}
+  function notifyLoginError(err){
+    const code=String(err?.code||'');
+    // Closing the account chooser is not a failure.
+    if(code==='auth/popup-closed-by-user'||code==='auth/cancelled-popup-request')return;
+    let msg='Google 로그인에 실패했습니다. 다시 시도해 주세요.';
+    if(code==='auth/api-key-not-valid'||code==='auth/invalid-api-key')msg='Firebase API 키가 유효하지 않습니다. 웹 앱 설정을 확인해 주세요.';
+    else if(code==='auth/unauthorized-domain')msg='로그인 도메인이 승인되지 않았습니다. Firebase에서 gw0212.github.io를 추가해 주세요.';
+    else if(code==='auth/popup-blocked')msg='로그인 팝업이 차단되었습니다. 브라우저 팝업 허용 설정을 확인해 주세요.';
+    else if(code==='auth/network-request-failed')msg='네트워크 연결에 실패했습니다. 인터넷 연결을 확인해 주세요.';
+    else if(code==='auth/operation-not-allowed')msg='Firebase에서 Google 로그인이 활성화되지 않았습니다.';
+    else if(code==='auth/too-many-requests')msg='로그인 요청이 일시적으로 제한됐습니다. 잠시 후 다시 시도해 주세요.';
+    else if(code==='auth/account-exists-with-different-credential')msg='같은 이메일에 다른 로그인 방식이 등록되어 있습니다.';
+    else if(err?.message)msg=String(err.message);
+    const el=$('cloudLoginNotice');if(!el)return;
+    $('cloudLoginNoticeMessage').textContent=msg;
+    el.classList.remove('hidden');el.setAttribute('aria-hidden','false');
+    clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{el.classList.add('hidden');el.setAttribute('aria-hidden','true');},3000);
+  }
+
   function showDialog(){ $('cloudDialog')?.classList.remove('hidden');document.body.style.overflow='hidden'; }
   function hideDialog(){ $('cloudDialog')?.classList.add('hidden');document.body.style.overflow=''; }
   function ui(){
@@ -100,26 +119,27 @@
     }catch(e){loadingRemote=false;ready=false;status('클라우드 초기 동기화 실패: '+e.message+' · 로컬 목록은 유지됩니다. 다시 로그인하거나 지금 동기화하세요.');}
   }
   async function signIn(){
-    if(!configured||loginBusy)return;loginBusy=true;
+    if(loginBusy)return;
+    if(!configured){notifyLoginError({message:'Firebase 설정이 필요합니다. firebase-config.js를 확인해 주세요.'});return;}
+    // SDK is loaded at startup. Do not await an unrelated dialog, which can
+    // forfeit the transient user activation needed by popup-based auth.
+    if(!auth){notifyLoginError({message:'Google 로그인 기능을 준비하고 있습니다. 잠시 후 다시 눌러 주세요.'});return;}
+    loginBusy=true;
     try{
-      status('Google 로그인 창을 여는 중…');
       const provider=new firebase.auth.GoogleAuthProvider();
-      // Popup keeps GitHub Pages on the same origin; redirect may require a
-      // custom authDomain because modern mobile browsers partition storage.
-      try{await auth.signInWithPopup(provider);}
-      catch(e){if(['auth/popup-blocked','auth/operation-not-supported-in-this-environment'].includes(e.code))await auth.signInWithRedirect(provider);else throw e;}
+      await auth.signInWithPopup(provider);
     }catch(e){
-      const msg=String(e?.message||e||'');
-      if(msg.includes('auth/api-key-not-valid')){
-        status('Google 로그인 오류: API 키가 유효하지 않습니다. 최신 파일이 배포되지 않았거나 브라우저 캐시가 남아있을 수 있습니다. GitHub Pages 파일 업로드 후 강력 새로고침(Ctrl+F5) 또는 모바일 브라우저 새로고침 후 다시 시도하세요. 계속되면 Firebase 웹 앱의 apiKey와 승인된 도메인(gw0212.github.io), Google 로그인 사용 설정을 다시 확인해 주세요.');
-      }else{
-        status('Google 로그인 오류: '+msg);
-      }
-    }
-    finally{loginBusy=false;}
+      // Browser policy may block popups. Keep the error visible, rather than
+      // silently redirecting the current page and risking local UI state.
+      notifyLoginError(e);
+    }finally{loginBusy=false;}
+  }
+  function accountClick(){
+    if(user){showDialog();return;}
+    signIn();
   }
   async function init(){
-    $('cloudAccountBtn')?.addEventListener('click',showDialog);
+    $('cloudAccountBtn')?.addEventListener('click',accountClick);
     $('cloudClose')?.addEventListener('click',hideDialog);
     $('cloudDialog')?.addEventListener('click',e=>{if(e.target===$('cloudDialog'))hideDialog();});
     $('cloudSignIn')?.addEventListener('click',signIn);
@@ -130,7 +150,7 @@
       await loadSDK();
       if(!cfg.apiKey || !/^AIza[0-9A-Za-z_-]{20,}$/.test(cfg.apiKey)) throw Error('Firebase API key 형식이 올바르지 않습니다. firebase-config.js를 확인해 주세요.');
       firebase.initializeApp(cfg);auth=firebase.auth();db=firebase.firestore();
-      auth.getRedirectResult().catch(e=>status('Google 로그인 리디렉션 오류: '+e.message));
+      auth.getRedirectResult().catch(e=>notifyLoginError(e));
       auth.onAuthStateChanged(async next=>{
         // Existing local app initialization must finish before applying remote data.
         if(typeof FAV_MEM==='undefined'||FAV_MEM===null){await new Promise(resolve=>{let tries=0;const h=setInterval(()=>{if(FAV_MEM!==null||++tries>120){clearInterval(h);resolve();}},100);});}
