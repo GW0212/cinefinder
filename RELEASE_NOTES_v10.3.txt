@@ -1,0 +1,6 @@
+Cinefinder v10.3 Firebase API 키 교체
+- 사용자 제공 Google Cloud Browser key를 firebase-config.js에 정확히 반영
+- index.html 내 중복 Firebase 설정 제거 (단일 설정 파일 사용)
+- 캐시 방지용 스크립트 버전 갱신
+- Google 로그인/Firestore 동기화/로컬 저장 기능 유지
+주의: 실제 Google 로그인 및 클라우드 동기화는 배포 후 점검해야 합니다.

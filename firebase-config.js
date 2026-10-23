@@ -1,7 +1,7 @@
 // Cinefinder Firebase web app configuration (Firebase Console project: cinefinder-4f479).
 // This is a public Web SDK configuration, NOT a service-account private key.
 window.CINEFINDER_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyD_eBTMqwSWJNbvcQyuqVHBAjaQ37jdxVw",
+  apiKey: "AIzaSyD_eBTMqWSWJNbvcQyuqVHBAjaQ37jdxVw",
   authDomain: "cinefinder-4f479.firebaseapp.com",
   projectId: "cinefinder-4f479",
   storageBucket: "cinefinder-4f479.firebasestorage.app",
