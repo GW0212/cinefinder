@@ -1,8 +1,10 @@
-// Firebase Console > 프로젝트 설정 > 내 앱 > 웹 앱 설정값으로 아래 값을 교체하세요.
-// 설정 전에는 기존 오프라인 저장 기능만 작동합니다.
+// Cinefinder Firebase web app configuration (Firebase Console project: cinefinder-4f479).
+// This is a public Web SDK configuration, NOT a service-account private key.
 window.CINEFINDER_FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  appId: ""
+  apiKey: "AIzaSyD_eBTMqwSWJNbvcQyuqVHBAjaQ37jdxVw",
+  authDomain: "cinefinder-4f479.firebaseapp.com",
+  projectId: "cinefinder-4f479",
+  storageBucket: "cinefinder-4f479.firebasestorage.app",
+  messagingSenderId: "483997979705",
+  appId: "1:483997979705:web:62ff1c4bb6332c290fa9e8"
 };

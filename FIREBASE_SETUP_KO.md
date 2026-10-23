@@ -1,10 +1,10 @@
 # Cinefinder v10 — Google 계정 동기화 설정 (필수)
 
-GitHub Pages는 정적 호스팅이므로 Google 로그인/클라우드 저장을 위해 본인 Firebase 프로젝트 설정이 필요합니다. Firebase 프로젝트가 생성되기 전에는 Google 로그인 기능이 작동하지 않으며 기존 로컬 저장은 계속 작동합니다.
+GitHub Pages는 정적 호스팅이므로 Google 로그인/클라우드 저장을 위해 본인 Firebase 프로젝트 설정이 필요합니다. Firebase 웹 앱 설정값은 `firebase-config.js`에 적용되었습니다. 실제 서비스 이용을 위해 Authentication과 Firestore 보안 규칙을 확인해야 합니다.
 
 1. https://console.firebase.google.com/ 에서 프로젝트 생성.
 2. 프로젝트 설정 → 웹 앱 등록 → Firebase 구성 정보에서 apiKey/authDomain/projectId/appId 복사.
-3. `firebase-config.js`에 위 4개 값을 채웁니다 (따옴표 안의 빈값 교체). **개인 서비스 계정 암호나 OAuth client secret은 넣지 마세요.**
+3. `firebase-config.js`에 실제 프로젝트 설정값이 이미 적용되어 있으므로 수정하지 않아도 됩니다. **서비스 계정 암호나 OAuth client secret은 절대 넣지 마세요.**
 4. 빌드 → Authentication → 시작하기 → 로그인 방법 → Google 제공업체 활성화. 지원 이메일 선택.
 5. Authentication → 설정 → 승인된 도메인에 `gw0212.github.io` 추가. 프로젝트 기본 authDomain도 허용해야 합니다.
 6. 빌드 → Firestore Database → 데이터베이스 생성(프로덕션 모드 권장), 규칙 탭에서 `firestore.rules` 전체 붙여 넣고 게시. 절대로 전체 공개 규칙을 사용하지 마세요.
@@ -30,3 +30,13 @@ GitHub Pages는 정적 호스팅이므로 Google 로그인/클라우드 저장�
 
 ### 제한사항
 Firebase 콘솔 자격증명 없이 완전 자동 로그인 배포는 불가능합니다. SDK 외부 로딩이 차단된 환경에서는 클라우드 연결이 실패합니다. Firebase 실제 계정과 2대 기기를 이용한 종단 간 테스트는 포함하지 않았습니다.
+
+### 특히 중요한 보안 규칙 경로 확인
+이 웹사이트의 `cloud-sync.js`는 `/cinefinder_users/{uid}/lists/{favs|watch|ratings}` 문서에 저장합니다.
+따라서 Firebase 규칙 화면에 `/users/{userId}/...`만 허용한 규칙을 게시했다면 동기화가 실패합니다.
+ZIP 안의 **`firestore.rules`를 그대로 복사해 규칙 화면에 게시**해야 합니다.
+
+### 배포 후 확인
+- GitHub Pages에 모든 파일을 올린 뒤 강력 새로고침(Ctrl+Shift+R)
+- Google 로그인 → 동기화 상태 메시지 확인 → 작은 즐겨찾기 변경 → Firestore 데이터에서 `cinefinder_users` 확인
+- 모바일은 팝업이 차단되면 로그인 실패할 수 있습니다. 이 경우 화면의 오류 메시지를 확인합니다.
