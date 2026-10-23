@@ -208,6 +208,25 @@ async function grab(srcs,item){
  }
  return null;
 }
+// Same 10-band color scheme as app.js / style.css (1-point score bins).
+function pdfRatingPalette(score) {
+  const n=Number(score);
+  const i=Number.isFinite(n)?Math.min(9,Math.max(0,Math.ceil(n)-1)):0;
+  const palettes=[
+    {foreground:'#3B2608',background:'#D9C49A',accent:'#5C3B0B',rainbow:false},
+    {foreground:'#B91C1C',background:'#FEE2E2',accent:'#DC2626',rainbow:false},
+    {foreground:'#C2410C',background:'#FFEDD5',accent:'#F97316',rainbow:false},
+    {foreground:'#854D0E',background:'#FEF9C3',accent:'#EAB308',rainbow:false},
+    {foreground:'#3F6212',background:'#ECFCCB',accent:'#84CC16',rainbow:false},
+    {foreground:'#166534',background:'#DCFCE7',accent:'#16A34A',rainbow:false},
+    {foreground:'#075985',background:'#E0F2FE',accent:'#0EA5E9',rainbow:false},
+    {foreground:'#1E3A8A',background:'#DBEAFE',accent:'#1D4ED8',rainbow:false},
+    {foreground:'#6B21A8',background:'#F3E8FF',accent:'#9333EA',rainbow:false},
+    {foreground:'#243B53',background:'#FFFFFF',accent:'#7C3AED',rainbow:true}
+  ];
+  return palettes[i];
+}
+
 function pageCanvas(items,imgs,start,page,allPages,groupLabel){
  const c=document.createElement('canvas');c.width=1488;c.height=1052;const g=c.getContext('2d');
  g.fillStyle='#f3f5f9';g.fillRect(0,0,c.width,c.height);
@@ -225,13 +244,23 @@ function pageCanvas(items,imgs,start,page,allPages,groupLabel){
   const n=i;if(n>=items.length)break;const r=items[n],x=40+(i%4)*(cw+gx),y=y0+Math.floor(i/4)*(ch+gy);
   g.fillStyle='#e1e5ed';g.fillRect(x+2,y+4,cw,ch);
   g.fillStyle='#fff';g.fillRect(x,y,cw,ch);g.strokeStyle='#d9dfe9';g.strokeRect(x,y,cw,ch);
-  g.fillStyle='#e65b45';g.fillRect(x,y,4,ch);
-  g.fillStyle='#faf1ed';g.fillRect(x+123,y+133,cw-133,30);
+  const ratingColors=pdfRatingPalette(r.rating);
+  if(ratingColors.rainbow){
+    const grad=g.createLinearGradient(x,y,x,y+ch);
+    ['#E53935','#FF9800','#FDD835','#43A047','#1E88E5','#8E24AA'].forEach((color,i)=>grad.addColorStop(i/5,color));
+    g.fillStyle=grad;g.fillRect(x,y,5,ch);
+    const badgeGrad=g.createLinearGradient(x+123,y+133,x+cw-10,y+133);
+    ['#E53935','#FF9800','#FDD835','#43A047','#1E88E5','#8E24AA'].forEach((color,i)=>badgeGrad.addColorStop(i/5,color));
+    g.fillStyle=badgeGrad;g.fillRect(x+123,y+133,cw-133,30);
+  }else{
+    g.fillStyle=ratingColors.accent;g.fillRect(x,y,4,ch);
+    g.fillStyle=ratingColors.background;g.fillRect(x+123,y+133,cw-133,30);
+  }
   if(imgs[n])g.drawImage(imgs[n],x+9,y+9,106,160);else {g.fillStyle='#e4e9f1';g.fillRect(x+9,y+9,106,160);g.fillStyle='#445b77';g.font='bold 14px sans-serif';g.fillText('포스터 오류',x+16,y+80)}
   g.save();g.beginPath();g.rect(x+123,y+15,cw-132,108);g.clip();g.font='bold 17px sans-serif';g.fillStyle='#243148';
   let title=String(r.title||'');let lines=[];while(title.length&&lines.length<4){let cut=title.length;while(cut>1&&g.measureText(title.slice(0,cut)).width>cw-143)cut--;lines.push(title.slice(0,cut));title=title.slice(cut)}
   lines.forEach((l,j)=>g.fillText(l,x+123,y+34+j*23));g.restore();
-  g.font='bold 17px sans-serif';g.fillStyle='#dc4a35';g.fillText('★ '+Number(r.rating).toFixed(1)+' / 10',x+132,y+148);
+  g.font='bold 17px sans-serif';g.fillStyle=ratingColors.rainbow?'#ffffff':ratingColors.foreground;if(ratingColors.rainbow){g.shadowColor='rgba(0,0,0,.8)';g.shadowBlur=2;}g.fillText('★ '+Number(r.rating).toFixed(1)+' / 10',x+132,y+148);g.shadowBlur=0;
  }
  // The lower-right work counter is intentionally omitted.
  return c;

@@ -918,13 +918,12 @@ const COMMON_TITLE_CHARS_RE = /^[\u0000-\u007F\uAC00-\uD7A3\u1100-\u11FF\u3130-\
 const JA_TITLE_CHARS_RE = /^[\u0000-\u007F\u3040-\u30FF\u3400-\u9FFF\s.,:;!?"'()\[\]{}\-–—_&+/·•★☆#@%°]+$/;
 const ZH_TITLE_CHARS_RE = /^[\u0000-\u007F\u3400-\u9FFF\s.,:;!?"'()\[\]{}\-–—_&+/·•★☆#@%°]+$/;
 function cleanTitle(v){ return String(v||'').replace(/\s+/g,' ').trim(); }
-// 내 평점 배지 색상: 1~3 빨강 / 3.1~6 주황 / 6.1~7.9 노랑 / 8~10 초록
+// 1점 간격 10구간: 경계 점수는 낮은 구간에 포함됩니다.
+const RATING_TIER_CLASSES=["rating-tier-red", "rating-tier-rose", "rating-tier-coral", "rating-tier-orange", "rating-tier-amber", "rating-tier-yellow", "rating-tier-lime", "rating-tier-teal", "rating-tier-blue", "rating-tier-green"];
 function ratingTierClass(v){
-  const n = Number(v) || 0;
-  if(n <= 3) return 'rating-tier-red';
-  if(n <= 6) return 'rating-tier-orange';
-  if(n <= 7.9) return 'rating-tier-yellow';
-  return 'rating-tier-green';
+  const n=Number(v);
+  const index=Number.isFinite(n)?Math.min(9,Math.max(0,Math.ceil(n)-1)):0;
+  return RATING_TIER_CLASSES[index];
 }
 function itemTitle(it,type){ return cleanTitle(type==='movie'?(it.title||it.name||it.original_title||it.original_name||''):(it.name||it.title||it.original_name||it.original_title||'')); }
 function translationTitle(entry,type){
@@ -1655,16 +1654,16 @@ function applyLibraryTypeFilter(items, isRatingsList){
   if(LIBRARY_TYPE_FILTER === 'anime') return items.filter(x => savedItemIsAnime(x));
   return items.filter(x => x.media_type === LIBRARY_TYPE_FILTER && !savedItemIsAnime(x));
 }
-// 별점 구간(1~3/3.1~6/6.1~7.9/8~10)별, 콘텐츠 종류(영화/드라마/애니)별 개수를 계산합니다.
+// 점수별 10구간 집계: 예를 들어 8.0은 7.1~8.0, 8.1은 8.1~9.0.
 function computeRatingsBreakdown(list){
-  const tiers = { red:0, orange:0, yellow:0, green:0 };
-  const types = { movie:0, drama:0, anime:0 };
+  const tiers=Object.fromEntries(RATING_TIER_CLASSES.map(c=>[c.replace('rating-tier-',''),0]));
+  const types={movie:0,drama:0,anime:0};
   (list||[]).forEach(r=>{
-    const tierName = ratingTierClass(r.rating).replace('rating-tier-','');
-    if(tierName in tiers) tiers[tierName]++;
-    if(r.type in types) types[r.type]++;
+    const key=ratingTierClass(r.rating).replace('rating-tier-','');
+    tiers[key]++;
+    if(r.type in types)types[r.type]++;
   });
-  return { total:(list||[]).length, tiers, types };
+  return {total:(list||[]).length,tiers,types};
 }
 function computeSavedBreakdown(list){
   const types = { movie:0, drama:0, anime:0 };
@@ -1708,10 +1707,16 @@ function renderRatingsBreakdownPopup(breakdown, mode='ratings'){
   if(mode === 'ratings'){
     popup.innerHTML = `
       <div class="ratings-breakdown-title">${t('ratings_by_score')}</div>
-      ${scoreRow('rating-tier-red','1 ~ 3',breakdown.tiers.red)}
-      ${scoreRow('rating-tier-orange','3.1 ~ 6',breakdown.tiers.orange)}
-      ${scoreRow('rating-tier-yellow','6.1 ~ 7.9',breakdown.tiers.yellow)}
-      ${scoreRow('rating-tier-green','8 ~ 10',breakdown.tiers.green)}
+      ${scoreRow('rating-tier-green','9.1 ~ 10.0 · 무지개',breakdown.tiers.green)}
+      ${scoreRow('rating-tier-blue','8.1 ~ 9.0',breakdown.tiers.blue)}
+      ${scoreRow('rating-tier-teal','7.1 ~ 8.0',breakdown.tiers.teal)}
+      ${scoreRow('rating-tier-lime','6.1 ~ 7.0',breakdown.tiers.lime)}
+      ${scoreRow('rating-tier-yellow','5.1 ~ 6.0',breakdown.tiers.yellow)}
+      ${scoreRow('rating-tier-amber','4.1 ~ 5.0',breakdown.tiers.amber)}
+      ${scoreRow('rating-tier-orange','3.1 ~ 4.0',breakdown.tiers.orange)}
+      ${scoreRow('rating-tier-coral','2.1 ~ 3.0',breakdown.tiers.coral)}
+      ${scoreRow('rating-tier-rose','1.1 ~ 2.0',breakdown.tiers.rose)}
+      ${scoreRow('rating-tier-red','0.0 ~ 1.0',breakdown.tiers.red)}
       <div class="ratings-breakdown-divider"></div>
       <div class="ratings-breakdown-title">${t('ratings_by_type')}</div>
       ${scoreRow('type-dot-movie',t('badge_movie'),breakdown.types.movie)}
@@ -2939,7 +2944,7 @@ async function refreshRatingBadges(){
         scoreEl.textContent = `★ ${Number(saved.rating).toFixed(1)}`;
         scoreEl.setAttribute('title', `${t('my_rating')} ${Number(saved.rating).toFixed(1)}`);
         scoreEl.setAttribute('aria-label', `${t('my_rating')} ${Number(saved.rating).toFixed(1)}`);
-        scoreEl.classList.remove('hidden', 'rating-tier-red', 'rating-tier-orange', 'rating-tier-yellow', 'rating-tier-green');
+        scoreEl.classList.remove('hidden', ...RATING_TIER_CLASSES);
         scoreEl.classList.add(ratingTierClass(saved.rating));
       }
       if(holder){
@@ -2959,7 +2964,7 @@ async function refreshRatingBadges(){
         scoreEl.removeAttribute('title');
         scoreEl.removeAttribute('aria-label');
         scoreEl.classList.add('hidden');
-        scoreEl.classList.remove('rating-tier-red', 'rating-tier-orange', 'rating-tier-yellow', 'rating-tier-green');
+        scoreEl.classList.remove(...RATING_TIER_CLASSES);
       }
       if(holder){ holder.textContent = ''; holder.classList.add('hidden'); }
       setRateButtonVisual(card.querySelector('.rate-btn'), null);
