@@ -919,9 +919,10 @@ const JA_TITLE_CHARS_RE = /^[\u0000-\u007F\u3040-\u30FF\u3400-\u9FFF\s.,:;!?"'()
 const ZH_TITLE_CHARS_RE = /^[\u0000-\u007F\u3400-\u9FFF\s.,:;!?"'()\[\]{}\-–—_&+/·•★☆#@%°]+$/;
 function cleanTitle(v){ return String(v||'').replace(/\s+/g,' ').trim(); }
 // 1점 간격 10구간: 경계 점수는 낮은 구간에 포함됩니다.
-const RATING_TIER_CLASSES=["rating-tier-red", "rating-tier-rose", "rating-tier-coral", "rating-tier-orange", "rating-tier-amber", "rating-tier-yellow", "rating-tier-lime", "rating-tier-teal", "rating-tier-blue", "rating-tier-green"];
+const RATING_TIER_CLASSES=["rating-tier-red", "rating-tier-rose", "rating-tier-coral", "rating-tier-orange", "rating-tier-amber", "rating-tier-yellow", "rating-tier-lime", "rating-tier-teal", "rating-tier-blue", "rating-tier-green", "rating-tier-rainbow"];
 function ratingTierClass(v){
   const n=Number(v);
+  if(Number.isFinite(n) && n===10) return "rating-tier-rainbow";
   const index=Number.isFinite(n)?Math.min(9,Math.max(0,Math.ceil(n)-1)):0;
   return RATING_TIER_CLASSES[index];
 }
@@ -1707,7 +1708,8 @@ function renderRatingsBreakdownPopup(breakdown, mode='ratings'){
   if(mode === 'ratings'){
     popup.innerHTML = `
       <div class="ratings-breakdown-title">${t('ratings_by_score')}</div>
-      ${scoreRow('rating-tier-green','9.1 ~ 10.0 · 무지개',breakdown.tiers.green)}
+      ${scoreRow('rating-tier-rainbow','10.0 · 무지개',breakdown.tiers.rainbow)}
+      ${scoreRow('rating-tier-green','9.1 ~ 9.9 · 포도색',breakdown.tiers.green)}
       ${scoreRow('rating-tier-blue','8.1 ~ 9.0',breakdown.tiers.blue)}
       ${scoreRow('rating-tier-teal','7.1 ~ 8.0',breakdown.tiers.teal)}
       ${scoreRow('rating-tier-lime','6.1 ~ 7.0',breakdown.tiers.lime)}

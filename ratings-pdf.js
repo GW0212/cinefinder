@@ -222,8 +222,9 @@ function pdfRatingPalette(score) {
     {foreground:'#075985',background:'#E0F2FE',accent:'#0EA5E9',rainbow:false},
     {foreground:'#1E3A8A',background:'#DBEAFE',accent:'#1D4ED8',rainbow:false},
     {foreground:'#6B21A8',background:'#F3E8FF',accent:'#9333EA',rainbow:false},
-    {foreground:'#243B53',background:'#FFFFFF',accent:'#7C3AED',rainbow:true}
+    {foreground:'#FFFFFF',background:'#3B0764',accent:'#260442',rainbow:false}
   ];
+  if(Number.isFinite(n) && n===10) return {foreground:'#FFFFFF',background:'#FFFFFF',accent:'#7C3AED',rainbow:true};
   return palettes[i];
 }
 

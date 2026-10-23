@@ -6101,8 +6101,13 @@ body {
 [data-theme="dark"] .rating-tier-teal{--tier-fg:#BFDBFE;--tier-bg:#172554;--tier-border:#60A5FA}
 .rating-tier-blue{--tier-fg:#6B21A8;--tier-bg:#F3E8FF;--tier-border:#9333EA}
 [data-theme="dark"] .rating-tier-blue{--tier-fg:#E9D5FF;--tier-bg:#3B0764;--tier-border:#C084FC}
-.rating-tier-green{--tier-fg:#243B53;--tier-bg:#FFFFFF;--tier-border:#7C3AED}
-[data-theme="dark"] .rating-tier-green{--tier-fg:#FFFFFF;--tier-bg:#172554;--tier-border:#A78BFA}
-.card-user-rating.rating-tier-green,.detail-chip.rating-chip.rating-tier-green,.results-grid .card .thumb-top-info > .card-user-rating.rating-tier-green:not(.hidden){background:linear-gradient(105deg,#E53935 0%,#FF9800 18%,#FDD835 37%,#43A047 55%,#1E88E5 73%,#8E24AA 100%)!important;color:#fff!important;border:1px solid #6B21A8!important;text-shadow:0 1px 2px rgba(0,0,0,.8)!important;font-weight:800!important}
-.tier-dot.rating-tier-green{background:linear-gradient(105deg,#E53935 0%,#FF9800 18%,#FDD835 37%,#43A047 55%,#1E88E5 73%,#8E24AA 100%)!important}
-[data-theme="dark"] .card-user-rating.rating-tier-green,[data-theme="dark"] .detail-chip.rating-chip.rating-tier-green,[data-theme="dark"] .results-grid .card .thumb-top-info > .card-user-rating.rating-tier-green:not(.hidden){background:linear-gradient(105deg,#E53935 0%,#FF9800 18%,#FDD835 37%,#43A047 55%,#1E88E5 73%,#8E24AA 100%)!important;color:#fff!important;border-color:#a78bfa!important}
+/* v11.4: 9.1–9.9 deep grape, exactly 10.0 rainbow. */
+.rating-tier-green{--tier-fg:#FFFFFF;--tier-bg:#3B0764;--tier-border:#260442}
+[data-theme="dark"] .rating-tier-green{--tier-fg:#FFFFFF;--tier-bg:#3B0764;--tier-border:#A855F7}
+.card-user-rating.rating-tier-green,.detail-chip.rating-chip.rating-tier-green,.results-grid .card .thumb-top-info > .card-user-rating.rating-tier-green:not(.hidden){background:#3B0764!important;color:#FFFFFF!important;border:1px solid #260442!important;text-shadow:none!important;font-weight:800!important}
+.tier-dot.rating-tier-green{background:#3B0764!important}
+[data-theme="dark"] .card-user-rating.rating-tier-green,[data-theme="dark"] .detail-chip.rating-chip.rating-tier-green,[data-theme="dark"] .results-grid .card .thumb-top-info > .card-user-rating.rating-tier-green:not(.hidden){background:#3B0764!important;color:#FFFFFF!important;border-color:#A855F7!important}
+.rating-tier-rainbow{--tier-fg:#FFFFFF;--tier-bg:#7C3AED;--tier-border:#6B21A8}
+.card-user-rating.rating-tier-rainbow,.detail-chip.rating-chip.rating-tier-rainbow,.results-grid .card .thumb-top-info > .card-user-rating.rating-tier-rainbow:not(.hidden){background:linear-gradient(105deg,#E53935 0%,#FF9800 18%,#FDD835 37%,#43A047 55%,#1E88E5 73%,#8E24AA 100%)!important;color:#fff!important;border:1px solid #6B21A8!important;text-shadow:0 1px 2px rgba(0,0,0,.8)!important;font-weight:800!important}
+.tier-dot.rating-tier-rainbow{background:linear-gradient(105deg,#E53935 0%,#FF9800 18%,#FDD835 37%,#43A047 55%,#1E88E5 73%,#8E24AA 100%)!important}
+[data-theme="dark"] .card-user-rating.rating-tier-rainbow,[data-theme="dark"] .detail-chip.rating-chip.rating-tier-rainbow,[data-theme="dark"] .results-grid .card .thumb-top-info > .card-user-rating.rating-tier-rainbow:not(.hidden){border-color:#A78BFA!important}
