@@ -814,6 +814,7 @@ async function persistListDual(key, list){
       LAST_SAVE_ERROR=null;
       if(copy.length) await writeHistory(key,copy);
       console.log(`[cinefinder] saved ${key}: ${copy.length}, indexedDB=${idbOk}, localStorage=${localOk}`);
+      if(!window.CineCloud?.isApplyingRemote) window.CineCloud?.onLocalSaved?.(key, copy);
     }else console.error(`[cinefinder] save FAILED: ${key}`);
     return success;
   });

@@ -1,0 +1,1 @@
+v10: Firebase Google Sign-in, Firestore saved list sync, local first-login merge, real-time updates, sign out, mobile auth UI. Requires Firebase setup. See FIREBASE_SETUP_KO.md.

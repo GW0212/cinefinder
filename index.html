@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20261024mobile9" />
+  <link rel="stylesheet" href="style.css?v=20261024cloud10" />
 </head>
 <body>
 <div id="app">
@@ -211,6 +211,7 @@
           <button id="searchBtn" type="submit" class="btn-search">검색</button>
         </form>
         <div class="library-actions" aria-label="저장 목록">
+          <button id="cloudAccountBtn" type="button" class="cloud-account-btn" title="Google 계정 동기화" aria-label="Google 계정 동기화"><span id="cloudAccountIcon">G</span><span id="cloudAccountText">Google 로그인</span></button>
           <button id="btnFav" class="saved-btn fav-saved" title="즐겨찾기">
             <span class="saved-btn-icon" aria-hidden="true">♡</span>
             <span>즐겨찾기</span>
@@ -315,6 +316,17 @@
     </section>
   </div>
 
+  <!-- CLOUD ACCOUNT -->
+  <div id="cloudDialog" class="cloud-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="cloudDialogTitle">
+    <section class="cloud-panel">
+      <button id="cloudClose" type="button" class="cloud-close" aria-label="닫기">×</button>
+      <h2 id="cloudDialogTitle">Google 계정 동기화</h2>
+      <p id="cloudStatus">Google 계정으로 로그인하면 세 가지 목록을 기기 간에 동기화합니다.</p>
+      <div id="cloudProfile" class="cloud-profile hidden"></div>
+      <div class="cloud-control"><button id="cloudSignIn" type="button" class="cloud-primary">Google 계정으로 로그인</button><button id="cloudSyncNow" type="button" class="hidden">지금 동기화</button><button id="cloudSignOut" type="button" class="hidden">로그아웃</button></div>
+      <small>즐겨찾기 · 나중에 보기 · 내 평점만 동기화됩니다. 로그인 전 데이터는 첫 연결 시 병합하며 원본 로컬 기록도 유지됩니다.</small>
+    </section>
+  </div>
   <!-- ══════════ UTILITIES ══════════ -->
   <div id="toast" class="toast" aria-live="polite"></div>
   <button id="scrollTopBtn" class="scroll-top-btn" aria-label="맨위로">
@@ -322,12 +334,14 @@
   </button>
 
 </div><!-- /#app -->
-<script src="app.js?v=20261024cache7"></script>
+<script src="app.js?v=20261024cloud10"></script>
 <script src="vendor/jszip.min.js?v=20261023fix2"></script>
 <script src="vendor/pptxgen.bundle.js?v=20261023fix2"></script>
 <script src="ratings-ppt.js?v=20261023ratingviewfix10"></script>
 <script src="ratings-pdf.js?v=20261024mobile9"></script>
 <script src="data-help.js?v=1"></script>
 <script src="data-safety-ui.js?v=1"></script>
+<script src="firebase-config.js?v=1"></script>
+<script src="cloud-sync.js?v=10"></script>
 </body>
 </html>
