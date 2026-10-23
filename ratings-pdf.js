@@ -6,7 +6,30 @@ let running=false;
 let lastLog=null;
 const trace=(r,step,result,extra={})=>{if(lastLog)lastLog.events.push({time:new Date().toISOString(),id:String(r?.id||''),type:r?.type||'',title:r?.title||'',step,result,...extra})};
 const bucket=r=>Math.max(0,Math.min(9,Math.ceil(Number(r.rating))-1));
+const mobilePDF=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1 && innerWidth<900);
+const isiOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+let readyPdfUrl=null;
 const downloadBlob=(blob,name)=>{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)};
+function offerMobilePDF(blob,name,pages){
+ const prev=readyPdfUrl;readyPdfUrl=URL.createObjectURL(blob);if(prev)setTimeout(()=>URL.revokeObjectURL(prev),1000);
+ let panel=document.getElementById('cineMobilePdfReady');if(!panel){
+  panel=document.createElement('section');panel.id='cineMobilePdfReady';panel.className='cine-mobile-pdf-ready';panel.setAttribute('role','status');panel.setAttribute('aria-live','polite');
+  panel.innerHTML='<div class="cine-mobile-pdf-title">✓ PDF 생성 완료</div><p id="cineMobilePdfDescription"></p><div class="cine-mobile-pdf-actions"><a id="cineMobilePdfSave" class="cine-mobile-pdf-save" download>PDF 저장 / 열기</a><button id="cineMobilePdfShare" type="button">공유 · 파일에 저장</button><button id="cineMobilePdfDismiss" type="button" aria-label="완료 알림 닫기">닫기</button></div>';
+  document.body.appendChild(panel);
+  panel.querySelector('#cineMobilePdfDismiss').addEventListener('click',()=>{panel.hidden=true});
+ }
+ panel.hidden=false;panel.querySelector('#cineMobilePdfDescription').textContent=`${pages}페이지 · ${(blob.size/1048576).toFixed(1)}MB · 버튼을 눌러 기기에 저장하세요.`;
+ const anchor=panel.querySelector('#cineMobilePdfSave');anchor.href=readyPdfUrl;anchor.download=name;anchor.target='_blank';anchor.rel='noopener';
+ const shareBtn=panel.querySelector('#cineMobilePdfShare');
+ const file=new File([blob],name,{type:'application/pdf'});
+ const canShare=!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]}));
+ shareBtn.hidden=!canShare;
+ shareBtn.onclick=async()=>{try{await navigator.share({files:[file],title:'Cinefinder 내 평점 PDF'})}catch(err){if(err.name!=='AbortError')console.warn('PDF 공유 실패',err)}};
+ // iOS Safari commonly blocks a download triggered after async poster loading.
+ // Keep a visible, user-activated link instead of reporting a download as successful.
+ if(!isiOS)downloadBlob(blob,name);
+ return !isiOS;
+}
 function downloadLog(){if(!lastLog)return;downloadBlob(new Blob([JSON.stringify(lastLog,null,2)],{type:'application/json'}),'Cinefinder_PDF_Diagnostic_'+new Date().toISOString().replace(/[:.]/g,'-')+'.json')}
 const logBtn=document.createElement('button');logBtn.type='button';logBtn.textContent='진단 LOG 다운로드';logBtn.id='cinefinderPdfDiagnostic';logBtn.style.cssText='margin:8px 0 0 8px;padding:9px 13px;border:1px solid #bac7d8;border-radius:9px;background:#f8fbff;color:#23476d;font-weight:700;cursor:pointer';logBtn.addEventListener('click',downloadLog);const host=document.getElementById('ratingPdfCreate')?.parentElement;if(host)host.appendChild(logBtn);logBtn.disabled=true;
 const ART='cinefinder_rating_original_poster_v1';
@@ -263,7 +286,7 @@ async function exportPDF(){
  try{
  const entries=chosenItems();const grouped=new Map();for(const entry of entries){const id=key(entry);const old=grouped.get(id);if(!old || Number(entry.rating)>Number(old.rating))grouped.set(id,entry)}
  const items=[...grouped.values()].sort((a,b)=>bucket(b)-bucket(a)||Number(b.rating)-Number(a.rating)||String(a.title).localeCompare(String(b.title),'ko'));if(!items.length)throw new Error('저장할 작품이 없습니다.');
- lastLog={format:'Cinefinder PDF diagnostic v3',createdAt:new Date().toISOString(),appLocation:location.origin+location.pathname,userAgent:navigator.userAgent,selectedCount:items.length,settings:{concurrency:14,perUrlTimeoutMs:2700},summary:{},events:[]};logBtn.disabled=false;
+ lastLog={format:'Cinefinder PDF diagnostic v3',createdAt:new Date().toISOString(),appLocation:location.origin+location.pathname,userAgent:navigator.userAgent,selectedCount:items.length,settings:{concurrency:mobilePDF?5:14,perUrlTimeoutMs:2700},summary:{},events:[]};logBtn.disabled=false;
  window.__cinefinderPdfItemCount=items.length;const candidates=sources(items),imgs=new Array(items.length);let missing=[];
  // Deterministic, dispersed sample rather than always checking the first few pages.
  // Includes all ten scoring buckets when possible, with a maximum of 30 detail requests.
@@ -325,16 +348,16 @@ async function exportPDF(){
   if(processed%10===0||processed===items.length){status(5+processed/items.length*75,`포스터 ${processed}/${items.length} · 확인 실패 ${missing.length}`);await wait()}
  }
  async function worker(){while(cursor<items.length){const i=cursor++;await resolveOne(i)}}
- await Promise.all(Array.from({length:14},worker));
+ await Promise.all(Array.from({length:mobilePDF?5:14},worker));
  // Never silently label a PDF with missing real posters as verified. Still provide output.
  if(missing.length){console.warn('Cinefinder PDF missing poster names',missing);window.__cinefinderLastPosterErrors=missing.slice();}
  const sheets=[];const groups=[];
  for(let b=9;b>=0;b--){const indices=items.map((r,i)=>bucket(r)===b?i:-1).filter(i=>i>=0);if(indices.length)for(let q=0;q<indices.length;q+=20)groups.push({ids:indices.slice(q,q+20),label:`${String(b).padStart(2,'0')}~${String(b+1).padStart(2,'0')}점`})}
  for(let j=0;j<groups.length;j++){const group=groups[j],sub=group.ids.map(i=>items[i]),images=group.ids.map(i=>imgs[i]);const c=pageCanvas(sub,images,group.ids[0],j,groups.length,group.label);sheets.push(dataBytes(c.toDataURL('image/jpeg',0.85)));status(80+20*(j+1)/groups.length,`PDF ${j+1}/${groups.length}페이지 작성 중`);if(j%3===0)await wait()}
  
- const file=await pdfFile(sheets,groups,items);downloadBlob(file,'Cinefinder_Ratings_'+new Date().toISOString().slice(0,10)+'.pdf');
- status(100,`PDF 다운로드 시작 · ${sheets.length}페이지 · 포스터 확인 실패 ${missing.length}개`);finishPdfNotice(true,`PDF 저장 완료 · ${sheets.length}페이지`);if(missing.length)alert(`포스터 ${missing.length}개를 복구하지 못했습니다. 필요하면 '진단 LOG 다운로드' 버튼으로 오류 정보를 저장할 수 있습니다.`);
- lastLog.summary={selected:items.length,pdfPages:sheets.length,success:items.length-missing.length,failed:missing.length,failures:missing,pdfSizeBytes:file.size,sorting:'score bucket descending, then rating descending',result:'pdf_download_started'};
+ const file=await pdfFile(sheets,groups,items);const filename='Cinefinder_Ratings_'+new Date().toISOString().slice(0,10)+'.pdf';const downloadStarted=mobilePDF?offerMobilePDF(file,filename,sheets.length):(downloadBlob(file,filename),true);
+ status(100,`${downloadStarted?'PDF 다운로드 시작':'PDF 준비 완료 · 저장 버튼을 누르세요'} · ${sheets.length}페이지 · 포스터 확인 실패 ${missing.length}개`);finishPdfNotice(true,`PDF 생성 완료 · ${sheets.length}페이지`);if(missing.length)alert(`포스터 ${missing.length}개를 복구하지 못했습니다. 필요하면 '진단 LOG 다운로드' 버튼으로 오류 정보를 저장할 수 있습니다.`);
+ lastLog.summary={selected:items.length,pdfPages:sheets.length,success:items.length-missing.length,failed:missing.length,failures:missing,pdfSizeBytes:file.size,sorting:'score bucket descending, then rating descending',result:downloadStarted?'pdf_download_started':'pdf_ready_user_action_required'};
  }catch(err){if(lastLog){lastLog.summary={...(lastLog.summary||{}),result:'exception',error:String(err?.stack||err)}}console.error('[Cinefinder PDF export]',err);alert('PDF 생성 실패: '+(err?.message||err));status(0,'PDF 생성 실패 · 콘솔 확인');finishPdfNotice(false,'PDF 저장 실패 · 진단 LOG 확인')}
  finally{running=false;btn.disabled=false;btn.textContent=original;updatePdfNoticeVisibility()}
 }

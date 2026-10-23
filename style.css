@@ -5944,3 +5944,26 @@ body {
 #ratingPptFloating[hidden]{display:none!important}
 
 .rating-export-buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.rating-ppt-footer .rating-export-buttons #ratingPdfCreate{background:#234e83;color:#fff;border:0;border-radius:12px;padding:13px 15px;font-weight:850;cursor:pointer}.rating-export-buttons button{white-space:nowrap}@media(max-width:600px){.rating-ppt-footer{align-items:stretch;flex-direction:column}.rating-export-buttons{width:100%}.rating-export-buttons button{flex:1!important;padding:12px 5px!important}}
+
+/* v9: Mobile PDF export and accessible mobile controls */
+.cine-mobile-pdf-ready{position:fixed;z-index:100200;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(94vw,430px);background:#fff;color:#21334b;border:1px solid #dce5ef;border-radius:18px;box-shadow:0 16px 60px #13233855;padding:17px 18px;font-size:14px}
+.cine-mobile-pdf-ready[hidden]{display:none!important}.cine-mobile-pdf-title{font-size:17px;font-weight:850;color:#1b6648}.cine-mobile-pdf-ready p{margin:7px 0 14px;color:#526379;line-height:1.5}.cine-mobile-pdf-actions{display:flex;flex-wrap:wrap;gap:8px}.cine-mobile-pdf-actions>*{flex:1 1 auto;min-height:44px;border-radius:10px;padding:12px 10px;text-align:center;font-size:13px;font-weight:800;text-decoration:none;border:1px solid #d5dfea;background:#f1f5fa;color:#284660;cursor:pointer}.cine-mobile-pdf-actions .cine-mobile-pdf-save{background:#245385;color:white;border-color:#245385}.cine-mobile-pdf-actions button[hidden]{display:none!important}
+@media(max-width:720px){
+ .rating-ppt-backdrop{padding:0!important;align-items:flex-end!important;overscroll-behavior:contain}
+ .rating-ppt-panel{width:100%!important;max-height:calc(100dvh - env(safe-area-inset-top) - 12px)!important;max-height:calc(100svh - env(safe-area-inset-top) - 12px);border-radius:20px 20px 0 0!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+ .rating-ppt-head{position:sticky;top:0;z-index:3;padding:16px!important}
+ .rating-ppt-body{padding:16px 16px calc(24px + env(safe-area-inset-bottom))!important}
+ .rating-ppt-types{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-bottom:20px!important}
+ .rating-ppt-ranges{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ .rating-ppt-range{min-height:57px;min-width:0}.rating-ppt-type,.rating-ppt-quick button{min-height:44px}
+ .rating-ppt-section-row{flex-wrap:wrap}.rating-ppt-quick{margin-left:auto}
+ .rating-ppt-footer{display:flex!important;flex-direction:column!important;align-items:stretch!important}
+ .rating-ppt-footer>div:first-child{min-width:0}.rating-ppt-footer strong{font-size:14px!important;overflow-wrap:anywhere}
+ .rating-export-buttons{display:grid!important;grid-template-columns:1fr!important;width:100%}
+ .rating-export-buttons #ratingPdfCreate{min-height:48px;width:100%;font-size:15px!important}
+ #cinefinderPdfDiagnostic{display:block!important;width:100%!important;margin:8px 0 0!important;min-height:44px}
+ #cinefinderPdfStatus{max-width:calc(100vw - 32px)!important;white-space:normal;overflow-wrap:anywhere;font-size:12px!important;line-height:1.5}
+ .cine-mobile-pdf-ready{bottom:max(12px,env(safe-area-inset-bottom));padding:14px}
+}
+@media(max-width:380px){.rating-ppt-range{padding:10px 5px!important;font-size:11px!important}.rating-ppt-head h2{font-size:18px!important}.cine-mobile-pdf-actions>*{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.rating-ppt-panel,.cine-mobile-pdf-ready{scroll-behavior:auto!important;transition:none!important}}
