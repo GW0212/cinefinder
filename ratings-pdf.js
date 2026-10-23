@@ -12,13 +12,22 @@ const logBtn=document.createElement('button');logBtn.type='button';logBtn.textCo
 const ART='cinefinder_rating_original_poster_v1';
 const norm=s=>String(s||'').normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}]/gu,'');
 const kind=r=>r.type==='anime'?'anime':r.type==='drama'?'drama':'movie';
-const aliases={'해리포터4':'해리포터와불의잔','해리포터1':'해리포터와마법사의돌','해리포터2':'해리포터와비밀의방','해리포터3':'해리포터와아즈카반의죄수','해리포터5':'해리포터와불사조기사단','해리포터6':'해리포터와혼혈왕자','해리포터7':'해리포터와죽음의성물1부','해리포터8':'해리포터와죽음의성물2부','베놈1':'베놈','겨울왕국1':'겨울왕국','범죄도시1':'범죄도시','베테랑1':'베테랑','조커1':'조커','인사이드아웃1':'인사이드아웃'};
+const aliases={'해리포터4':'해리포터와불의잔','해리포터1':'해리포터와마법사의돌','해리포터2':'해리포터와비밀의방','해리포터3':'해리포터와아즈카반의죄수','해리포터5':'해리포터와불사조기사단','해리포터6':'해리포터와혼혈왕자','해리포터7':'해리포터와죽음의성물1부','해리포터8':'해리포터와죽음의성물2부','브레이킹배드':'브레이킹배드시즌1','나타중생1':'너자','나타중생2':'너자2','모모노케히메':'모노노케히메','베놈1':'베놈','겨울왕국1':'겨울왕국','범죄도시1':'범죄도시','베테랑1':'베테랑','조커1':'조커','인사이드아웃1':'인사이드아웃'};
 const key=r=>kind(r)+'::'+(aliases[norm(r.title)]||norm(r.title));
 const wait=()=>new Promise(r=>setTimeout(r,0));
 
 // Explicit recovery hints for legacy user-generated IDs (not trusted as poster URLs).
 // Search by translated titles as well and verify before use.
-const LEGACY_POSTER_HINTS = {"겨울 왕국 1":{"media":"movie","id":109445,"english":"Frozen"},"모모노케 히메":{"media":"movie","id":128,"english":"Princess Mononoke"},"그린북":{"media":"movie","id":490132,"english":"Green Book"},"바스터즈 : 거친녀석들":{"media":"movie","id":16869,"english":"Inglourious Basterds"},"인사이드 아웃 1":{"media":"movie","id":150540,"english":"Inside Out"},"범죄 도시 1":{"media":"movie","id":479718,"english":"The Outlaws"},"나타중생 1":{"media":"movie","id":663558,"english":"New Gods: Nezha Reborn"},"귀멸의 칼날 : 환락의 거리편":{"media":"tv","id":85937,"english":"Demon Slayer Kimetsu no Yaiba"},"베테랑 1":{"media":"movie","id":346650,"english":"Veteran"},"월리스와 그로밋: 거대 토끼의 저주":{"media":"movie","id":533,"english":"Wallace & Gromit The Curse of the Were Rabbit"},"사이버 펑크 : 엣지 러너":{"media":"tv","id":105214,"english":"Cyberpunk Edgerunners"},"포비든킹덤":{"media":"movie","id":1729,"english":"The Forbidden Kingdom"},"체인소맨 극장판 : 레제편":{"media":"movie","id":1228246,"english":"Chainsaw Man Reze Arc"},"해리포터 1":{"media":"movie","id":671,"english":"Harry Potter and the Philosopher Stone"},"해리포터 5":{"media":"movie","id":675,"english":"Harry Potter and the Order of the Phoenix"},"선덕 여왕":{"media":"tv","id":14186,"english":"Queen Seondeok"},"아메리칸 쉐프":{"media":"movie","id":212778,"english":"Chef"},"앤더스 게임":{"media":"movie","id":80274,"english":"Enders Game"},"더 발라드 오브 리처드 주얼":{"media":"movie","id":292011,"english":"Richard Jewell"},"전생했더니 슬라임이었던 건에 대하여 2기 1부":{"media":"tv","id":82684,"english":"That Time I Got Reincarnated as a Slime"},"전생했더니 슬라임이었던 건에 대하여 2기 2부":{"media":"tv","id":82684,"english":"That Time I Got Reincarnated as a Slime"},"베놈 1":{"media":"movie","id":335983,"english":"Venom"},"택시 운전사":{"media":"movie","id":437068,"english":"A Taxi Driver"},"해리포터 3":{"media":"movie","id":673,"english":"Harry Potter and the Prisoner of Azkaban"},"더 위쳐 시즌 1":{"media":"tv","id":71912,"english":"The Witcher"},"나타중생 2":{"media":"movie","id":980477,"english":"Ne Zha 2"},"더 위쳐 시즌 2":{"media":"tv","id":71912,"english":"The Witcher"},"더 플랫폼 1":{"media":"movie","id":619264,"english":"The Platform"},"해리포터 7":{"media":"movie","id":12444,"english":"Harry Potter and the Deathly Hallows Part 1"},"암수 살인":{"media":"movie","id":539154,"english":"Dark Figure of Crime"},"해리포터 8":{"media":"movie","id":12445,"english":"Harry Potter and the Deathly Hallows Part 2"},"해리포터 6":{"media":"movie","id":767,"english":"Harry Potter and the Half Blood Prince"},"샤크: 더 스톰":{"media":"tv","id":0,"english":"Shark The Storm"},"조선 미녀 삼총사":{"media":"movie","id":256960,"english":"The Huntresses"},"라스트 갓 파더":{"media":"movie","id":0,"english":"The Last Godfather"},"곰돌이 푸 : 피와 꿀 1":{"media":"movie","id":980078,"english":"Winnie the Pooh Blood and Honey"}};
+const LEGACY_POSTER_HINTS = {"퍼펙트 맨":{"media":"movie","id":0,"english":"Man of Men"},"겨울 왕국 1":{"media":"movie","id":109445,"english":"Frozen"},"모모노케 히메":{"media":"movie","id":128,"english":"Princess Mononoke"},"그린북":{"media":"movie","id":490132,"english":"Green Book"},"바스터즈 : 거친녀석들":{"media":"movie","id":16869,"english":"Inglourious Basterds"},"인사이드 아웃 1":{"media":"movie","id":150540,"english":"Inside Out"},"범죄 도시 1":{"media":"movie","id":479718,"english":"The Outlaws"},"나타중생 1":{"media":"movie","id":663558,"english":"New Gods: Nezha Reborn"},"귀멸의 칼날 : 환락의 거리편":{"media":"tv","id":85937,"english":"Demon Slayer Kimetsu no Yaiba"},"베테랑 1":{"media":"movie","id":346650,"english":"Veteran"},"월리스와 그로밋: 거대 토끼의 저주":{"media":"movie","id":533,"english":"Wallace & Gromit The Curse of the Were Rabbit"},"사이버 펑크 : 엣지 러너":{"media":"tv","id":105214,"english":"Cyberpunk Edgerunners"},"포비든킹덤":{"media":"movie","id":1729,"english":"The Forbidden Kingdom"},"체인소맨 극장판 : 레제편":{"media":"movie","id":1218925,"english":"Chainsaw Man - The Movie: Reze Arc"},"해리포터 1":{"media":"movie","id":671,"english":"Harry Potter and the Philosopher Stone"},"해리포터 5":{"media":"movie","id":675,"english":"Harry Potter and the Order of the Phoenix"},"선덕 여왕":{"media":"tv","id":14186,"english":"Queen Seondeok"},"아메리칸 쉐프":{"media":"movie","id":212778,"english":"Chef"},"앤더스 게임":{"media":"movie","id":80274,"english":"Enders Game"},"더 발라드 오브 리처드 주얼":{"media":"movie","id":292011,"english":"Richard Jewell"},"전생했더니 슬라임이었던 건에 대하여 2기 1부":{"media":"tv","id":82684,"english":"That Time I Got Reincarnated as a Slime"},"전생했더니 슬라임이었던 건에 대하여 2기 2부":{"media":"tv","id":82684,"english":"That Time I Got Reincarnated as a Slime"},"베놈 1":{"media":"movie","id":335983,"english":"Venom"},"택시 운전사":{"media":"movie","id":437068,"english":"A Taxi Driver"},"해리포터 3":{"media":"movie","id":673,"english":"Harry Potter and the Prisoner of Azkaban"},"더 위쳐 시즌 1":{"media":"tv","id":71912,"english":"The Witcher"},"나타중생 2":{"media":"movie","id":980477,"english":"Ne Zha 2"},"더 위쳐 시즌 2":{"media":"tv","id":71912,"english":"The Witcher"},"더 플랫폼 1":{"media":"movie","id":619264,"english":"The Platform"},"해리포터 7":{"media":"movie","id":12444,"english":"Harry Potter and the Deathly Hallows Part 1"},"암수 살인":{"media":"movie","id":539154,"english":"Dark Figure of Crime"},"해리포터 8":{"media":"movie","id":12445,"english":"Harry Potter and the Deathly Hallows Part 2"},"해리포터 6":{"media":"movie","id":767,"english":"Harry Potter and the Half Blood Prince"},"샤크: 더 스톰":{"media":"tv","id":0,"english":"Shark The Storm"},"조선 미녀 삼총사":{"media":"movie","id":256960,"english":"The Huntresses"},"라스트 갓 파더":{"media":"movie","id":0,"english":"The Last Godfather"},"곰돌이 푸 : 피와 꿀 1":{"media":"movie","id":980078,"english":"Winnie the Pooh Blood and Honey"}};
+// Explicit identity locks: no fuzzy poster lookup and no prior incorrect cached poster.
+const STRICT_POSTER_IDS = {
+ '모모노케히메':['movie',128], '모노노케히메':['movie',128],
+ '나타중생1':['movie',615453], '너자':['movie',615453],
+ '나타중생2':['movie',980477], '너자2':['movie',980477],
+ '체인소맨극장판레제편':['movie',1218925], '극장판체인소맨레제편':['movie',1218925],
+ '투모로우워':['movie',588228]
+};
+const STRICT_POSTER_NAMES=new Set(['퍼펙트맨']);
 const POSTER_API_BASE='https://api.themoviedb.org/3';
 const POSTER_EXPECTED_ID_LOOKUP = new Map();
 function keyTitle(t){return norm(t).replace(/^(the|a)/,'')}
@@ -33,6 +42,8 @@ async function tmdbPosterRecovery(item){
  async function detail(media,id){if(!id)return null;const k=media+'/'+id;if(tried.has(k))return null;tried.add(k);
   try{const res=await fetchWithDeadline(query('/'+media+'/'+id,{language:'ko-KR'}));if(!res.ok){trace(item,'apiDetail','http'+res.status,{media,id});return null}const d=await res.json();return d?.poster_path?{media,id,title:d.title||d.name||'',original:d.original_title||d.original_name||'',path:d.poster_path}:null}
   catch(e){trace(item,'apiDetail','networkError',{media,id,message:String(e)})}return null}
+ const locked=STRICT_POSTER_IDS[norm(item.title)];
+ if(locked){const hit=await detail(locked[0],locked[1]);if(hit){trace(item,'identityLocked','ok',{id:locked[1],media:locked[0]});return [hit.path]}trace(item,'identityLocked','notFound',{id:locked[1]});return []}
  if(hint?.id){const hit=await detail(hint.media,hint.id);if(hit){
    const expected=keyTitle(hint.english),real=[hit.title,hit.original].map(keyTitle);
    const credible=real.some(x=>x && expected && (x===expected || (x.length>7&&expected.includes(x)) || (expected.length>7&&x.includes(expected))));
@@ -105,6 +116,7 @@ function sources(items){
   try{const mk=typeof ratingMatchCacheKey==='function'?ratingMatchCacheKey(r):null;if(mk&&typeof RATING_MATCH_STORE!=='undefined')paths.push(RATING_MATCH_STORE[mk]?.data?.poster_path)}catch{}
   paths.push(byExact.get(kind(r)+'::'+norm(r.title)));
   if(/^\d+$/.test(String(r.id)))paths.push(byId.get(media(r)+'::'+r.id));
+  if(STRICT_POSTER_IDS[norm(r.title)] || STRICT_POSTER_NAMES.has(norm(r.title)))return [];
   return [...new Set(paths.map(posterURL).filter(Boolean))];
  });
 }
@@ -214,7 +226,8 @@ async function pdfFile(pages,groups,items){
 async function exportPDF(){
  if(running)return;running=true;btn.disabled=true;const original=btn.textContent;btn.textContent='PDF 생성 중…';
  try{
- const items=chosenItems().sort((a,b)=>bucket(b)-bucket(a)||Number(b.rating)-Number(a.rating)||String(a.title).localeCompare(String(b.title),'ko'));if(!items.length)throw new Error('저장할 작품이 없습니다.');
+ const entries=chosenItems();const grouped=new Map();for(const entry of entries){const id=key(entry);const old=grouped.get(id);if(!old || Number(entry.rating)>Number(old.rating))grouped.set(id,entry)}
+ const items=[...grouped.values()].sort((a,b)=>bucket(b)-bucket(a)||Number(b.rating)-Number(a.rating)||String(a.title).localeCompare(String(b.title),'ko'));if(!items.length)throw new Error('저장할 작품이 없습니다.');
  lastLog={format:'Cinefinder PDF diagnostic v3',createdAt:new Date().toISOString(),appLocation:location.origin+location.pathname,userAgent:navigator.userAgent,selectedCount:items.length,settings:{concurrency:14,perUrlTimeoutMs:2700},summary:{},events:[]};logBtn.disabled=false;
  window.__cinefinderPdfItemCount=items.length;const candidates=sources(items),imgs=new Array(items.length);let missing=[];
  // Limit concurrency so one failing external image cannot delay all 1,000+ titles.
@@ -227,7 +240,7 @@ async function exportPDF(){
   // Prefer the verified title match over a guessed URL or a stale synthetic ID.
   let im=null;
   if(src.length){const sk=src.join('|');if(!imgPromiseCache.has(sk))imgPromiseCache.set(sk,grab(src,item));im=await imgPromiseCache.get(sk)}
-  if(!im && typeof findTmdbMatchForRating==='function'){
+  if(!im && !STRICT_POSTER_IDS[norm(item.title)] && !STRICT_POSTER_NAMES.has(norm(item.title)) && typeof findTmdbMatchForRating==='function'){
    try{
     const hit=await findTmdbMatchForRating(item);
     if(hit?.poster_path){const canonical=posterURL(hit.poster_path);trace(item,'tmdbVerifiedRecovery','found',{tmdbId:hit.id,mediaType:hit.media_type,posterPath:hit.poster_path});
@@ -239,7 +252,7 @@ async function exportPDF(){
     }else trace(item,'tmdbVerifiedRecovery','noResult');
    }catch(e){trace(item,'tmdbVerifiedRecovery','failed',{error:String(e)})}
   }
-  if(!im && /^\d+$/.test(String(item.id||'')) && typeof API_KEY!=='undefined' && API_KEY){
+  if(!im && !STRICT_POSTER_IDS[norm(item.title)] && /^\d+$/.test(String(item.id||'')) && typeof API_KEY!=='undefined' && API_KEY){
    try{const mt=media(item),res=await fetch(`https://api.themoviedb.org/3/${mt}/${item.id}?api_key=${encodeURIComponent(API_KEY)}&language=ko-KR`);trace(item,'tmdbDetail',res.ok?'ok':'httpError',{httpStatus:res.status});if(res.ok){const data=await res.json();if(data?.poster_path){const u=posterURL(data.poster_path);im=await grab([u],item);if(im){src=[u];recovered[key(item)]=data.poster_path;persistRecovery()}}}}
    catch(e){trace(item,'tmdbDetail','failed',{error:String(e)})}
   }
@@ -266,9 +279,9 @@ async function exportPDF(){
  for(let j=0;j<groups.length;j++){const group=groups[j],sub=group.ids.map(i=>items[i]),images=group.ids.map(i=>imgs[i]);const c=pageCanvas(sub,images,group.ids[0],j,groups.length,group.label);sheets.push(dataBytes(c.toDataURL('image/jpeg',0.85)));status(80+20*(j+1)/groups.length,`PDF ${j+1}/${groups.length}페이지 작성 중`);if(j%3===0)await wait()}
  
  const file=await pdfFile(sheets,groups,items);downloadBlob(file,'Cinefinder_Ratings_'+new Date().toISOString().slice(0,10)+'.pdf');
- status(100,`PDF 다운로드 시작 · ${sheets.length}페이지 · 포스터 확인 실패 ${missing.length}개`);if(missing.length)alert(`포스터 ${missing.length}개를 복구하지 못했습니다. 자동 저장된 진단 로그에서 개별 원인을 확인할 수 있습니다.`);
- lastLog.summary={selected:items.length,pdfPages:sheets.length,success:items.length-missing.length,failed:missing.length,failures:missing,pdfSizeBytes:file.size,sorting:'score bucket descending, then rating descending',result:'pdf_download_started'};downloadLog();
- }catch(err){if(lastLog){lastLog.summary={...(lastLog.summary||{}),result:'exception',error:String(err?.stack||err)};downloadLog()}console.error('[Cinefinder PDF export]',err);alert('PDF 생성 실패: '+(err?.message||err));status(0,'PDF 생성 실패 · 콘솔 확인')}
+ status(100,`PDF 다운로드 시작 · ${sheets.length}페이지 · 포스터 확인 실패 ${missing.length}개`);if(missing.length)alert(`포스터 ${missing.length}개를 복구하지 못했습니다. 필요하면 '진단 LOG 다운로드' 버튼으로 오류 정보를 저장할 수 있습니다.`);
+ lastLog.summary={selected:items.length,pdfPages:sheets.length,success:items.length-missing.length,failed:missing.length,failures:missing,pdfSizeBytes:file.size,sorting:'score bucket descending, then rating descending',result:'pdf_download_started'};
+ }catch(err){if(lastLog){lastLog.summary={...(lastLog.summary||{}),result:'exception',error:String(err?.stack||err)}}console.error('[Cinefinder PDF export]',err);alert('PDF 생성 실패: '+(err?.message||err));status(0,'PDF 생성 실패 · 콘솔 확인')}
  finally{running=false;btn.disabled=false;btn.textContent=original;setTimeout(()=>{const s=document.getElementById('cinefinderPdfStatus');if(s)s.hidden=true},8000)}
 }
 btn.addEventListener('click',exportPDF);

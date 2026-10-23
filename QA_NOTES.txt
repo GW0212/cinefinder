@@ -1,0 +1,1 @@
+Cinefinder PPT poster reliability patch. Uses same complete ratings-view poster cache with exact title/type or canonical ID when valid; retries same artwork on transient errors. Does not substitute different works. Actual TMDB 1193-image downloads and real browser localStorage were not verified here. No guaranteed zero misses under offline/CORS/network restrictions.\n

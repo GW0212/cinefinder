@@ -1,0 +1,18 @@
+Cinefinder poster/PPT regression QA - 2026-10-23
+Input: ratings-2026-08-27-08-57-19.json (1,233 ratings; no image bytes or poster URLs).
+
+PATCH
+- PPT exporter now reuses Cinefinder's own rating matcher for missing poster associations.
+- Existing user-visible card poster and verified saved poster paths still take priority.
+- data:image/jpeg / PNG image paths supported directly for repeatable export testing.
+- Rating lists and previous backups are not overwritten.
+
+TESTED
+- Chromium: 1,233 exact JSON records + 2,000 synthetic entries, poster data conversion: 3,233 / 3,233 success with supplied fixture images.
+- Chromium/PptxGenJS: generated 62 slides from all 1,233 JSON titles, with 1,233 embedded JPEG media references and valid PPTX ZIP structure. Test poster images are synthetic, NOT the real artwork.
+- JavaScript syntax: all local *.js pass Node --check.
+
+NOT TESTED / LIMITATION
+- This runtime cannot resolve api.themoviedb.org or image.tmdb.org (DNS/network restrictions). Hence 1,233 or 2,000 real external posters were NOT downloaded/verified.
+- The JSON does not contain posters. Actual matching success depends on the user's deployed Cinefinder cache and online TMDB connectivity.
+- DO NOT claim 0 missing real posters. Any missing real covers are reported in the existing in-app missing-art diagnostic.
