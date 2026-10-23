@@ -129,6 +129,12 @@ function status(percent,msg){
 }
 function finishPdfNotice(ok,message){
  const badge=pdfNotice();clearTimeout(completionTimer);
+ // Mobile has a persistent, actionable PDF save/share dialog. Never show a
+ // duplicate 2-second completion toast on top of it.
+ if(mobilePDF && ok){
+   badge.dataset.completed='';badge.hidden=true;
+   return;
+ }
  badge.dataset.completed='true';badge.textContent=message;
  updatePdfNoticeVisibility();
  completionTimer=setTimeout(()=>{badge.dataset.completed='';badge.hidden=true},2000);

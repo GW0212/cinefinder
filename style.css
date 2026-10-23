@@ -6018,3 +6018,17 @@ body {
 .cloud-account-top{width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;flex-basis:36px!important}
 #status:has(+ #nothing){display:block}
 }
+
+/* v10.7: Single mobile PDF completion dialog, centered on screen. */
+@media(max-width:720px){
+ .cine-mobile-pdf-ready{
+   position:fixed!important;
+   top:50%!important;bottom:auto!important;left:50%!important;
+   transform:translate(-50%,-50%)!important;
+   width:min(calc(100vw - 32px),430px)!important;
+   max-height:calc(100dvh - 32px);
+   overflow-y:auto;
+   z-index:100200!important;
+   box-sizing:border-box;
+ }
+}

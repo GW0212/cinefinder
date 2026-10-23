@@ -844,10 +844,12 @@ const tmdbLang   = () => LANGS[CUR_LANG]?.tmdb || 'ko-KR';
 const posterUrl  = (p, s='w342') => p ? `https://image.tmdb.org/t/p/${s}${p}` : '';
 const getYear    = d => (d||'').slice(0,4) || '';
 const setStatus = m => {
-  const v=String(m||''); const target=$('#status'); if(target) target.textContent=v;
+  const v=String(m||'');
+  const busy=Boolean(v && /TMDB|확인 중|불러오는 중|loading|Loading|Resolving|確認中|正在确认|Recherche/.test(v));
+  // Loading copy belongs ONLY in the center overlay, not in the in-page status bar.
+  const target=$('#status'); if(target) target.textContent=busy?'':v;
   const overlay=document.getElementById('cineLoadingOverlay');
   if(overlay){
-    const busy=Boolean(v && /TMDB|확인 중|불러오는 중|loading|Loading|Resolving|確認中|正在确认|Recherche/.test(v));
     overlay.classList.toggle('hidden',!busy);
     overlay.setAttribute('aria-hidden',busy?'false':'true');
     if(busy) document.getElementById('cineLoadingText').textContent=v;

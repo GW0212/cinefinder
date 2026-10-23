@@ -1,0 +1,5 @@
+Cinefinder v10.7
+- Hide original inline loading status while centered loading overlay is visible.
+- On mobile, show only the actionable PDF completed panel, centered in the viewport.
+- Hide redundant ephemeral PDF completion toast on mobile.
+- Keep desktop notice behavior and mobile save/share functionality.
