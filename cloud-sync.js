@@ -10,7 +10,7 @@
   const api={isApplyingRemote:false,onLocalSaved:(key,list)=>{
     if(!user||!ready||ignoreLocal)return;
     const name=Object.keys(KEYS).find(k=>KEYS[k]===key);
-    if(name){dirty.add(name);schedule(name);}
+    if(name){dirty.add(name);status('변경 사항 저장 중…');schedule(name);}
   }};
   window.CineCloud=api;
   function status(message){const e=$('cloudStatus');if(e)e.textContent=message;}
@@ -45,8 +45,8 @@
     $('cloudSyncNow')?.classList.toggle('hidden',!user);
     const profile=$('cloudProfile');if(profile){profile.classList.toggle('hidden',!user);profile.textContent=user?`${user.displayName||'Google 계정'} · ${user.email||''}`:'';}
     if(!configured)status('Firebase 설정이 필요합니다. ZIP의 FIREBASE_SETUP_KO.md 안내에 따라 firebase-config.js를 설정해 주세요. 기존 로컬 목록은 그대로 유지됩니다.');
-    else if(user)status(`로그인됨: ${user.email||''} · ${ready?'동기화 연결됨':'동기화 준비 중'}`);
-    else status('Google 로그인으로 즐겨찾기·나중에 보기·내 평점을 PC와 모바일에 연결하세요.');
+    else if(user)status(ready?'Google 동기화 완료 · 실시간 동기화 활성화':'클라우드 데이터 동기화 중…');
+    else status('Google 로그인으로 즐겨찾기·나중에 보기·내 평점을 모든 기기에서 동기화하세요.');
   }
   async function loadSDK(){
     for(const url of ['https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js','https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js']){
@@ -82,13 +82,13 @@
     if(!user||!ready||!dirty.has(name)||busy.has(name))return;
     busy.add(name);dirty.delete(name);const uid=user.uid;
     try{await ref(name).set({items:local(name),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),schema:1});
-      if(user?.uid===uid)status(`동기화 완료: ${LABEL[name]}`);
-    }catch(err){dirty.add(name);status(`동기화 실패 (${LABEL[name]}): ${err.message||err}. 로컬 데이터는 유지됩니다.`);}
+      if(user?.uid===uid)status(dirty.size||busy.size>1?'변경 사항 저장 중…':'모든 변경 사항이 동기화되었습니다.');
+    }catch(err){dirty.add(name);status(`동기화 실패 (${LABEL[name]}): ${err.message||err}. 로컬 데이터는 유지됩니다. 다시 시도해 주세요.`);}
     finally{busy.delete(name);if(dirty.has(name)&&user?.uid===uid&&navigator.onLine)schedule(name);}
   }
   async function stop(){ready=false;loadingRemote=false;sub.forEach(f=>{try{f();}catch{}});sub=[];timers.forEach(t=>clearTimeout(t));timers.clear();dirty.clear();busy.clear();}
   async function start(current){
-    await stop();user=current;ui();if(!current)return;
+    await stop();user=current;ui();if(!current)return;status('클라우드 데이터 동기화 중…');
     const uid=current.uid;loadingRemote=true;
     try{
       // First sign-in on a device: combine existing local records into account once.
@@ -115,7 +115,7 @@
           apply(name,remote).catch(e=>status('클라우드 목록 반영 실패: '+e.message));
         },err=>status('실시간 동기화 오류: '+err.message)));
       }
-      status('Google 동기화 연결됨 · PC와 모바일 목록 연동 중');
+      status('Google 동기화 완료 · 실시간 동기화 활성화');
     }catch(e){loadingRemote=false;ready=false;status('클라우드 초기 동기화 실패: '+e.message+' · 로컬 목록은 유지됩니다. 다시 로그인하거나 지금 동기화하세요.');}
   }
   async function signIn(){
@@ -144,7 +144,7 @@
     $('cloudDialog')?.addEventListener('click',e=>{if(e.target===$('cloudDialog'))hideDialog();});
     $('cloudSignIn')?.addEventListener('click',signIn);
     $('cloudSignOut')?.addEventListener('click',async()=>{if(!auth)return;await auth.signOut();status('로그아웃했습니다. 현재 기기에 저장된 목록은 유지됩니다.');});
-    $('cloudSyncNow')?.addEventListener('click',async()=>{if(!user)return;status('클라우드 데이터를 확인 중…');await start(user);});
+    $('cloudSyncNow')?.addEventListener('click',async()=>{if(!user)return;status('클라우드 데이터 동기화 중…');await start(user);});
     ui();if(!configured)return;
     try{
       await loadSDK();
@@ -158,7 +158,8 @@
         if(user?.uid===next.uid&&ready)return;
         await start(next);ui();
       });
-      window.addEventListener('online',()=>{for(const name of dirty)schedule(name);});
+      window.addEventListener('online',()=>{for(const name of dirty)schedule(name);if(user&&ready&&!dirty.size)status('Google 동기화 완료 · 실시간 동기화 활성화');});
+      window.addEventListener('offline',()=>{if(user)status('오프라인 상태 · 로컬에 저장 중');});
     }catch(e){status('Firebase 초기화 실패: '+e.message);}
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
