@@ -2770,27 +2770,26 @@ async function getRatings(){
 function patchRatingViewCacheForList(newList){
   try{
     const cache = RATING_VIEW_MEMORY_CACHE || JSON.parse(localStorage.getItem(SK.ratingViewCache)||'null');
-    if(!cache) return;
-    if(!cache || !Array.isArray(cache.items) || !cache.items.length) return;
-    const cachedByKey = new Map();
+    if(!cache || !Array.isArray(cache.items)) return;
+    // Keep the artwork/metadata of every unchanged rating. A newly added rating
+    // must not wipe posters and release dates for the other 1,000+ entries.
+    const oldByKey = new Map();
     cache.items.forEach(item => {
       if(!item) return;
-      const rKey = ratingKey(item.user_rating_type || contentTypeToRatingType(item.media_type), item.user_rating_id || item.id, item.user_rating_title || item.title || item.name || '');
-      cachedByKey.set(rKey, item);
+      const key = ratingKey(item.user_rating_type || contentTypeToRatingType(item.media_type), item.user_rating_id || item.id, item.user_rating_title || item.title || item.name || '');
+      oldByKey.set(key,item);
     });
-    const patchedItems = [];
-    let allKnown = true;
+    const keep=[];
+    let missing=0;
     for(const entry of newList){
-      const cachedItem = cachedByKey.get(entry.k);
-      if(!cachedItem){ allKnown = false; break; }
-      patchedItems.push({ ...cachedItem, user_rating_value: entry.rating, user_rating_note: entry.note || '' });
+      const old=oldByKey.get(entry.k);
+      if(old) keep.push({...old,user_rating_value:entry.rating,user_rating_note:entry.note||''});
+      else missing++;
     }
-    if(allKnown){
-      setCachedRatingView(newList, patchedItems, cache.stats || null);
-    } else {
-      clearRatingViewCache();
-    }
-  }catch{ clearRatingViewCache(); }
+    // A partially resolved snapshot is explicitly marked incomplete so the
+    // missing items can be fetched without rendering fake "poster unavailable" cards.
+    setCachedRatingView(newList,keep,cache.stats||null,missing>0);
+  }catch(e){console.warn('[cinefinder] rating cache patch',e);}
 }
 async function setRatings(list){
   ratingDataRevision++;
@@ -3400,8 +3399,8 @@ async function getCachedRatingViewPersistent(list){
   }catch(e){console.warn('[cinefinder] rating cache read',e);}
   return null;
 }
-function setCachedRatingView(list,items,stats){
-  const payload={sig:ratingListSignature(list),when:Date.now(),stats:stats||null,items:items||[]};
+function setCachedRatingView(list,items,stats,partial=false){
+  const payload={sig:ratingListSignature(list),when:Date.now(),stats:stats||null,items:items||[],partial:Boolean(partial)};
   RATING_VIEW_MEMORY_CACHE=payload;
   // Persist the full cache in the larger IndexedDB store; localStorage is a best-effort fast mirror.
   idbBackupSet(SK.ratingViewCache,payload).catch(e=>console.warn('[cinefinder] rating cache write',e));
@@ -3545,43 +3544,48 @@ async function showRatings(){
   if(myToken !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings')return;
   const maps = ratingCachedMaps(list);
   if(maps.cached?.items?.length){
-    // 이미 리졸브(포스터 확인)된 캐시가 있으면 바로 보여줍니다 — 대기 없음.
-    const cachedItems = clientSort(filterByCurrentQuery(applyLibraryTypeFilter(dedupeRatingDisplayCards(maps.cached.items || []), true)), 'user_rating_value');
-    if(cachedItems.length){
-      renderPagedRatings(cachedItems);
+    // Render only records with real TMDB details; do not paint synthetic cards
+    // that show "poster unavailable" / "unknown year" while matching is pending.
+    const cachedItems = clientSort(filterByCurrentQuery(applyLibraryTypeFilter(dedupeRatingDisplayCards(maps.cached.items), true)), 'user_rating_value');
+    if(cachedItems.length) renderPagedRatings(cachedItems);
+    else if(PAGE_STATE.query || LIBRARY_TYPE_FILTER !== 'all') renderEmptyState();
+    if(!maps.cached.partial){
       setStatus('');
-      maybeToastImportStats((maps.cached.items || []).length, maps.cached.stats);
+      maybeToastImportStats(maps.cached.items.length,maps.cached.stats);
       return;
     }
-    if(PAGE_STATE.query || LIBRARY_TYPE_FILTER !== 'all'){
-      renderEmptyState();
-      setStatus('');
-      maybeToastImportStats((maps.cached.items || []).length, maps.cached.stats);
-      return;
-    }
+  }else{
+    // No resolved cache yet. Indicate loading rather than inventing artwork/year.
+    $('#results').replaceChildren();
+    showSkeletons();
   }
 
-  // 캐시가 없을 때는 포스터 없는 카드가 먼저 떴다가 나중에 하나씩 채워지는 대신,
-  // 전체 조회가 끝날 때까지 로딩 화면을 유지한 뒤 한 번에 제대로 보여줍니다.
-  const instantCards=clientSort(filterByCurrentQuery(applyLibraryTypeFilter(
-    dedupeRatingDisplayCards(list.map(entry=>ratingItemToFastCard(entry,maps)).filter(Boolean)),true)), 'user_rating_value');
-  if(instantCards.length)renderPagedRatings(instantCards);
-  else renderEmptyState();
-  // First-ever matching still runs in background to fill posters; subsequent visits use IDB cache.
-  const resolved = await resolveRatingListToTmdb(list);
-  if(myToken !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings') return; // 그 사이 화면이 바뀌었으면 중단
-  const sortedResolved = clientSort(dedupeRatingDisplayCards(resolved || []), 'user_rating_value');
-  setCachedRatingView(list, sortedResolved, resolved._ratingStats || null);
+  // For additions to a cached list, resolve ONLY entries not already covered
+  // by the previous snapshot. Unchanged posters and release years stay intact.
+  const alreadyMatched=new Set(maps.byRatingKey.keys());
+  const missingList=list.filter(entry=>!alreadyMatched.has(entry.k));
+  const resolveAll=!maps.cached;
+  const fetched=await resolveRatingListToTmdb(resolveAll?list:missingList);
+  if(myToken !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings')return;
+  const existing=resolveAll?[]:(maps.cached?.items||[]);
+  const merged=dedupeRatingDisplayCards([...existing,...fetched]);
+  const sortedResolved=clientSort(merged,'user_rating_value');
+  const oldStats=maps.cached?.stats || null;
+  const finalStats=resolveAll?fetched._ratingStats:{
+    total:list.length,matched:sortedResolved.length,shown:sortedResolved.length,
+    missing:(oldStats?.missing||0)+(fetched._ratingStats?.missing||0),
+    duplicate:(oldStats?.duplicate||0)+(fetched._ratingStats?.duplicate||0)
+  };
+  setCachedRatingView(list,sortedResolved,finalStats,false);
   clearSkeletons();
-  const visible = filterByCurrentQuery(applyLibraryTypeFilter(sortedResolved, true));
+  const visible=filterByCurrentQuery(applyLibraryTypeFilter(sortedResolved,true));
   if(!visible.length){
     (PAGE_STATE.query || LIBRARY_TYPE_FILTER !== 'all') ? renderEmptyState() : renderRatingFallbackEmpty();
-    setStatus('');
-    return;
+  }else{
+    renderPagedRatings(visible);
   }
-  renderPagedRatings(visible);
   setStatus('');
-  maybeToastImportStats(sortedResolved.length, resolved._ratingStats || null);
+  maybeToastImportStats(sortedResolved.length,finalStats);
 }
 async function exportRatings(){
   const list = await getRatings();
