@@ -2525,6 +2525,45 @@ function shuffleArray(arr){
   }
   return a;
 }
+// A shared, device-local TMDB popularity snapshot keeps discover and saved ratings
+// on the same ranking inputs. Store compact numeric metadata, never the card DOM.
+const CINE_POPULARITY_CACHE_KEY='cinefinder_shared_popularity_v1';
+let CINE_POPULARITY_CACHE=null;
+function sharedPopularityCache(){
+  if(CINE_POPULARITY_CACHE)return CINE_POPULARITY_CACHE;
+  try{const obj=JSON.parse(localStorage.getItem(CINE_POPULARITY_CACHE_KEY)||'{}');CINE_POPULARITY_CACHE=obj&&typeof obj==='object'?obj:{};}catch{CINE_POPULARITY_CACHE={};}
+  return CINE_POPULARITY_CACHE;
+}
+function rememberDiscoverPopularity(items){
+  if(!['discover','search'].includes(PAGE_STATE.lastMode))return;
+  const cache=sharedPopularityCache();let changed=false;
+  for(const it of items||[]){
+    const type=it.media_type||(it.first_air_date?'tv':'movie');
+    const id=Number(it.id);if(!id||!['movie','tv'].includes(type))continue;
+    const pop=Number(it.popularity),vc=Number(it.vote_count);
+    if(!Number.isFinite(pop)||pop<=0)continue;
+    cache[`${type}-${id}`]={p:pop,v:Number.isFinite(vc)?vc:0,t:Date.now()};changed=true;
+  }
+  if(changed){
+    // Cap size: keep newest records. Firestore account state is not modified.
+    const entries=Object.entries(cache);
+    if(entries.length>2500){entries.sort((a,b)=>(b[1].t||0)-(a[1].t||0));CINE_POPULARITY_CACHE=Object.fromEntries(entries.slice(0,2000));}
+    try{localStorage.setItem(CINE_POPULARITY_CACHE_KEY,JSON.stringify(CINE_POPULARITY_CACHE||cache));}catch{}
+  }
+}
+function popularityScore(it){
+  const type=it.media_type||(it.first_air_date?'tv':'movie');
+  const shared=sharedPopularityCache()[`${type}-${it.id}`];
+  // The main discovery result is authoritative if we have seen this TMDB item.
+  const pop=Number(shared?.p??it.popularity??0);
+  const votes=Number(shared?.v??it.vote_count??0);
+  return pop*Math.log10(Math.max(votes,1)+1);
+}
+function comparePopularity(a,b){
+  const diff=popularityScore(b)-popularityScore(a);
+  if(Math.abs(diff)>0.01)return diff;
+  return (a._apiRank??9999)-(b._apiRank??9999);
+}
 function clientSort(list, ratingField='vote_average'){
   const usesPersonalRating = ratingField !== 'vote_average';
   if(SORT_BY==='random') return shuffleArray(list);
@@ -2551,17 +2590,7 @@ function clientSort(list, ratingField='vote_average'){
   if(SORT_BY==='date.desc')return[...list].sort((a,b)=>{const da=a.release_date||a.first_air_date||'',db=b.release_date||b.first_air_date||'';return db>da?1:db<da?-1:0;});
   // 인기순: popularity × log(vote_count+1) 가중치 적용
   // 투표수가 너무 적은 작품이 단순 popularity로 상위 노출되는 것을 보정
-  const score=it=>{
-    const pop=it.popularity||0;
-    const vc=it.vote_count||0;
-    const weight=Math.log10(Math.max(vc,1)+1); // 투표 없으면 weight≈0.3, 1000개면 ≈3
-    return pop*weight;
-  };
-  return[...list].sort((a,b)=>{
-    const diff=score(b)-score(a);
-    if(Math.abs(diff)>0.01)return diff;
-    return (a._apiRank??9999)-(b._apiRank??9999);
-  });
+  return [...list].sort(comparePopularity);
 }
 function mergeResults(arr){
   // 각 API 결과에 전역 순위 인덱스 부여 (movie/tv 인터리빙)
@@ -2844,10 +2873,16 @@ function ratingCardMatchesRatingItem(it,entry){
 }
 function ratingReorderVisible(card){
   if(!card || PAGE_STATE.lastMode!=='ratings')return;
-  const score=Number(card.getAttribute('data-user-rating')||0);
+  // Reposition using the currently selected sorting method, not always rating-desc.
+  const target=RATING_PAGE_STATE?.items?.find(it=>String(it.id)===String(card.dataset.id)&&it.media_type===card.dataset.type);
+  if(!target)return;
   const siblings=$$('#results .card').filter(c=>c!==card);
-  const after=siblings.find(c=>Number(c.getAttribute('data-user-rating')||0)<score);
-  if(after)$('#results').insertBefore(card,after); else $('#results').appendChild(card);
+  const getItem=c=>RATING_PAGE_STATE?.items?.find(it=>String(it.id)===String(c.dataset.id)&&it.media_type===c.dataset.type);
+  const sorted=clientSort([target,...siblings.map(getItem).filter(Boolean)],'user_rating_value');
+  const idx=sorted.indexOf(target);
+  const next=sorted.slice(idx+1).find(it=>siblings.some(c=>String(c.dataset.id)===String(it.id)&&c.dataset.type===it.media_type));
+  const nextCard=next&&siblings.find(c=>String(c.dataset.id)===String(next.id)&&c.dataset.type===next.media_type);
+  if(nextCard)$('#results').insertBefore(card,nextCard);else $('#results').appendChild(card);
 }
 async function ratingInsertVisible(entry,source){
   if(PAGE_STATE.lastMode!=='ratings')return;
@@ -3685,6 +3720,7 @@ let RENDERED_CARD_KEYS = new Set();
 // 리메이크처럼 실제로 다른 작품까지 하나로 합쳐버리지 않도록 합니다.
 let RENDERED_CARD_TITLE_YEARS = new Map();
 function renderCards(items,append,options={}){
+  rememberDiscoverPopularity(items);
   if(!append && PAGE_STATE.lastMode !== 'ratings') stopRatingPaging();
   if(!append){ RENDERED_CARD_KEYS = new Set(); RENDERED_CARD_TITLE_YEARS = new Map(); }
   const items_ = (items||[]).filter(it=>{
@@ -3905,7 +3941,7 @@ async function showSaved(kind){
       if(SORT_BY==='vote_average.desc') return (b.vote_average||0)-(a.vote_average||0);
       if(SORT_BY==='vote_average.asc') return (a.vote_average||0)-(b.vote_average||0);
       if(SORT_BY==='date.desc'){ const da=a.release_date||'',db=b.release_date||''; return db>da?1:db<da?-1:0; }
-      return (b.popularity||0)-(a.popularity||0);
+      return comparePopularity(a,b);
     });
   }
 
