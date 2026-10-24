@@ -2871,18 +2871,51 @@ function ratingCardMatchesRatingItem(it,entry){
   return String(it.user_rating_id||it.id)===String(entry.id) &&
     normalizeRatingType(it.user_rating_type || contentTypeToRatingType(it.media_type))===normalizeRatingType(entry.type);
 }
-function ratingReorderVisible(card){
-  if(!card || PAGE_STATE.lastMode!=='ratings')return;
-  // Reposition using the currently selected sorting method, not always rating-desc.
-  const target=RATING_PAGE_STATE?.items?.find(it=>String(it.id)===String(card.dataset.id)&&it.media_type===card.dataset.type);
-  if(!target)return;
-  const siblings=$$('#results .card').filter(c=>c!==card);
-  const getItem=c=>RATING_PAGE_STATE?.items?.find(it=>String(it.id)===String(c.dataset.id)&&it.media_type===c.dataset.type);
-  const sorted=clientSort([target,...siblings.map(getItem).filter(Boolean)],'user_rating_value');
-  const idx=sorted.indexOf(target);
-  const next=sorted.slice(idx+1).find(it=>siblings.some(c=>String(c.dataset.id)===String(it.id)&&c.dataset.type===it.media_type));
-  const nextCard=next&&siblings.find(c=>String(c.dataset.id)===String(next.id)&&c.dataset.type===next.media_type);
-  if(nextCard)$('#results').insertBefore(card,nextCard);else $('#results').appendChild(card);
+// Synchronise the paginated rating view with the *newly saved* score before
+// positioning DOM elements. Only move existing nodes / add a boundary card;
+// never remount the complete thousand-item collection on a single score edit.
+function ratingReorderVisible(card, savedEntry){
+  if(PAGE_STATE.lastMode!=='ratings' || !RATING_PAGE_STATE)return;
+  const state=RATING_PAGE_STATE;
+  if(savedEntry){
+    state.items=state.items.map(it=>ratingCardMatchesRatingItem(it,savedEntry)
+      ? {...it,user_rating_value:Number(savedEntry.rating),user_rating_note:savedEntry.note||''}
+      : it);
+  }
+  state.items=clientSort(state.items,'user_rating_value');
+  const count=Math.min(state.next,state.items.length);
+  const wanted=state.items.slice(0,count);
+  const root=$('#results');
+  if(!root)return;
+  const current=$$('#results .card');
+  const lookup=it=>current.find(c=>c.parentElement===root && ratingCardMatches(c,{
+    id:it.user_rating_id||it.id,
+    type:it.user_rating_type||contentTypeToRatingType(it.media_type),
+    title:it.user_rating_title||it.title||it.name||''
+  }));
+  const selected=new Set(wanted.map(lookup).filter(Boolean));
+  for(const node of current){
+    if(!selected.has(node)){
+      RENDERED_CARD_KEYS.delete(node.dataset.key);
+      node.remove();
+    }
+  }
+  // If a lowered score moved beyond the current batch, fetch only the
+  // newly visible boundary card (poster data is already in memory).
+  for(const it of wanted){
+    if(!lookup(it))renderCards([it],true,{skipEnrich:true,skipRatingRefresh:true});
+  }
+  const updated=$$('#results .card');
+  for(const it of wanted){
+    const node=updated.find(c=>ratingCardMatches(c,{
+      id:it.user_rating_id||it.id,
+      type:it.user_rating_type||contentTypeToRatingType(it.media_type),
+      title:it.user_rating_title||it.title||it.name||''
+    }));
+    if(node)root.appendChild(node);
+  }
+  const more=document.getElementById('ratingMoreSentinel');
+  if(more)more.textContent=`${count.toLocaleString()} / ${state.items.length.toLocaleString()} · 더 보기`;
 }
 async function ratingInsertVisible(entry,source){
   if(PAGE_STATE.lastMode!=='ratings')return;
@@ -2902,7 +2935,7 @@ async function ratingInsertVisible(entry,source){
   if(!$('#results .card'))$('#results').innerHTML='';
   renderCards([item],true,{skipEnrich:true,skipRatingRefresh:true});
   const card=$$('#results .card').find(c=>ratingCardMatches(c,entry));
-  if(card)ratingReorderVisible(card);
+  if(card)ratingReorderVisible(card,entry);
 }
 async function upsertRating(source){
   const item = normalizeRatingItem(source);
@@ -2934,7 +2967,7 @@ async function upsertRating(source){
   await refreshRatingBadges();
   if(PAGE_STATE.lastMode==='ratings'){
     const visible=$$('#results .card').find(c=>ratingCardMatches(c,item));
-    if(visible)ratingReorderVisible(visible);
+    if(visible)ratingReorderVisible(visible,item);
     else if(idx<0) await ratingInsertVisible(item,source);
   }
   return item;
