@@ -2811,6 +2811,61 @@ function findRating(list, source){
   const idx = findRatingIndex(list, source);
   return idx >= 0 ? list[idx] : null;
 }
+// Update one visible rating card without re-querying or re-rendering the whole tab.
+function ratingCardMatches(card, entry){
+  if(!card || !entry) return false;
+  const id=card.getAttribute('data-rating-id') || '';
+  const type=normalizeRatingType(card.getAttribute('data-rating-type') || '');
+  if(id && String(id)===String(entry.id) && type===normalizeRatingType(entry.type)) return true;
+  return Boolean(entry.title && type===normalizeRatingType(entry.type) &&
+    ratingCanonicalTitle(card.getAttribute('data-rating-title') || '')===ratingCanonicalTitle(entry.title));
+}
+function ratingRemoveVisible(entry){
+  if(PAGE_STATE.lastMode!=='ratings') return;
+  const cards=$$('#results .card').filter(c=>ratingCardMatches(c,entry));
+  cards.forEach(card=>{RENDERED_CARD_KEYS.delete(card.dataset.key);card.remove();});
+  if(RATING_PAGE_STATE){
+    RATING_PAGE_STATE.items=RATING_PAGE_STATE.items.filter(it=>!ratingCardMatchesRatingItem(it,entry));
+    RATING_PAGE_STATE.next=Math.max(0,RATING_PAGE_STATE.next-cards.length);
+    const sentinel=document.getElementById('ratingMoreSentinel');
+    if(sentinel){
+      sentinel.textContent=`${RATING_PAGE_STATE.next.toLocaleString()} / ${RATING_PAGE_STATE.items.length.toLocaleString()} · 더 보기`;
+      if(RATING_PAGE_STATE.next>=RATING_PAGE_STATE.items.length){RATING_PAGE_OBSERVER?.disconnect();sentinel.remove();}
+    }
+  }
+  if(!$('#results .card') && (!RATING_PAGE_STATE || !RATING_PAGE_STATE.items.length)) renderRatingFallbackEmpty();
+}
+function ratingCardMatchesRatingItem(it,entry){
+  return String(it.user_rating_id||it.id)===String(entry.id) &&
+    normalizeRatingType(it.user_rating_type || contentTypeToRatingType(it.media_type))===normalizeRatingType(entry.type);
+}
+function ratingReorderVisible(card){
+  if(!card || PAGE_STATE.lastMode!=='ratings')return;
+  const score=Number(card.getAttribute('data-user-rating')||0);
+  const siblings=$$('#results .card').filter(c=>c!==card);
+  const after=siblings.find(c=>Number(c.getAttribute('data-user-rating')||0)<score);
+  if(after)$('#results').insertBefore(card,after); else $('#results').appendChild(card);
+}
+async function ratingInsertVisible(entry,source){
+  if(PAGE_STATE.lastMode!=='ratings')return;
+  let resolved=null;
+  try{ resolved=await findTmdbMatchForRating(entry); }catch(e){console.warn('[cinefinder] one rating resolve',e);}
+  if(PAGE_STATE.lastMode!=='ratings'||!findRating(getRatingsSync(),entry))return;
+  if(!resolved && source?.id && source?.poster_path){
+    const type=source.media_type || (entry.type==='tv'?'tv':'movie');
+    resolved={...source,id:Number(source.id),media_type:type,title:source.title||entry.title};
+  }
+  if(!resolved)return;
+  const item={...resolved,user_rating_id:entry.id,user_rating_type:entry.type,user_rating_title:entry.title,user_rating_value:entry.rating,user_rating_note:entry.note||''};
+  if(RATING_PAGE_STATE){
+    RATING_PAGE_STATE.items.push(item);
+    RATING_PAGE_STATE.items=clientSort(dedupeRatingDisplayCards(RATING_PAGE_STATE.items),'user_rating_value');
+  }
+  if(!$('#results .card'))$('#results').innerHTML='';
+  renderCards([item],true,{skipEnrich:true,skipRatingRefresh:true});
+  const card=$$('#results .card').find(c=>ratingCardMatches(c,entry));
+  if(card)ratingReorderVisible(card);
+}
 async function upsertRating(source){
   const item = normalizeRatingItem(source);
   if(!item){ showToast(t('toast_invalid_rating'), 2400); return null; }
@@ -2839,6 +2894,11 @@ async function upsertRating(source){
   // 걸리고, 이 동안 다른 카드를 편집하면 상태가 꼬이는 문제가 있었습니다. 이미 화면에 보이는
   // 카드는 refreshRatingBadges()로 그 자리에서 바로 갱신하고, 전체 재로딩은 하지 않습니다.
   await refreshRatingBadges();
+  if(PAGE_STATE.lastMode==='ratings'){
+    const visible=$$('#results .card').find(c=>ratingCardMatches(c,item));
+    if(visible)ratingReorderVisible(visible);
+    else if(idx<0) await ratingInsertVisible(item,source);
+  }
   return item;
 }
 async function removeRating(source){
@@ -2850,20 +2910,9 @@ async function removeRating(source){
   next.splice(idx, 1);
   if(!await setRatings(next)){ showToast(saveFailedToastMessage(), 2800); return; }
   showToast(t('toast_rating_removed'));
+  // Must remove before badge refresh clears data-rating-id from the DOM.
+  ratingRemoveVisible(removed);
   await refreshRatingBadges();
-  // 평점을 완전히 삭제하면 "내 평점" 화면에서는 더 이상 보일 이유가 없는 카드이므로,
-  // 전체를 다시 불러오는 대신 해당 카드만 화면에서 제거합니다.
-  if(PAGE_STATE.lastMode === 'ratings'){
-    const removedType = normalizeRatingType(removed.type);
-    $$('#results .card').forEach(card => {
-      const cardRatingId = card.getAttribute('data-rating-id') || '';
-      const cardRatingType = normalizeRatingType(card.getAttribute('data-rating-type') || '');
-      if(cardRatingId === String(removed.id) && cardRatingType === removedType){
-        card.remove();
-      }
-    });
-    if(!$('#results .card')) renderRatingFallbackEmpty();
-  }
 }
 function ratingSourceFromCard(card){
   const mediaType = card.getAttribute('data-type') || 'movie';
@@ -4025,8 +4074,10 @@ async function openDetail(type,id,sourceEl=null){
         ${ratingStarPreviewMarkup()}
       </div>
       <div class="detail-rating-field detail-rating-note-field">
-        <label>${t('rating_note')}</label>
-        <textarea id="detailUserNote" class="rating-note-input" rows="3" autocomplete="off" enterkeyhint="done" placeholder="${t('note_placeholder')}">${escapeHtml(existingUserRating?.note || '')}</textarea>
+        <button id="detailNoteToggle" class="detail-note-toggle" type="button" aria-expanded="false" aria-controls="detailNoteBody"><span>${t('rating_note')}</span><span class="detail-note-toggle-mark" aria-hidden="true">▾</span></button>
+        <div id="detailNoteBody" hidden>
+          <textarea id="detailUserNote" class="rating-note-input" rows="3" autocomplete="off" enterkeyhint="done" placeholder="${t('note_placeholder')}">${escapeHtml(existingUserRating?.note || '')}</textarea>
+        </div>
       </div>
       <div class="detail-rating-actions">
         <button id="detailSaveRating" class="modal-save-btn modal-rating-save" type="button">★ ${t('save_rating')}</button>
@@ -4086,6 +4137,15 @@ async function openDetail(type,id,sourceEl=null){
       btn.textContent=`${kind==='fav'?(active?'♥':'♡'):(active?'✓':'⏱')} ${kind==='fav'?t('modal_add_fav'):t('modal_add_watch')}`;
       updateSavedButtons(kind, list);
     }));
+    $('#detailNoteToggle')?.addEventListener('click', e=>{
+      e.preventDefault();
+      const button=e.currentTarget, body=$('#detailNoteBody');
+      if(!body)return;
+      const expand=body.hidden;
+      body.hidden=!expand;
+      button.setAttribute('aria-expanded',String(expand));
+      if(expand) $('#detailUserNote')?.focus({preventScroll:true});
+    });
     attachRatingScoreMask($('#detailUserRating'), $('#modalBody .detail-rating-field .rating-star-preview'));
     const doSaveDetailRating = async () => {
       const rating = getRatingInputValue();
