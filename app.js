@@ -2773,12 +2773,11 @@ function normalizeRatingList(list){
     const key=`${item.type}::${canonical}`;
     const previous=grouped.get(key);
     if(!previous){grouped.set(key,item);continue;}
-    const currentScore=Number(item.rating),previousScore=Number(previous.rating);
-    const preferred=currentScore>previousScore?item:previous;
-    const alt=preferred===item?previous:item;
-    // Keep a real numeric source ID when available, without replacing a higher score.
+    // Last explicit entry wins; a previously saved higher score must not override
+    // a newer lower score for the same work.
+    const preferred=item, alt=previous;
     const selectedId=isRealRatingId(preferred.id)?preferred.id:(isRealRatingId(alt.id)?alt.id:preferred.id);
-    const winner={...preferred,id:selectedId,note:preferred.note||alt.note||''};
+    const winner={...preferred,id:selectedId,note:preferred.note||''};
     winner.k=ratingKey(winner.type,winner.id,winner.title);
     grouped.set(key,winner);
   }
@@ -2821,6 +2820,7 @@ function patchRatingViewCacheForList(newList){
   }catch(e){console.warn('[cinefinder] rating cache patch',e);}
 }
 async function setRatings(list){
+  RATING_BACKGROUND_RESOLVE_TOKEN++;
   ratingDataRevision++;
   const normalized = normalizeRatingList(list);
   patchRatingViewCacheForList(normalized);
@@ -3408,16 +3408,48 @@ function ratingListSignature(list){
 // Rating artwork / TMDB match results persist in IndexedDB when localStorage is full.
 // Keep a memory copy for synchronous single-card updates.
 let RATING_VIEW_MEMORY_CACHE=null;
+// Display caches contain artwork, never authoritative user scores.
+// Reconcile every cached card against the current local/cloud ratings so an old
+// snapshot cannot resurrect an earlier value after an explicit edit or deletion.
+function reconcileRatingViewPayload(payload,list){
+  if(!payload || !Array.isArray(payload.items))return payload;
+  const byKey=new Map(),byTitle=new Map();
+  for(const entry of normalizeRatingList(list)){
+    byKey.set(entry.k,entry);
+    byTitle.set(`${entry.type}::${ratingCanonicalTitle(entry.title)}`,entry);
+  }
+  let changed=false;
+  const items=[];
+  const seen=new Set();
+  for(const card of payload.items){
+    if(!card)continue;
+    const type=normalizeRatingType(card.user_rating_type || contentTypeToRatingType(card.media_type));
+    const title=card.user_rating_title || card.title || card.name || '';
+    const key=ratingKey(type,card.user_rating_id || card.id,title);
+    const entry=byKey.get(key) || byTitle.get(`${type}::${ratingCanonicalTitle(title)}`);
+    if(!entry){changed=true;continue;}
+    if(seen.has(entry.k)){changed=true;continue;}
+    seen.add(entry.k);
+    const next={...card,user_rating_id:entry.id,user_rating_type:entry.type,
+      user_rating_title:entry.title,user_rating_value:entry.rating,user_rating_note:entry.note||''};
+    if(card.user_rating_value!==entry.rating || card.user_rating_note!==(entry.note||'') || card.user_rating_id!==entry.id)changed=true;
+    items.push(next);
+  }
+  return changed?{...payload,items,partial:payload.partial||seen.size<byKey.size}:payload;
+}
 function ratingViewPayloadMatches(payload,list){
   return payload && payload.sig===ratingListSignature(list) && Array.isArray(payload.items);
 }
 function getCachedRatingView(list){
-  if(ratingViewPayloadMatches(RATING_VIEW_MEMORY_CACHE,list))return RATING_VIEW_MEMORY_CACHE;
+  if(ratingViewPayloadMatches(RATING_VIEW_MEMORY_CACHE,list)){
+    RATING_VIEW_MEMORY_CACHE=reconcileRatingViewPayload(RATING_VIEW_MEMORY_CACHE,list);
+    return RATING_VIEW_MEMORY_CACHE;
+  }
   try{
     const payload=JSON.parse(localStorage.getItem(SK.ratingViewCache)||'null');
     if(ratingViewPayloadMatches(payload,list)){
-      RATING_VIEW_MEMORY_CACHE=payload;
-      return payload;
+      RATING_VIEW_MEMORY_CACHE=reconcileRatingViewPayload(payload,list);
+      return RATING_VIEW_MEMORY_CACHE;
     }
   }catch{}
   return null;
@@ -3428,8 +3460,8 @@ async function getCachedRatingViewPersistent(list){
   try{
     const payload=await idbBackupGet(SK.ratingViewCache);
     if(ratingViewPayloadMatches(payload,list)){
-      RATING_VIEW_MEMORY_CACHE=payload;
-      return payload;
+      RATING_VIEW_MEMORY_CACHE=reconcileRatingViewPayload(payload,list);
+      return RATING_VIEW_MEMORY_CACHE;
     }
   }catch(e){console.warn('[cinefinder] rating cache read',e);}
   return null;
@@ -3601,7 +3633,8 @@ async function showRatings(){
   const missingList=list.filter(entry=>!alreadyMatched.has(entry.k));
   const resolveAll=!maps.cached;
   const fetched=await resolveRatingListToTmdb(resolveAll?list:missingList);
-  if(myToken !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings')return;
+  if(myToken !== RATING_BACKGROUND_RESOLVE_TOKEN || PAGE_STATE.lastMode !== 'ratings' ||
+     ratingListSignature(getRatingsSync())!==ratingListSignature(list))return;
   const existing=resolveAll?[]:(maps.cached?.items||[]);
   const merged=dedupeRatingDisplayCards([...existing,...fetched]);
   const sortedResolved=clientSort(merged,'user_rating_value');
