@@ -3281,7 +3281,7 @@ async function findTmdbMatchForRating(item){
   const cacheKey = ratingMatchCacheKey(item);
   const cached = RATING_MATCH_STORE[cacheKey];
   if(cached && Date.now() - (cached.when || 0) < 1000 * 60 * 60 * 24 * 30){
-    if(!cached.miss && cached.data?.poster_path) return cached.data;
+    if(!cached.miss && cached.data?.poster_path) return {...cached.data, user_rating_id:item.id, user_rating_type:item.type, user_rating_title:item.title, user_rating_value:item.rating, user_rating_note:item.note||''};
   }
 
   const numericId = /^\d+$/.test(String(item.id || '').trim()) ? String(item.id).trim() : '';
@@ -3380,10 +3380,8 @@ async function resolveRatingListToTmdb(list, onProgress){
     // 동일 TMDB 작품으로 매칭된 항목은 한 번만 표시합니다.
     // 예: 시즌별로 저장한 평점이 동일한 TV 시리즈로 매칭되면 카드 중복 노출 방지.
     const key = `${it.media_type}-${it.id}`;
-    const prev = byKey.get(key);
-    if(!prev || Number(it.user_rating_value || 0) > Number(prev.user_rating_value || 0)){
-      byKey.set(key, it);
-    }
+    // Never use historical score magnitude to resolve duplicate card metadata.
+    byKey.set(key, it);
   });
   const unique = Array.from(byKey.values());
   unique._ratingStats = {
@@ -3575,14 +3573,34 @@ function renderPagedRatings(items){
     RATING_PAGE_OBSERVER.observe(sentinel);
   }
 }
+function authoritativeRatingCards(cards, list=getRatingsSync()){
+  const byKey=new Map(),byTitle=new Map();
+  for(const entry of normalizeRatingList(list)){
+    byKey.set(entry.k,entry);
+    byTitle.set(`${entry.type}::${ratingCanonicalTitle(entry.title)}`,entry);
+  }
+  const result=[];
+  for(const card of cards||[]){
+    if(!card)continue;
+    const type=normalizeRatingType(card.user_rating_type||contentTypeToRatingType(card.media_type));
+    const title=card.user_rating_title||card.title||card.name||'';
+    const key=ratingKey(type,card.user_rating_id||card.id,title);
+    const current=byKey.get(key)||byTitle.get(`${type}::${ratingCanonicalTitle(title)}`);
+    if(!current)continue; // A deleted rating cannot be revived by a poster cache.
+    result.push({...card,user_rating_id:current.id,user_rating_type:current.type,
+      user_rating_title:current.title,user_rating_value:current.rating,user_rating_note:current.note||''});
+  }
+  return result;
+}
 function dedupeRatingDisplayCards(cards){
   const map=new Map();
-  for(const item of cards||[]){
+  for(const item of authoritativeRatingCards(cards)){
     const type=item.user_rating_type||contentTypeToRatingType(item.media_type);
     const title=item.user_rating_title||item.title||item.name||'';
     const key=type+'::'+ratingCanonicalTitle(title);
-    const old=map.get(key);
-    if(!old||Number(item.user_rating_value||0)>Number(old.user_rating_value||0))map.set(key,item);
+    // Scores come from the canonical ratings list, not from the poster cache.
+    // Keep the latest item for duplicate artwork matches instead of highest historical score.
+    map.set(key,item);
   }
   return [...map.values()];
 }
